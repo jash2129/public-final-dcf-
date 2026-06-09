@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: #E5FF8F;
+  --color-brand-hover: #D4F070;
+  --color-brand-light: #EDFFB1;
+  --color-brand-lightest: #FCFFF4;
+  
+  --color-secondary: #00D0FF;
+  --color-secondary-hover: #00BCE6;
+  
+  --color-dark: #000000;
+  --color-dark-100: #0D0D0D;
+  --color-dark-200: #161616;
+  --color-dark-300: #1F1F1F;
+  --color-dark-400: #282828;
+  
+  --color-positive: #39FF14;
+  --color-danger: #FF0000;
+  --color-warning: #FFA500;
+  
+  /* Compliance Types */
+  --color-gst: #3b82f6;
+  --color-tds: #a855f7;
+  --color-payroll: #10b981;
+  --color-statutory: #f59e0b;
+  --color-holiday-bg: #fee2e2;
+  --color-holiday-text: #ef4444;
+
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.02);
+  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans antialiased text-dark bg-white;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight font-black;
+  }
+
+  /* Premium Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  }
+
+  /* Native Focus Ring Refinement */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-white;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-xl bg-white/70 border border-white/20;
+  }
+  
+  .glass-dark {
+    @apply backdrop-blur-xl bg-black/60 border border-white/5;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-dark to-slate-500;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .mobile-card {
+    @apply bg-white p-4 rounded-2xl border border-slate-100 shadow-soft active:scale-[0.98] transition-all;
+  }
+
+  .calendar-day {
+    @apply aspect-square border-r border-b border-slate-100 p-2 sm:p-4 hover:bg-slate-50 transition-colors relative;
+  }
+
+  /* Premium Underline Animation */
+  .nav-link-underline {
+    @apply relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-brand after:transition-transform after:duration-300 hover:after:scale-x-100;
+  }
+
+  /* Premium Hover Card Effect */
+  .premium-hover-card {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-premium hover:border-slate-200/80;
+  }
+
+  /* Gimmick Glowing Effect */
+  .glowing-accent {
+    @apply shadow-[0_0_20px_rgba(229,255,143,0.15)];
+  }
+
+  /* Premium Keyframe Animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-12px) scale(1.01); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.25; filter: blur(80px); }
+    50% { opacity: 0.45; filter: blur(100px); }
+  }
+
+  @keyframes border-pulse {
+    0%, 100% { border-color: rgba(229, 255, 143, 0.2); }
+    50% { border-color: rgba(0, 208, 255, 0.6); }
+  }
+
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 3s;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 8s ease-in-out infinite;
+  }
+
+  .animate-border-pulse {
+    animation: border-pulse 4s ease-in-out infinite;
+  }
+
+  /* High Fidelity Glassmorphism */
+  .glass-card-premium {
+    @apply backdrop-blur-2xl bg-white/60 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.04)];
+  }
+
+  .glass-card-premium-dark {
+    @apply backdrop-blur-2xl bg-black/75 border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+  }
+
+  /* Mesh Gradient Utilities */
+  .mesh-gradient-light {
+    background-color: #ffffff;
+    background-image: 
+      radial-gradient(at 10% 20%, rgba(229, 255, 143, 0.15) 0px, transparent 50%),
+      radial-gradient(at 90% 10%, rgba(0, 208, 255, 0.12) 0px, transparent 50%),
+      radial-gradient(at 50% 80%, rgba(229, 255, 143, 0.1) 0px, transparent 50%);
+  }
+
+  .mesh-gradient-dark {
+    background-color: #0d0d0d;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(229, 255, 143, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(0, 208, 255, 0.08) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(0, 0, 0, 0.5) 0px, transparent 50%);
+  }
+}
+

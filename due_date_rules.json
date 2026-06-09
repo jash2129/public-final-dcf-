@@ -1,0 +1,557 @@
+[
+  {
+    "service_id": "START001",
+    "standard_due_rule": "No statutory deadline; complete registration before commencing business operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START002",
+    "standard_due_rule": "No statutory deadline; execute partnership deed and register before commencing business",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START003",
+    "standard_due_rule": "No statutory deadline; incorporate before commencing business; INC-20A mandatory within 180 days",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START004",
+    "standard_due_rule": "No statutory deadline; execute LLP agreement within 30 days of incorporation",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START005",
+    "standard_due_rule": "No statutory deadline; incorporate before commencing business; INC-20A mandatory within 180 days",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START006",
+    "standard_due_rule": "No statutory deadline; obtain licence before commencing charitable or NPO activities",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START007",
+    "standard_due_rule": "No statutory deadline; register trust deed with sub-registrar before commencing operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START008",
+    "standard_due_rule": "No statutory deadline; incorporate before commencing business; INC-20A mandatory within 180 days",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START009",
+    "standard_due_rule": "No statutory deadline; incorporate under Companies Act 2013 before commencing producer activities",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START010",
+    "standard_due_rule": "No statutory deadline; incorporate Indian subsidiary before commencing Indian operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "START011",
+    "standard_due_rule": "No statutory deadline; register on Udyam portal at any time after business commencement",
+    "reminder_offsets": "7,3,1 days before planned registration date"
+  },
+  {
+    "service_id": "REG001",
+    "standard_due_rule": "No statutory deadline; apply within 10 years of incorporation for DPIIT Startup recognition",
+    "reminder_offsets": "7,3,1 days before planned application date"
+  },
+  {
+    "service_id": "REG002",
+    "standard_due_rule": "Renewal before expiry (varies by authority)",
+    "reminder_offsets": "30,15,7 days before expiry"
+  },
+  {
+    "service_id": "REG003",
+    "standard_due_rule": "No statutory deadline; obtain FSSAI registration before commencing food business (mandatory for turnover up to ₹12L)",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "REG004",
+    "standard_due_rule": "No statutory deadline; obtain FSSAI licence before commencing food operations (valid 1–5 years; renew before expiry)",
+    "reminder_offsets": "60,30,15 days before expiry"
+  },
+  {
+    "service_id": "REG005",
+    "standard_due_rule": "Renewal before expiry",
+    "reminder_offsets": "60,30,15 days before expiry"
+  },
+  {
+    "service_id": "REG006",
+    "standard_due_rule": "No statutory deadline; register on ICEGATE before first import/export transaction",
+    "reminder_offsets": "7,3,1 days before planned first shipment date"
+  },
+  {
+    "service_id": "REG007",
+    "standard_due_rule": "No statutory deadline; obtain IEC before commencing import/export operations",
+    "reminder_offsets": "7,3,1 days before planned first shipment date"
+  },
+  {
+    "service_id": "REG008",
+    "standard_due_rule": "Renewal before expiry",
+    "reminder_offsets": "30,15,7 days before expiry"
+  },
+  {
+    "service_id": "REG009",
+    "standard_due_rule": "Renewal before expiry",
+    "reminder_offsets": "90,60,30 days before expiry"
+  },
+  {
+    "service_id": "REG010",
+    "standard_due_rule": "Mandatory within 30 days of employing 20 or more employees (EPF & MP Act 1952)",
+    "reminder_offsets": "15,7,3 days before 30-day deadline"
+  },
+  {
+    "service_id": "REG011",
+    "standard_due_rule": "Mandatory within 15 days of crossing 10-employee threshold (ESI Act 1948)",
+    "reminder_offsets": "7,3,1 days before 15-day deadline"
+  },
+  {
+    "service_id": "REG012",
+    "standard_due_rule": "Mandatory before first salary disbursement; enrol within 30 days of business commencement in applicable state",
+    "reminder_offsets": "7,3,1 days before first payroll date"
+  },
+  {
+    "service_id": "REG013",
+    "standard_due_rule": "Mandatory before marketing, booking, or launch of real estate project (RERA Act 2016)",
+    "reminder_offsets": "30,15,7 days before planned project launch date"
+  },
+  {
+    "service_id": "TM001",
+    "standard_due_rule": "No statutory deadline; file as early as possible to establish priority before product launch",
+    "reminder_offsets": "7,3,1 days before planned product launch date"
+  },
+  {
+    "service_id": "TM002",
+    "standard_due_rule": "Within 1 month of objection notice",
+    "reminder_offsets": "15,7,3 days before deadline"
+  },
+  {
+    "service_id": "TM003",
+    "standard_due_rule": "No statutory deadline; apply for certificate after registration number is allotted",
+    "reminder_offsets": "7,3,1 days before planned application date"
+  },
+  {
+    "service_id": "TM004",
+    "standard_due_rule": "Within 4 months of publication in the Trade Marks Journal (opposition window)",
+    "reminder_offsets": "30,15,7 days before 4-month opposition deadline"
+  },
+  {
+    "service_id": "TM005",
+    "standard_due_rule": "As per hearing notice from Trademark Registry (usually 21 days advance notice)",
+    "reminder_offsets": "7,3,1 days before hearing date"
+  },
+  {
+    "service_id": "TM006",
+    "standard_due_rule": "No statutory deadline; file TM-O rectification petition as required under Trade Marks Act 1999",
+    "reminder_offsets": "15,7,3 days before planned filing date"
+  },
+  {
+    "service_id": "TM007",
+    "standard_due_rule": "No statutory deadline; issue legal notice upon discovery of infringement",
+    "reminder_offsets": "7,3,1 days before planned notice issuance date"
+  },
+  {
+    "service_id": "TM008",
+    "standard_due_rule": "6 months before expiry (grace period: 6 months after)",
+    "reminder_offsets": "180,90,30 days before expiry"
+  },
+  {
+    "service_id": "TM009",
+    "standard_due_rule": "No statutory deadline; complete assignment and file TM-P with Trademark Registry within reasonable time",
+    "reminder_offsets": "7,3,1 days before planned transfer date"
+  },
+  {
+    "service_id": "TM010",
+    "standard_due_rule": "No statutory deadline; file before product launch to establish priority (expedited examination available)",
+    "reminder_offsets": "7,3,1 days before planned product launch date"
+  },
+  {
+    "service_id": "TM011",
+    "standard_due_rule": "No statutory deadline; complete logo design before trademark filing or brand launch",
+    "reminder_offsets": "3,2,1 days before planned trademark filing date"
+  },
+  {
+    "service_id": "TM012",
+    "standard_due_rule": "No statutory deadline; apply before commercial use of design (priority within 6 months of first foreign filing)",
+    "reminder_offsets": "7,3,1 days before planned product launch date"
+  },
+  {
+    "service_id": "TM013",
+    "standard_due_rule": "Within 1 month of objection notice",
+    "reminder_offsets": "15,7,3 days before deadline"
+  },
+  {
+    "service_id": "TM014",
+    "standard_due_rule": "No statutory deadline; register at any time to establish public record of copyright ownership",
+    "reminder_offsets": "7,3,1 days before planned publication or launch date"
+  },
+  {
+    "service_id": "TM015",
+    "standard_due_rule": "Within 1 month of objection notice",
+    "reminder_offsets": "15,7,3 days before deadline"
+  },
+  {
+    "service_id": "TM016",
+    "standard_due_rule": "File before public disclosure; claim Paris Convention priority within 12 months of first foreign filing",
+    "reminder_offsets": "30,15,7 days before 12-month priority deadline"
+  },
+  {
+    "service_id": "TM017",
+    "standard_due_rule": "Monthly monitoring cycle; monitoring report due by end of each calendar month",
+    "reminder_offsets": "7,3,1 days before month end"
+  },
+  {
+    "service_id": "GST001",
+    "standard_due_rule": "Mandatory within 30 days of crossing GST turnover threshold (₹20L for services, ₹40L for goods)",
+    "reminder_offsets": "15,7,3 days before 30-day deadline"
+  },
+  {
+    "service_id": "GST002",
+    "standard_due_rule": "GSTR-1: 11th, GSTR-3B: 20th of following month",
+    "reminder_offsets": "7,3,1 days before deadline"
+  },
+  {
+    "service_id": "GST003",
+    "standard_due_rule": "Before start of financial year",
+    "reminder_offsets": "30,15,7 days before FY start"
+  },
+  {
+    "service_id": "GST004",
+    "standard_due_rule": "As per notice (usually 7–15 days from date of notice)",
+    "reminder_offsets": "7,3,1 days before deadline"
+  },
+  {
+    "service_id": "GST005",
+    "standard_due_rule": "31 December of following year",
+    "reminder_offsets": "30,15,7 days before 31 Dec"
+  },
+  {
+    "service_id": "GST006",
+    "standard_due_rule": "Mandatory before first taxable supply in India; apply online at least 5 days before first transaction",
+    "reminder_offsets": "7,3,1 days before planned first transaction date"
+  },
+  {
+    "service_id": "GST007",
+    "standard_due_rule": "Within 15 days of any change in GST registration details (address, partners, mobile, etc.)",
+    "reminder_offsets": "7,3,1 days before 15-day deadline"
+  },
+  {
+    "service_id": "GST008",
+    "standard_due_rule": "Within 30 days of cancellation order",
+    "reminder_offsets": "15,7,3 days before deadline"
+  },
+  {
+    "service_id": "GST009",
+    "standard_due_rule": "Within 3 months of cancellation/surrender",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "GST010",
+    "standard_due_rule": "No statutory deadline; complete GST registration for virtual office address before first taxable supply",
+    "reminder_offsets": "7,3,1 days before planned first transaction date"
+  },
+  {
+    "service_id": "GST011",
+    "standard_due_rule": "GSTR-1: 11th, GSTR-3B: 20th of following month",
+    "reminder_offsets": "7,3,1 days before deadline"
+  },
+  {
+    "service_id": "GST012",
+    "standard_due_rule": "31 December of following year",
+    "reminder_offsets": "30,15,7 days before 31 Dec"
+  },
+  {
+    "service_id": "IT001",
+    "standard_due_rule": "31 July (non-audit cases); 31 October (tax audit cases) of assessment year",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "IT002",
+    "standard_due_rule": "31 July (non-audit); 31 October (tax audit cases) of assessment year",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "IT003",
+    "standard_due_rule": "31 October of assessment year (tax audit mandatory for most partnership firms and LLPs)",
+    "reminder_offsets": "30,15,7 days before 31 Oct"
+  },
+  {
+    "service_id": "IT004",
+    "standard_due_rule": "31 October of assessment year (tax audit mandatory for all companies)",
+    "reminder_offsets": "30,15,7 days before 31 Oct"
+  },
+  {
+    "service_id": "IT005",
+    "standard_due_rule": "31 October of assessment year (trusts/NGOs with audit u/s 12A/12AB); 31 July if audit not required",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "IT006",
+    "standard_due_rule": "Before each foreign remittance; file Form 15CA/15CB prior to executing bank transaction",
+    "reminder_offsets": "7,3,1 days before remittance date"
+  },
+  {
+    "service_id": "IT007",
+    "standard_due_rule": "Apply within 30 days of first TDS/TCS deduction obligation arising (Form 49B)",
+    "reminder_offsets": "15,7,3 days before first TDS payment date"
+  },
+  {
+    "service_id": "IT008",
+    "standard_due_rule": "Q1 by 31 July; Q2 by 31 October; Q3 by 31 January; Q4 by 31 May of the following year",
+    "reminder_offsets": "15,7,3 days before quarterly deadline"
+  },
+  {
+    "service_id": "IT009",
+    "standard_due_rule": "As per notice (usually 15–30 days from date of notice; extensions possible via ITBA portal)",
+    "reminder_offsets": "7,3,1 days before deadline"
+  },
+  {
+    "service_id": "IT010",
+    "standard_due_rule": "Within 2 years from end of relevant assessment year (ITR-U under Section 139(8A))",
+    "reminder_offsets": "30,15,7 days before 2-year deadline"
+  },
+  {
+    "service_id": "IT011",
+    "standard_due_rule": "31 July of assessment year (salaried/pension income, total income up to ₹50L, no business income)",
+    "reminder_offsets": "30,15,7 days before 31 July"
+  },
+  {
+    "service_id": "IT012",
+    "standard_due_rule": "31 July of assessment year (capital gains, NRI, multiple house properties, no business income)",
+    "reminder_offsets": "30,15,7 days before 31 July"
+  },
+  {
+    "service_id": "IT013",
+    "standard_due_rule": "31 October of assessment year (business or profession income; tax audit required u/s 44AB)",
+    "reminder_offsets": "30,15,7 days before 31 Oct"
+  },
+  {
+    "service_id": "MCA001",
+    "standard_due_rule": "AOC-4: within 30 days of AGM; MGT-7: within 60 days of AGM (AGM must be held by 30 September)",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "MCA002",
+    "standard_due_rule": "Form 11 (Annual Return): 30 May; Form 8 (Statement of Accounts): 30 October of each financial year",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "MCA003",
+    "standard_due_rule": "MGT-7A: within 60 days of close of FY (by 29 May); AOC-4: within 180 days of close of FY (by 27 September)",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "MCA004",
+    "standard_due_rule": "File INC-24 within 60 days of passing special resolution for name change",
+    "reminder_offsets": "15,7,3 days before 60-day deadline"
+  },
+  {
+    "service_id": "MCA005",
+    "standard_due_rule": "File INC-22 within 30 days of change of registered office (inter-state change requires NCLT approval)",
+    "reminder_offsets": "15,7,3 days before 30-day deadline"
+  },
+  {
+    "service_id": "MCA006",
+    "standard_due_rule": "30 September annually (DIR-3 KYC mandatory for all directors holding active DIN)",
+    "reminder_offsets": "30,15,7 days before 30 Sep"
+  },
+  {
+    "service_id": "MCA007",
+    "standard_due_rule": "File DIR-3 KYC immediately upon deactivation; no fixed statutory window but delay attracts ₹5,000 fee",
+    "reminder_offsets": "7,3,1 days before planned filing date"
+  },
+  {
+    "service_id": "MCA008",
+    "standard_due_rule": "File DIR-12 within 30 days of appointment or change of director",
+    "reminder_offsets": "15,7,3 days before 30-day deadline"
+  },
+  {
+    "service_id": "MCA009",
+    "standard_due_rule": "File DIR-12 within 30 days of cessation or removal of director",
+    "reminder_offsets": "15,7,3 days before 30-day deadline"
+  },
+  {
+    "service_id": "MCA010",
+    "standard_due_rule": "30 September annually (DIR-3 KYC filing for all directors with active DIN)",
+    "reminder_offsets": "30,15,7 days before 30 Sep"
+  },
+  {
+    "service_id": "MCA011",
+    "standard_due_rule": "30 June annually (DPT-3 return of deposits and outstanding unsecured loans or transactions)",
+    "reminder_offsets": "30,15,7 days before 30 June"
+  },
+  {
+    "service_id": "MCA012",
+    "standard_due_rule": "30 May annually (LLP Annual Return for preceding financial year)",
+    "reminder_offsets": "30,15,7 days before 30 May"
+  },
+  {
+    "service_id": "MCA013",
+    "standard_due_rule": "File MSC-1 within 30 days of board resolution; annual MSC-3 return by 30 March each year",
+    "reminder_offsets": "15,7,3 days before deadline"
+  },
+  {
+    "service_id": "MCA014",
+    "standard_due_rule": "File MGT-14 and INC-27 within 30 days of special resolution for MOA amendment",
+    "reminder_offsets": "15,7,3 days before 30-day deadline"
+  },
+  {
+    "service_id": "MCA015",
+    "standard_due_rule": "File MGT-14 within 30 days of special resolution for AOA amendment",
+    "reminder_offsets": "15,7,3 days before 30-day deadline"
+  },
+  {
+    "service_id": "MCA016",
+    "standard_due_rule": "File SH-7 within 30 days of ordinary resolution authorising increase in authorised capital",
+    "reminder_offsets": "15,7,3 days before 30-day deadline"
+  },
+  {
+    "service_id": "MCA017",
+    "standard_due_rule": "Complete transfer and update register within 2 months of date of instrument of transfer (SH-4)",
+    "reminder_offsets": "15,7,3 days before 2-month deadline"
+  },
+  {
+    "service_id": "MCA018",
+    "standard_due_rule": "As per MCA dematerialisation mandate; private companies must demat all shares within prescribed regulatory timeline",
+    "reminder_offsets": "30,15,7 days before compliance deadline"
+  },
+  {
+    "service_id": "MCA019",
+    "standard_due_rule": "File LLP Form 24 (strike off) after settling all liabilities; complete within 90 days of partners' resolution",
+    "reminder_offsets": "30,15,7 days before 90-day deadline"
+  },
+  {
+    "service_id": "MCA020",
+    "standard_due_rule": "File STK-2 within 30 days of board resolution; voluntary winding up under Section 59, Insolvency & Bankruptcy Code",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "MCA021",
+    "standard_due_rule": "Within 180 days of date of incorporation (mandatory declaration of commencement of business via INC-20A)",
+    "reminder_offsets": "30,15,7 days before 180-day deadline"
+  },
+  {
+    "service_id": "MCA022",
+    "standard_due_rule": "As per MCA scheme notification; file within the scheme validity window (scheme dates vary per MCA circular)",
+    "reminder_offsets": "15,7,3 days before scheme closure date"
+  },
+  {
+    "service_id": "COMP001",
+    "standard_due_rule": "Within 30 days of receipt of FDI; annual FC-GPR/FC-TRS return by 30 June",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "COMP002",
+    "standard_due_rule": "Within 30 days of making overseas investment; annual ODI/APR return by 30 June",
+    "reminder_offsets": "30,15,7 days before deadline"
+  },
+  {
+    "service_id": "COMP003",
+    "standard_due_rule": "15 July annually",
+    "reminder_offsets": "30,15,7 days before 15 July"
+  },
+  {
+    "service_id": "COMP004",
+    "standard_due_rule": "30 days before expiry",
+    "reminder_offsets": "60,30,15 days before expiry"
+  },
+  {
+    "service_id": "COMP005",
+    "standard_due_rule": "31 May annually",
+    "reminder_offsets": "30,15,7 days before 31 May"
+  },
+  {
+    "service_id": "COMP006",
+    "standard_due_rule": "No statutory deadline; complete as required by business need or investor/lender requirement",
+    "reminder_offsets": "7,3,1 days before planned submission date"
+  },
+  {
+    "service_id": "COMP007",
+    "standard_due_rule": "Last day of month",
+    "reminder_offsets": "7,3,1 days before month end"
+  },
+  {
+    "service_id": "COMP008",
+    "standard_due_rule": "15th of following month",
+    "reminder_offsets": "7,3,1 days before 15th"
+  },
+  {
+    "service_id": "COMP009",
+    "standard_due_rule": "15th of following month",
+    "reminder_offsets": "7,3,1 days before 15th"
+  },
+  {
+    "service_id": "COMP010",
+    "standard_due_rule": "Last day of following month (varies by state)",
+    "reminder_offsets": "7,3,1 days before month end"
+  },
+  {
+    "service_id": "COMP011",
+    "standard_due_rule": "31 October (IT Return)",
+    "reminder_offsets": "30,15,7 days before 31 Oct"
+  },
+  {
+    "service_id": "COMP012",
+    "standard_due_rule": "31 July (IT Return)",
+    "reminder_offsets": "30,15,7 days before 31 July"
+  },
+  {
+    "service_id": "COMP013",
+    "standard_due_rule": "Last day of month",
+    "reminder_offsets": "7,3,1 days before month end"
+  },
+  {
+    "service_id": "COMP014",
+    "standard_due_rule": "Monthly advisory cycle; review and report by end of each calendar month",
+    "reminder_offsets": "7,3,1 days before month end"
+  },
+  {
+    "service_id": "GLOB001",
+    "standard_due_rule": "No statutory deadline; incorporate before commencing UAE business operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "GLOB002",
+    "standard_due_rule": "No statutory deadline; incorporate before commencing US business operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "GLOB003",
+    "standard_due_rule": "No statutory deadline; incorporate before commencing Singapore business operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "GLOB004",
+    "standard_due_rule": "No statutory deadline; incorporate before commencing UK business operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "GLOB005",
+    "standard_due_rule": "No statutory deadline; file before US product launch to establish priority rights (USPTO examination: 3–6 months)",
+    "reminder_offsets": "7,3,1 days before planned US launch date"
+  },
+  {
+    "service_id": "GLOB006",
+    "standard_due_rule": "File within 6 months of Indian base registration to claim Paris Convention priority date",
+    "reminder_offsets": "30,15,7 days before 6-month priority deadline"
+  },
+  {
+    "service_id": "GLOB007",
+    "standard_due_rule": "No statutory deadline; obtain DED/free zone e-commerce licence before commencing UAE online operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  },
+  {
+    "service_id": "GLOB008",
+    "standard_due_rule": "No statutory deadline; complete attestation before submitting documents to UAE authorities or employers",
+    "reminder_offsets": "7,3,1 days before planned submission date"
+  },
+  {
+    "service_id": "GLOB009",
+    "standard_due_rule": "No statutory deadline; complete Ajman Free Zone registration before commencing free zone operations",
+    "reminder_offsets": "7,3,1 days before planned launch date"
+  }
+]
