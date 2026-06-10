@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
         </div>
         
         <div className="p-12 prose prose-slate max-w-none prose-headings:text-dark prose-headings:font-bold prose-p:text-slate-600 prose-li:text-slate-600">
-          <p>Trust is the foundation of our relationship with our clients. This Privacy Policy describes how Deccan Filings collects, uses, and protects your personal information when you use our website and services.</p>
+          <p>This Privacy Policy describes how <strong>TOR BUSINESS SOLUTIONS PRIVATE LIMITED</strong> (“we”, “our”, or “us”), operating under the brand name Deccan Filings, collects, uses, and safeguards your data.</p>
 
           <h2 className="flex items-center gap-3 mt-10 mb-6">
             <Eye className="h-6 w-6 text-brand" /> 1. Information We Collect
@@ -46,8 +46,15 @@ export default function PrivacyPolicy() {
           </h2>
           <p>You have the right to access, correct, or delete your personal information stored on our platform. You can manage your profile settings or contact our support team for any data-related requests.</p>
 
-          <div className="mt-16 pt-8 border-t border-slate-100 text-center">
-            <p className="text-sm text-slate-400">If you have any questions about this Privacy Policy, please contact us at <strong>privacy@deccanfilings.com</strong></p>
+          <div className="mt-16 pt-8 border-t border-slate-100 text-center space-y-4">
+            <div className="text-sm text-slate-500">
+              <p className="font-bold text-dark">Contact Us:</p>
+              <p>Company: <strong>TOR BUSINESS SOLUTIONS PRIVATE LIMITED</strong></p>
+              <p>Address: Third Floor, Union Bank Building, 53/3RT and 7-1-621/261,</p>
+              <p>Thabga Terrain, SR Nagar Main Road,</p>
+              <p>Ameerpet, Hyderabad, Telangana - 500038.</p>
+              <p className="mt-2">Email: <strong>privacy@deccanfilings.com</strong></p>
+            </div>
           </div>
         </div>
       </div>

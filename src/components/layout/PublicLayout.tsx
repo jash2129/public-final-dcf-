@@ -466,7 +466,10 @@ export default function PublicLayout() {
           </div>
           
           <div className="border-t border-slate-800/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-            <p>&copy; {new Date().getFullYear()} Deccan Filings. All rights reserved.</p>
+            <div className="text-center md:text-left space-y-1">
+              <p>© 2026 Deccan Filings. All rights reserved.</p>
+              <p>Deccan Filings is a brand owned and operated by <strong className="text-white">TOR BUSINESS SOLUTIONS PRIVATE LIMITED.</strong></p>
+            </div>
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               {[
                 { name: 'Blog', path: '/blog' },

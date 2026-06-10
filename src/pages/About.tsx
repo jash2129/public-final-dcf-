@@ -94,8 +94,20 @@ export default function About() {
         </div>
       </section>
 
+      {/* Corporate Structure */}
+      <section className="py-16">
+        <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-dark mb-6">Corporate Structure</h2>
+          <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 shadow-sm text-center">
+            <p className="text-lg text-slate-600 leading-relaxed">
+              Deccan Filings is a prominent business compliance platform and a brand wholly owned, managed, and operated by <strong className="text-dark">TOR BUSINESS SOLUTIONS PRIVATE LIMITED</strong> (CIN: U74909TS2023PTC173678). All legal, financial, and contractual obligations are executed under our registered parent entity.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Team CTA */}
-      <section className="py-24">
+      <section className="py-24 bg-slate-50 border-t border-slate-200">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-dark mb-8">Ready to start your business journey?</h2>
           <Link 

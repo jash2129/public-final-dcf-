@@ -26,10 +26,10 @@ export const pool = new Proxy({} as mysql.Pool, {
 
 export async function setupDatabase(): Promise<mysql.Pool> {
   try {
-    let dbHost = process.env.DB_HOST; //|| 'localhost';
-    const dbUser = process.env.DB_USER;// || 'u149740700_DeccanFilings';
-    const dbPassword = process.env.DB_PASSWORD;// || 'DeccanFilings@2026';
-    const dbName = process.env.DB_NAME;// || 'u149740700_DeccanFilings';
+    let dbHost = process.env.DB_HOST || 'localhost';
+    const dbUser = process.env.DB_USER || 'root';
+    const dbPassword = process.env.DB_PASSWORD || '';
+    const dbName = process.env.DB_NAME || 'deccan_filings';
     let dbPort = 3306;
 
     // Normalize dbHost if it was configured as a URI (e.g. http://127.0.0.1:3306)

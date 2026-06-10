@@ -1,7 +1,7 @@
 export const serviceCategories = [
   {
-    title: "Startup",
-    slug: "startup",
+    title: "Startup Registrations",
+    slug: "startup-registrations",
     services: [
       "Proprietorship Registration",
       "Partnership Firm Registration",
@@ -13,19 +13,23 @@ export const serviceCategories = [
       "Public Limited Company Registration",
       "Producer Company Registration",
       "Indian Subsidiary Registration",
-      "Nidhi Company Registration"
+      "Nidhi Company Registration",
+      "Foreign Company Registration",
+      "Society Registration"
     ]
   },
   {
-    title: "Registrations",
-    slug: "registrations",
+    title: "License",
+    slug: "license",
     services: [
-      "GST Registration",
-      "GST Registration for Foreigners",
+      "Startup India",
+      "Factory Pollution",
       "MSME/Udyam Registration",
+      "Trade License",
+      "FSSAI License / Food License Registration",
+      "ISO Certification",
       "Import Export Code (IEC) Registration",
       "Shop & Establishment License Registration",
-      "Trade License",
       "Professional Tax Registration",
       "PF Registration",
       "ESI Registration",
@@ -33,30 +37,25 @@ export const serviceCategories = [
       "Barcode Registration",
       "RCMC Registration",
       "Darpan Registration",
-      "FSSAI License / Food License Registration",
       "FSSAI Food Product Approval",
       "Drug License",
       "Fire License / NOC",
-      "Halal Certification",
-      "ISO Certification"
+      "Halal Certification"
     ]
   },
   {
-    title: "Trademark",
-    slug: "trademark",
+    title: "Income Tax",
+    slug: "income-tax",
     services: [
-      "Trademark Registration (Indian)",
-      "International Trademark Registration",
-      "Expedited Trademark Registration",
-      "Trademark Search",
-      "Trademark Objection Reply",
-      "Trademark Opposition",
-      "Trademark Renewal",
-      "Trademark Assignment / Transfer",
-      "Trademark Infringement Notice",
-      "Copyright Registration",
-      "Patent Registration",
-      "Design Registration"
+      "Tax Audit",
+      "Individual ITR Filing",
+      "Business ITR Filing",
+      "Tax Notice Handling",
+      "15CA / 15CB Form Filing",
+      "Company e-Taxing",
+      "TDS Return Filing",
+      "Form 16 Generation",
+      "Lower TDS Certificate"
     ]
   },
   {
@@ -64,6 +63,7 @@ export const serviceCategories = [
     slug: "gst",
     services: [
       "GST Registration",
+      "GST Registration for Foreigners",
       "GST Cancellation",
       "GST Amendment",
       "GST LUT Form Filing",
@@ -76,19 +76,6 @@ export const serviceCategories = [
       "GST Software for Accountants",
       "GST Notice Handling",
       "GST Audit Assistance"
-    ]
-  },
-  {
-    title: "Income Tax",
-    slug: "income-tax",
-    services: [
-      "Individual ITR Filing",
-      "Business ITR Filing",
-      "Tax Notice Handling",
-      "15CA / 15CB Form Filing",
-      "Income Tax e-Filing",
-      "TDS Return Filing",
-      "Form 16 Generation"
     ]
   },
   {
@@ -118,6 +105,12 @@ export const serviceCategories = [
     title: "Compliance",
     slug: "compliance",
     services: [
+      "MCA/ROC Registration",
+      "GST Compliance",
+      "TDS Compliance",
+      "PF/ESI Compliance",
+      "PT Compliance",
+      "Annual Returns",
       "Company Compliance Calendar & Alerts",
       "Company Compliance Software / Management",
       "RBI Compliance Filings",
@@ -136,6 +129,24 @@ export const serviceCategories = [
     ]
   },
   {
+    title: "Trademark",
+    slug: "trademark",
+    services: [
+      "Trademark Registration (Indian)",
+      "International Trademark Registration",
+      "Expedited Trademark Registration",
+      "Trademark Search",
+      "Trademark Objection Reply",
+      "Trademark Opposition",
+      "Trademark Renewal",
+      "Trademark Assignment / Transfer",
+      "Trademark Infringement Notice",
+      "Copyright Registration",
+      "Patent Registration",
+      "Design Registration"
+    ]
+  },
+  {
     title: "Finance",
     slug: "finance",
     services: [
@@ -148,12 +159,8 @@ export const serviceCategories = [
     title: "Global",
     slug: "global",
     services: [
-      "USA Company Registration",
-      "UAE Company Registration",
-      "UAE Ecommerce Setup",
-      "UAE Embassy Attestation",
-      "Foreign Subsidiary Setup",
-      "UAE Services Platform"
+      "US Accounting",
+      "US Taxation"
     ]
   },
   {

@@ -16,6 +16,7 @@ import adminRouter from "./server/routes/admin.routes";
 import complianceRouter from "./server/routes/compliance.routes";
 import documentRouter from "./server/routes/document.routes";
 import profileRouter from "./server/routes/profile.routes";
+import contactRouter from "./server/routes/contact.routes";
 import { errorHandler } from "./server/middlewares/error.middleware";
 
 async function startServer() {
@@ -119,6 +120,7 @@ async function startServer() {
   app.use("/api/admin", adminRouter);
   app.use("/api/compliance", complianceRouter);
   app.use("/api/documents", documentRouter);
+  app.use("/api/contact", contactRouter);
   app.use("/api", profileRouter); // Matches: /api/user/*, /api/invoices, /api/stats/*
 
   // Serve static files from uploads

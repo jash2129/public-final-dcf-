@@ -1,19 +1,19 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Building2, ArrowRight, FileText, Briefcase, CheckCircle, Globe, Scale, BookOpen, Calculator, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { serviceCategories, generateSlug } from '../data/services';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const categoryIcons: Record<string, any> = {
-  "Startup": Building2,
-  "Registrations": FileText,
-  "Trademark": Briefcase,
-  "GST": Calculator,
+  "Startup Registrations": Building2,
+  "License": FileText,
   "Income Tax": BookOpen,
+  "GST": Calculator,
   "MCA": Building2,
   "Compliance": CheckCircle,
-  "Global": Globe,
+  "Trademark": Briefcase,
   "Finance": Wallet,
+  "Global": Globe,
   "More Services": Scale
 };
 
@@ -109,6 +109,17 @@ export default function ServicesCatalog() {
       });
     }
   };
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const slug = location.hash.replace('#', '');
+      setTimeout(() => {
+        scrollToCategory(slug);
+      }, 100); // slight delay for smooth scrolling after render
+    }
+  }, [location.hash]);
 
   return (
     <div className="bg-[#fafafa] min-h-screen py-20 relative overflow-hidden">

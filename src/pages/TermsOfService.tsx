@@ -12,7 +12,7 @@ export default function TermsOfService() {
         </div>
         
         <div className="p-12 prose prose-slate max-w-none prose-headings:text-dark prose-headings:font-bold prose-p:text-slate-600">
-          <p>By accessing or using Deccan Filings, you agree to be bound by these Terms of Service. Please read them carefully before using our platform.</p>
+          <p>By accessing or using Deccan Filings, you agree to be bound by these Terms of Service. Deccan Filings is a brand wholly owned and operated by <strong>TOR BUSINESS SOLUTIONS PRIVATE LIMITED.</strong> Please read them carefully before using our platform.</p>
 
           <h2 className="flex items-center gap-3 mt-10 mb-6">
             <FileCheck className="h-6 w-6 text-secondary" /> 1. Services Provided
@@ -34,8 +34,15 @@ export default function TermsOfService() {
           </h2>
           <p>Deccan Filings shall not be liable for any indirect, incidental, or consequential damages arising out of the use or inability to use our services, including but not limited to lost profits or government penalties due to delayed filings not caused by our gross negligence.</p>
 
-          <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+          <div className="mt-16 pt-8 border-t border-slate-100 text-center space-y-4">
             <p className="text-sm text-slate-400">For clarifications regarding these terms, please contact <strong>legal@deccanfilings.com</strong></p>
+            <div className="text-sm text-slate-500">
+              <p className="font-bold text-dark">Registered Office:</p>
+              <p><strong>TOR BUSINESS SOLUTIONS PRIVATE LIMITED</strong></p>
+              <p>Third Floor, Union Bank Building, 53/3RT and 7-1-621/261,</p>
+              <p>Thabga Terrain, SR Nagar Main Road,</p>
+              <p>Ameerpet, Hyderabad, Telangana - 500038.</p>
+            </div>
           </div>
         </div>
       </div>
