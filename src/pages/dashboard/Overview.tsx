@@ -97,7 +97,7 @@ export default function Overview() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate('/dashboard/orders', { state: { openNewOrderModal: true } })}
-          className="bg-dark text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+          className="bg-brand text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-brand-hover transition-all shadow-[0_0_15px_rgba(0,87,255,0.4)] hover:shadow-[0_0_25px_rgba(0,87,255,0.6)] flex items-center gap-2"
         >
           <span>New Request</span>
           <ArrowRight className="h-4 w-4" />
@@ -120,7 +120,7 @@ export default function Overview() {
           <motion.div 
             key={stat.title} 
             variants={itemAnim}
-            className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-soft hover:shadow-md transition-shadow"
+            className="clean-card-premium p-4 sm:p-6 rounded-3xl premium-hover-card"
           >
             {loading ? (
               <div className="space-y-3">
@@ -155,7 +155,7 @@ export default function Overview() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-[32px] border border-slate-200 shadow-soft p-8"
+            className="clean-card-premium rounded-[32px] p-8"
           >
             <div className="flex justify-between items-center mb-6">
               <div>
@@ -175,8 +175,8 @@ export default function Overview() {
                   <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRequests" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#FBBC05" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#FBBC05" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#0057FF" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#0057FF" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -194,8 +194,8 @@ export default function Overview() {
           </motion.div>
 
           {/* Recent Orders */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+          <div className="clean-card-premium rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-slate-200/50 flex justify-between items-center">
               <h2 className="font-bold text-lg text-dark">Recent Orders</h2>
               <Link to="/dashboard/orders" className="text-sm font-bold text-dark hover:text-secondary transition-colors">View All</Link>
             </div>
@@ -204,7 +204,7 @@ export default function Overview() {
                 <div className="p-6 text-center text-slate-500">No recent orders.</div>
               ) : (
                 recentOrders.map((order: any) => (
-                  <div key={order.id} className="p-4 sm:p-6 flex items-center justify-between hover:bg-slate-50 transition-colors group cursor-pointer active:bg-slate-100">
+                  <div key={order.id} className="p-4 sm:p-6 flex items-center justify-between hover:bg-white/50 transition-colors group cursor-pointer active:bg-white/70">
                     <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                       <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-brand group-hover:text-dark transition-colors shrink-0">
                         <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -234,8 +234,8 @@ export default function Overview() {
         {/* Right Column */}
         <div className="space-y-8">
           {/* Upcoming Compliance */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <div className="p-6 border-b border-slate-100">
+          <div className="clean-card-premium rounded-2xl">
+            <div className="p-6 border-b border-slate-200/50">
               <h2 className="font-bold text-lg text-dark">Upcoming Compliance</h2>
             </div>
             <div className="p-6">
@@ -243,7 +243,7 @@ export default function Overview() {
                 {complianceTasks.slice(0, 3).map((item: any, i: number) => (
                   <div key={i} className="flex gap-4 relative">
                     <div className="flex flex-col items-center">
-                      <div className={`w-3 h-3 rounded-full mt-1.5 z-10 ${item.status === 'overdue' ? 'bg-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]' : 'bg-brand shadow-[0_0_0_4px_rgba(229,255,143,0.2)]'}`}></div>
+                      <div className={`w-3 h-3 rounded-full mt-1.5 z-10 ${item.status === 'overdue' ? 'bg-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.1)]' : 'bg-brand shadow-[0_0_0_4px_rgba(0,87,255,0.2)] glowing-accent'}`}></div>
                       {i !== 2 && <div className="w-0.5 h-full bg-slate-100 absolute top-3 left-1.5"></div>}
                     </div>
                     <div className="pb-2">
@@ -260,7 +260,7 @@ export default function Overview() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-dark text-white rounded-2xl shadow-xl overflow-hidden relative">
+          <div className="bg-dark text-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] overflow-hidden relative border border-white/10">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand rounded-full blur-[80px] opacity-20"></div>
             <div className="p-6 relative z-10">
               <h2 className="font-bold text-lg mb-2">Need a new service?</h2>

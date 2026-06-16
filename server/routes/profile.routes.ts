@@ -57,7 +57,7 @@ router.get('/user/profile', async (req: AuthenticatedRequest, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
     const [users] = await pool.query<mysql.RowDataPacket[]>(
-      'SELECT id, name, email, role, phone, avatar, company_name, address, gstin, notification_prefs FROM users WHERE id = ?',
+      'SELECT id, name, email, role, phone, whatsapp_number, avatar, company_name, address, gstin, notification_prefs FROM users WHERE id = ?',
       [req.user.id]
     );
     if (users.length === 0) return res.status(404).json({ error: "User not found" });
@@ -86,11 +86,24 @@ router.get('/user/profile', async (req: AuthenticatedRequest, res, next) => {
 router.patch('/user/profile', async (req: AuthenticatedRequest, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    const { name, email, phone, company_name, address, gstin } = req.body;
+    const { name, email, phone, whatsapp_number, company_name, address, gstin } = req.body;
+
+    if (whatsapp_number) {
+      if (!/^\+?[0-9]{10,15}$/.test(whatsapp_number.trim())) {
+        return res.status(400).json({ error: 'A valid WhatsApp number is required (10-15 digits)' });
+      }
+      const [existing] = await pool.query<mysql.RowDataPacket[]>(
+        'SELECT id FROM users WHERE whatsapp_number = ? AND id != ?',
+        [whatsapp_number, req.user.id]
+      );
+      if (existing.length > 0) {
+        return res.status(400).json({ error: 'WhatsApp number is already in use' });
+      }
+    }
 
     await pool.execute(
-      'UPDATE users SET name = ?, email = ?, phone = ?, company_name = ?, address = ?, gstin = ? WHERE id = ?',
-      [name, email, phone, company_name, address, gstin, req.user.id]
+      'UPDATE users SET name = ?, email = ?, phone = ?, whatsapp_number = ?, company_name = ?, address = ?, gstin = ? WHERE id = ?',
+      [name, email, phone, whatsapp_number, company_name, address, gstin, req.user.id]
     );
 
     await logActivity(req.user.id, 'PROFILE_UPDATE', 'Updated profile information');

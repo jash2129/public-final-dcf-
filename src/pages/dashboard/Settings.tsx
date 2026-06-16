@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Shield, Bell, CreditCard, Save, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SuccessOverlay from '../../components/ui/SuccessOverlay';
+import Skeleton from '../../components/ui/Skeleton';
 
 type Tab = 'profile' | 'security' | 'notifications' | 'billing';
 
@@ -17,6 +18,7 @@ export default function Settings() {
     name: '',
     email: '',
     phone: '',
+    whatsapp_number: '',
     company_name: '',
     address: '',
     gstin: '',
@@ -68,6 +70,7 @@ export default function Settings() {
         name: data.name || '',
         email: data.email || '',
         phone: data.phone || '',
+        whatsapp_number: data.whatsapp_number || '',
         company_name: data.company_name || '',
         address: data.address || '',
         gstin: data.gstin || '',
@@ -242,8 +245,50 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 text-brand animate-spin" />
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        
+        <div className="bg-white rounded-2xl border border-[var(--ds-border)] shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+          {/* Sidebar Skeleton */}
+          <div className="w-full md:w-64 bg-[var(--ds-bg)] border-b md:border-b-0 md:border-r border-[var(--ds-border)] p-4 space-y-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i}>
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+          </div>
+          
+          {/* Content Skeleton */}
+          <div className="flex-1 p-6 md:p-8">
+            <Skeleton className="h-6 w-48 mb-8" />
+            
+            <div className="flex items-center gap-6 mb-8">
+              <Skeleton variant="circle" className="h-20 w-20 shrink-0" />
+              <div className="space-y-3 w-full max-w-xs">
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="md:col-span-2 space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -278,9 +323,9 @@ export default function Settings() {
         )}
       </AnimatePresence>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+      <div className="bg-white rounded-2xl border border-[var(--ds-border)] shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[500px]">
         {/* Settings Sidebar */}
-        <div className="w-full md:w-64 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 p-4">
+        <div className="w-full md:w-64 bg-[var(--ds-bg)] border-b md:border-b-0 md:border-r border-[var(--ds-border)] p-4">
           <nav className="space-y-1">
             {navItems.map((item) => (
               <button
@@ -288,11 +333,11 @@ export default function Settings() {
                 onClick={() => setActiveTab(item.id as Tab)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
                   activeTab === item.id 
-                    ? 'bg-white text-dark shadow-sm border border-slate-200' 
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-dark'
+                    ? 'bg-white text-[var(--ds-text)] shadow-sm border border-[var(--ds-border)]' 
+                    : 'text-[var(--ds-text-muted)] hover:bg-white hover:text-[var(--ds-text)]'
                 }`}
               >
-                <item.icon className={`h-4 w-4 ${activeTab === item.id ? 'text-brand' : 'text-slate-400'}`} />
+                <item.icon className={`h-4 w-4 ${activeTab === item.id ? 'text-brand' : 'text-[var(--ds-text-muted)]'}`} />
                 {item.label}
               </button>
             ))}
@@ -363,7 +408,19 @@ export default function Settings() {
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all"
                     />
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
+                    <label className="block text-sm font-bold text-dark mb-2">WhatsApp Number</label>
+                    <input 
+                      type="tel" 
+                      value={formData.whatsapp_number}
+                      onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                      placeholder="e.g. 9876543210"
+                      pattern="^\+?[0-9]{10,15}$"
+                      title="Please enter a valid WhatsApp number (10-15 digits)"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div>
                     <label className="block text-sm font-bold text-dark mb-2">Company Name</label>
                     <input 
                       type="text" 

@@ -3,6 +3,7 @@ import * as orderService from '../services/order.service';
 import * as orderModel from '../models/order.model';
 import { validateOrder } from '../schemas/validation.schema';
 import { authenticate, AuthenticatedRequest } from '../middlewares/auth';
+import * as paymentService from '../services/payment.service';
 
 const router = Router();
 
@@ -112,6 +113,58 @@ router.get('/:order_id', async (req: AuthenticatedRequest, res, next) => {
       items
     });
   } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/orders/:id/pay/initiate
+ * Initiate a Razorpay payment transaction.
+ */
+router.post('/:id/pay/initiate', async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    const orderId = req.params.id;
+    const paymentData = await paymentService.initiatePayment(orderId, req.user.id);
+    return res.json(paymentData);
+  } catch (error: any) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.message });
+    }
+    next(error);
+  }
+});
+
+/**
+ * POST /api/orders/:id/pay/verify
+ * Verify Razorpay payment signature.
+ */
+router.post('/:id/pay/verify', async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    const orderId = req.params.id;
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      return res.status(400).json({ error: 'Missing required Razorpay payment fields.' });
+    }
+
+    const isValid = await paymentService.verifyPaymentSignature(
+      orderId,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
+    );
+
+    if (isValid) {
+      return res.json({ success: true, message: 'Payment verified and captured.' });
+    } else {
+      return res.status(400).json({ success: false, error: 'Signature verification failed.' });
+    }
+  } catch (error: any) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.message });
+    }
     next(error);
   }
 });

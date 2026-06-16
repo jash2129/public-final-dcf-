@@ -201,8 +201,8 @@ export default function Home() {
               className="flex flex-wrap gap-x-6 gap-y-3 text-xs text-slate-400 font-bold uppercase tracking-wider"
             >
               <span className="text-slate-500">Trending:</span>
-              <Link to="/services/startup/private-limited-company-registration" className="hover:text-brand transition-colors">Private Limited Company</Link>
-              <Link to="/services/registrations/gst-registration" className="hover:text-brand transition-colors">GST Registration</Link>
+              <Link to="/services/startup-registrations/private-limited-company-registration" className="hover:text-brand transition-colors">Private Limited Company</Link>
+              <Link to="/services/gst/gst-registration" className="hover:text-brand transition-colors">GST Registration</Link>
               <Link to="/services/trademark/trademark-registration-indian" className="hover:text-brand transition-colors">Trademark</Link>
             </motion.div>
           </div>
@@ -308,7 +308,7 @@ export default function Home() {
           >
             {/* Bento Card 1 - Double Width */}
             <motion.div variants={fadeInUp} className="md:col-span-2 lg:col-span-2">
-              <Link to="/services/startup" className="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full relative overflow-hidden">
+              <Link to="/services#startup-registrations" className="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-bl-full group-hover:bg-brand/10 transition-colors"></div>
                 <div>
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-8">
@@ -327,7 +327,7 @@ export default function Home() {
 
             {/* Bento Card 2 - Standard */}
             <motion.div variants={fadeInUp} className="col-span-1">
-              <Link to="/services/registrations/gst-registration" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full">
+              <Link to="/services/gst/gst-registration" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full">
                 <div>
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-6">
                     <FileText className="h-7 w-7" />
@@ -341,7 +341,7 @@ export default function Home() {
 
             {/* Bento Card 3 - Standard */}
             <motion.div variants={fadeInUp} className="col-span-1">
-              <Link to="/services/mca" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full">
+              <Link to="/services#mca" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full">
                 <div>
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-6">
                     <Briefcase className="h-7 w-7" />
@@ -355,7 +355,7 @@ export default function Home() {
 
             {/* Bento Card 4 - Full Width Row */}
             <motion.div variants={fadeInUp} className="md:col-span-3 lg:col-span-4">
-              <Link to="/services/income-tax" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 h-full relative overflow-hidden">
+              <Link to="/services#income-tax" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 h-full relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-brand/5 rounded-full blur-3xl group-hover:bg-brand/10 transition-colors -z-10"></div>
                 <div className="flex items-start sm:items-center gap-6">
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 shrink-0">
@@ -486,10 +486,10 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {[
-              { title: 'Private Limited Company', price: '₹5,999', path: '/services/startup/private-limited-company-registration', category: 'Startup' },
-              { title: 'GST Registration', price: '₹1,499', path: '/services/registrations/gst-registration', category: 'Registrations' },
+              { title: 'Private Limited Company', price: '₹5,999', path: '/services/startup-registrations/private-limited-company-registration', category: 'Startup' },
+              { title: 'GST Registration', price: '₹1,499', path: '/services/gst/gst-registration', category: 'Registrations' },
               { title: 'Trademark Registration', price: '₹1,999', path: '/services/trademark/trademark-registration-indian', category: 'Trademark' },
-              { title: 'FSSAI License', price: '₹2,499', path: '/services/registrations/fssai-license-food-license-registration', category: 'Registrations' },
+              { title: 'FSSAI License', price: '₹2,499', path: '/services/license/fssai-license-food-license-registration', category: 'Registrations' },
             ].map((service) => (
               <motion.div key={service.title} variants={fadeInUp} className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col hover:border-brand hover:shadow-2xl transition-all duration-300 group">
                 <div className="p-8 flex-grow">

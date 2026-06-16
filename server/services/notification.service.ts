@@ -2,6 +2,18 @@ import fs from 'fs';
 import path from 'path';
 import { pool } from '../db';
 import { formatCurrency } from '../utils/helpers';
+import nodemailer from 'nodemailer';
+import * as invoiceService from './invoice.service';
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || '',
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || '',
+  },
+});
 
 const LOG_DIR = path.join(process.cwd(), 'logs');
 const LOG_FILE = path.join(LOG_DIR, 'notifications.log');
@@ -50,11 +62,40 @@ async function logToActivityDB(userId: number, action: string, details: string) 
 /**
  * Mock Email Dispatcher
  */
-export async function sendEmail(to: string, subject: string, body: string, userId?: number): Promise<boolean> {
+export async function sendEmail(
+  to: string,
+  subject: string,
+  body: string,
+  userId?: number,
+  attachments?: any[]
+): Promise<boolean> {
+  const smtpHost = process.env.SMTP_HOST;
+  
+  if (smtpHost) {
+    try {
+      const fromEmail = process.env.SYSTEM_EMAIL_FROM || process.env.SMTP_USER || 'support@deccanfilings.com';
+      await transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
+        text: body,
+        attachments,
+      });
+      console.log(`[SMTP] Email sent successfully to ${to}`);
+      if (userId) {
+        await logToActivityDB(userId, 'Email Dispatched', `Subject: ${subject}`);
+      }
+      return true;
+    } catch (error) {
+      console.error(`[SMTP ERROR] Failed to send email to ${to}, falling back to mock logging. Error:`, error);
+    }
+  }
+
+  // Graceful fallback to mock logging
   console.log(`[SMTP MOCK] Sending Email to ${to}:\nSubject: ${subject}\nBody: ${body}\n`);
   logNotificationToFile('EMAIL', to, subject, body);
   if (userId) {
-    await logToActivityDB(userId, 'Email Dispatched', `Subject: ${subject}`);
+    await logToActivityDB(userId, 'Email Dispatched (Mock)', `Subject: ${subject}`);
   }
   return true;
 }
@@ -165,4 +206,46 @@ export async function notifyComplianceDeadline(
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
   }
+}
+
+/**
+ * Notify user of payment success
+ */
+export async function notifyPaymentSuccess(
+  orderId: string,
+  amount: number,
+  userEmail: string,
+  userName: string,
+  userId: number,
+  serviceName: string
+): Promise<void> {
+  const formattedAmt = formatCurrency(amount);
+  const emailSubject = `Payment Received - Invoice for Order ${orderId}`;
+  const emailBody = `Hi ${userName},\n\n` +
+                    `We are pleased to confirm that your payment of ${formattedAmt} for Order ${orderId} has been successfully received.\n\n` +
+                    `Thank you for choosing Deccan Filings! Our professional team has already begun processing your filing request. We will reach out to you if any additional documents or clarifications are needed.\n\n` +
+                    `You can monitor the status of your request at any time by logging into your dashboard.\n\n` +
+                    `Best regards,\nTeam Deccan Filings`;
+  
+  let attachments: any[] | undefined = undefined;
+  try {
+    const pdfBuffer = await invoiceService.generateInvoiceBuffer(
+      orderId,
+      amount,
+      userName,
+      userEmail,
+      serviceName
+    );
+    attachments = [
+      {
+        filename: `Invoice_${orderId}.pdf`,
+        content: pdfBuffer,
+        contentType: 'application/pdf',
+      },
+    ];
+  } catch (err) {
+    console.error(`Failed to generate invoice PDF for order ${orderId}:`, err);
+  }
+
+  await sendEmail(userEmail, emailSubject, emailBody, userId, attachments);
 }

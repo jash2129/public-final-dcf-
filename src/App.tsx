@@ -18,6 +18,7 @@ import DashboardCompliance from './pages/dashboard/Compliance';
 import DashboardInvoices from './pages/dashboard/Invoices';
 import DashboardSettings from './pages/dashboard/Settings';
 import Blog from './pages/Blog';
+import BlogPostDetail from './pages/BlogPostDetail';
 import Careers from './pages/Careers';
 import Contact from './pages/Contact';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="/tools" element={<div className="p-20 text-center text-2xl font-bold">Tools Page</div>} />
 
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPostDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/contact" element={<Contact />} />

@@ -47,7 +47,7 @@ export default function Invoices() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="clean-card-premium p-6 rounded-2xl">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-brand-lightest text-dark rounded-xl">
               <Receipt className="h-6 w-6" />
@@ -59,7 +59,7 @@ export default function Invoices() {
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-2xl border border-amber-100 shadow-sm">
+        <div className="clean-card-premium p-6 rounded-2xl border-amber-200/50">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
               <Clock className="h-6 w-6" />
@@ -69,15 +69,15 @@ export default function Invoices() {
               <p className="text-2xl font-bold text-dark">₹1,499</p>
             </div>
           </div>
-          <button className="w-full bg-dark text-white text-sm font-bold py-2 rounded-lg hover:bg-dark-200 transition-colors">
+          <button className="w-full bg-brand text-white text-sm font-bold py-2 rounded-lg hover:bg-brand-hover transition-colors shadow-[0_0_15px_rgba(0,87,255,0.4)] hover:shadow-[0_0_25px_rgba(0,87,255,0.6)]">
             Pay Now
           </button>
         </div>
       </div>
 
       {/* Invoices List */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between gap-4">
+      <div className="clean-card-premium rounded-2xl overflow-hidden">
+        <div className="p-6 border-b border-slate-200/50 flex flex-col sm:flex-row justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input 
@@ -96,7 +96,7 @@ export default function Invoices() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
+              <tr className="bg-slate-50/50 border-b border-slate-200/50">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Invoice ID</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Service</th>
@@ -120,7 +120,7 @@ export default function Invoices() {
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={invoice.id} className="hover:bg-brand/5 transition-colors group">
                     <td className="px-6 py-4 text-sm font-bold text-dark">{invoice.id}</td>
                     <td className="px-6 py-4 text-sm text-slate-500">{invoice.date}</td>
                     <td className="px-6 py-4 text-sm font-medium text-slate-700">{invoice.service}</td>

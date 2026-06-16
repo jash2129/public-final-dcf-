@@ -145,6 +145,7 @@ router.post('/google', async (req, res, next) => {
 
     // Check database
     let user = await userModel.findUserByEmail(email);
+    let isNewUser = false;
 
     if (user) {
       if (!user.avatar && picture) {
@@ -152,6 +153,7 @@ router.post('/google', async (req, res, next) => {
         user.avatar = picture;
       }
     } else {
+      isNewUser = true;
       // Create user
       const dummyPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
       const hashedPassword = await bcrypt.hash(dummyPassword, 10);
@@ -173,7 +175,7 @@ router.post('/google', async (req, res, next) => {
     await logActivity(user.id, 'LOGIN_GOOGLE', 'Signed in using Google OAuth');
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-    return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar } });
+    return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar, phone: user.phone }, isNewUser });
 
   } catch (error: any) {
     console.error('Google Auth route error:', error);

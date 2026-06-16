@@ -145,6 +145,106 @@ export default function Orders() {
     }
   };
 
+  const handlePayment = async (orderId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // 1. Call pay initiate endpoint
+      const response = await fetch(`/api/orders/${orderId}/pay/initiate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to initiate payment');
+      }
+      
+      const paymentData = await response.json();
+      
+      // Get logged in user details to prefill form
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      
+      // 2. Open Razorpay checkout modal
+      const options = {
+        key: paymentData.key,
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        name: 'Deccan Filings',
+        description: `Payment for Order ${orderId}`,
+        order_id: paymentData.razorpayOrderId,
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: 'Pay directly via UPI Apps',
+                instruments: [
+                  { method: 'upi' }
+                ]
+              },
+              other: {
+                name: 'Other Payment Methods',
+                instruments: [
+                  { method: 'card' },
+                  { method: 'netbanking' }
+                ]
+              }
+            },
+            sequence: ['block.upi', 'block.other'],
+            preferences: {
+              show_default_blocks: false
+            }
+          }
+        },
+        handler: async function (callbackResponse: any) {
+          try {
+            // 3. Call verify payment endpoint
+            const verifyResponse = await fetch(`/api/orders/${orderId}/pay/verify`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                razorpay_payment_id: callbackResponse.razorpay_payment_id,
+                razorpay_order_id: callbackResponse.razorpay_order_id,
+                razorpay_signature: callbackResponse.razorpay_signature
+              })
+            });
+            
+            const verifyData = await verifyResponse.json();
+            if (verifyData.success) {
+              alert('Payment verified and captured successfully!');
+              fetchOrders();
+            } else {
+              alert('Payment verification failed: ' + (verifyData.error || 'Verification error'));
+            }
+          } catch (verifyErr: any) {
+            console.error('Error during signature verification:', verifyErr);
+            alert('An error occurred during payment verification.');
+          }
+        },
+        prefill: {
+          name: user?.name || '',
+          email: user?.email || '',
+          contact: user?.phone || ''
+        },
+        theme: {
+          color: '#0057FF'
+        }
+      };
+      
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      console.error('Payment initiation error:', err);
+      alert('Failed to launch payment checkout: ' + err.message);
+    }
+  };
+
   // Filtered Orders Logic
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
@@ -193,7 +293,7 @@ export default function Orders() {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="hidden sm:flex bg-dark text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 items-center gap-2"
+          className="hidden sm:flex bg-brand text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-brand-hover transition-all shadow-[0_0_15px_rgba(0,87,255,0.4)] hover:shadow-[0_0_25px_rgba(0,87,255,0.6)] hover:-translate-y-0.5 items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           <span>New Order</span>
@@ -208,8 +308,8 @@ export default function Orders() {
         <Plus className="h-6 w-6" />
       </button>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between gap-4">
+      <div className="clean-card-premium rounded-2xl overflow-hidden">
+        <div className="p-6 border-b border-slate-200/50 flex flex-col sm:flex-row justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input 
@@ -225,7 +325,7 @@ export default function Orders() {
               onClick={() => setShowFilterMenu(!showFilterMenu)}
               className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-bold transition-all ${
                 statusFilter !== 'All' 
-                ? 'bg-dark text-white border-dark' 
+                ? 'bg-brand text-white border-brand shadow-[0_0_10px_rgba(0,87,255,0.3)]' 
                 : 'border-slate-200 text-dark hover:bg-slate-50'
               }`}
             >
@@ -255,7 +355,7 @@ export default function Orders() {
                         }}
                         className={`w-full text-left px-4 py-2 text-sm transition-colors ${
                           statusFilter === status 
-                          ? 'bg-brand text-dark font-bold' 
+                          ? 'bg-brand/10 text-brand font-bold' 
                           : 'text-slate-600 hover:bg-slate-50'
                         }`}
                       >
@@ -281,7 +381,7 @@ export default function Orders() {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
+              <tr className="bg-slate-50/50 border-b border-slate-200/50">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Order ID</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Service</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
@@ -311,7 +411,7 @@ export default function Orders() {
                 </tr>
               ) : (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={order.id} className="hover:bg-brand/5 transition-colors group">
                     <td className="px-6 py-4 text-sm font-bold text-dark">{order.id}</td>
                     <td className="px-6 py-4 text-sm font-medium text-slate-700">{order.service}</td>
                     <td className="px-6 py-4 text-sm text-slate-500">{order.date}</td>
@@ -326,17 +426,27 @@ export default function Orders() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setIsDetailModalOpen(true);
-                          }}
-                          className="p-2 text-slate-400 hover:text-brand transition-colors rounded-lg hover:bg-slate-100" 
-                          title="View Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
+                      <div className="flex items-center justify-end gap-3">
+                        {order.status === 'Placed' && (
+                          <button
+                            onClick={() => handlePayment(order.id)}
+                            className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl transition-all shadow-[0_0_10px_rgba(0,87,255,0.3)] hover:shadow-[0_0_15px_rgba(0,87,255,0.5)] hover:-translate-y-0.5"
+                          >
+                            Pay Now
+                          </button>
+                        )}
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button 
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setIsDetailModalOpen(true);
+                            }}
+                            className="p-2 text-slate-400 hover:text-brand transition-colors rounded-lg hover:bg-slate-100" 
+                            title="View Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -364,7 +474,7 @@ export default function Orders() {
                   setSelectedOrder(order);
                   setIsDetailModalOpen(true);
                 }}
-                className="p-4 active:bg-slate-50 transition-colors"
+                className="p-4 active:bg-brand/5 hover:bg-brand/5 transition-colors"
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -379,9 +489,22 @@ export default function Orders() {
                     {order.status}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-xs font-bold">
+                <div className="flex justify-between items-center text-xs font-bold mt-2">
                   <span className="text-slate-500">{order.date}</span>
-                  <span className="text-dark">{order.amount}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-dark">{order.amount}</span>
+                    {order.status === 'Placed' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePayment(order.id);
+                        }}
+                        className="px-3 py-1.5 bg-brand hover:bg-brand-hover text-white text-[10px] font-black rounded-lg transition-all shadow-md uppercase tracking-wider"
+                      >
+                        Pay Now
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))
@@ -412,7 +535,7 @@ export default function Orders() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden"
+              className="relative clean-card-premium w-full max-w-lg rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden"
             >
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
@@ -486,7 +609,7 @@ export default function Orders() {
                     <button 
                       type="submit"
                       disabled={isSubmitting}
-                      className="flex-1 py-3 px-6 bg-dark text-white rounded-xl font-bold hover:bg-dark-200 shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="flex-1 py-3 px-6 bg-brand text-white rounded-xl font-bold hover:bg-brand-hover shadow-[0_0_15px_rgba(0,87,255,0.4)] hover:shadow-[0_0_25px_rgba(0,87,255,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? (
                         <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -516,7 +639,7 @@ export default function Orders() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden"
+              className="relative clean-card-premium w-full max-w-lg rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden"
             >
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
@@ -568,7 +691,18 @@ export default function Orders() {
                     </div>
                   </div>
 
-                  <div className="pt-4">
+                  <div className="pt-4 space-y-3">
+                    {selectedOrder.status === 'Placed' && (
+                      <button
+                        onClick={() => {
+                          setIsDetailModalOpen(false);
+                          handlePayment(selectedOrder.id);
+                        }}
+                        className="w-full py-4 bg-brand text-white rounded-2xl font-bold hover:bg-brand-hover transition-all shadow-[0_0_15px_rgba(0,87,255,0.4)] hover:shadow-[0_0_25px_rgba(0,87,255,0.6)] hover:-translate-y-0.5"
+                      >
+                        Pay Now ({selectedOrder.amount})
+                      </button>
+                    )}
                     <button 
                       onClick={() => setIsDetailModalOpen(false)}
                       className="w-full py-4 bg-dark text-white rounded-2xl font-bold hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl"

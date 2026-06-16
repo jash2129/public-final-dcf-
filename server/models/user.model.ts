@@ -9,6 +9,7 @@ export interface User {
   role: 'user' | 'admin' | 'super_admin';
   avatar?: string;
   phone?: string;
+  whatsapp_number?: string;
   company_name?: string;
   address?: string;
   gstin?: string;
@@ -30,7 +31,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
  */
 export async function findUserById(id: number): Promise<User | null> {
   const [rows] = await pool.query<mysql.RowDataPacket[]>(
-    'SELECT id, name, email, role, phone, avatar, company_name, address, gstin, notification_prefs, created_at FROM users WHERE id = ?',
+    'SELECT id, name, email, role, phone, whatsapp_number, avatar, company_name, address, gstin, notification_prefs, created_at FROM users WHERE id = ?',
     [id]
   );
   if (rows.length === 0) return null;
@@ -42,7 +43,7 @@ export async function findUserById(id: number): Promise<User | null> {
  */
 export async function createUser(user: Partial<User>): Promise<number> {
   const [result] = await pool.execute(
-    'INSERT INTO users (name, email, password, role, avatar, phone, company_name, address, gstin, notification_prefs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO users (name, email, password, role, avatar, phone, whatsapp_number, company_name, address, gstin, notification_prefs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [
       user.name,
       user.email,
@@ -50,6 +51,7 @@ export async function createUser(user: Partial<User>): Promise<number> {
       user.role || 'user',
       user.avatar || null,
       user.phone || null,
+      user.whatsapp_number || null,
       user.company_name || null,
       user.address || null,
       user.gstin || null,
@@ -57,6 +59,15 @@ export async function createUser(user: Partial<User>): Promise<number> {
     ]
   );
   return (result as any).insertId;
+}
+
+/**
+ * Find user by WhatsApp number
+ */
+export async function findUserByWhatsappNumber(whatsappNumber: string): Promise<User | null> {
+  const [rows] = await pool.query<mysql.RowDataPacket[]>('SELECT * FROM users WHERE whatsapp_number = ?', [whatsappNumber]);
+  if (rows.length === 0) return null;
+  return rows[0] as User;
 }
 
 /**
@@ -106,7 +117,7 @@ export async function updateNotificationPrefs(id: number, prefsJson: string): Pr
  * Get all users (Super Admin dashboard view)
  */
 export async function listAllUsers(): Promise<User[]> {
-  const [rows] = await pool.query<mysql.RowDataPacket[]>('SELECT id, name, email, role, created_at FROM users ORDER BY id ASC');
+  const [rows] = await pool.query<mysql.RowDataPacket[]>('SELECT id, name, email, role, whatsapp_number, created_at FROM users ORDER BY id ASC');
   return rows as User[];
 }
 

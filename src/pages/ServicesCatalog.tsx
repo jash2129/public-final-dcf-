@@ -5,7 +5,7 @@ import { serviceCategories, generateSlug } from '../data/services';
 import { useState, useEffect } from 'react';
 
 const categoryIcons: Record<string, any> = {
-  "Startup Registrations": Building2,
+  "Registrations": Building2,
   "License": FileText,
   "Income Tax": BookOpen,
   "GST": Calculator,

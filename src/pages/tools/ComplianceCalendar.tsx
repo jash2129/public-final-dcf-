@@ -17,6 +17,7 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { complianceCalendar2026, ComplianceMonth } from '../../data/compliance_2026';
+import EmptyState from '../../components/ui/EmptyState';
 
 const TYPE_COLORS: Record<string, string> = {
   gst: 'bg-gst/10 text-gst border-gst/20',
@@ -474,11 +475,12 @@ export default function ComplianceCalendar() {
                         })}
                       </div>
                     ) : (
-                      <div className="text-center py-20 px-10 bg-slate-50 rounded-[32px] border border-dashed border-slate-200">
-                        <CalendarIcon className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                        <p className="text-slate-500 font-bold">No major deadlines this month.</p>
-                        <p className="text-slate-400 text-sm mt-1">Enjoy your productivity!</p>
-                      </div>
+                      <EmptyState
+                        icon={CalendarIcon}
+                        title="No deadlines this month"
+                        description="There are no major statutory deadlines scheduled for this month. Enjoy your productivity!"
+                        className="my-8"
+                      />
                     )}
                   </motion.div>
                 )}

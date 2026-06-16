@@ -29,6 +29,10 @@ export function validateRegister(body: any): ValidationResult {
     errors.email = 'A valid email address is required';
   }
   
+  if (!body.whatsapp_number || typeof body.whatsapp_number !== 'string' || !/^\+?[0-9]{10,15}$/.test(body.whatsapp_number.trim())) {
+    errors.whatsapp_number = 'A valid WhatsApp number is required (10-15 digits)';
+  }
+  
   if (!body.password || typeof body.password !== 'string' || body.password.length < 6) {
     errors.password = 'Password must be at least 6 characters long';
   }

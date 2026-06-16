@@ -17,6 +17,7 @@ import complianceRouter from "./server/routes/compliance.routes";
 import documentRouter from "./server/routes/document.routes";
 import profileRouter from "./server/routes/profile.routes";
 import contactRouter from "./server/routes/contact.routes";
+import webhookRoutes from "./server/routes/webhook.routes";
 import { errorHandler } from "./server/middlewares/error.middleware";
 
 async function startServer() {
@@ -34,6 +35,9 @@ async function startServer() {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
   });
+
+  // --- Webhook Routes (Mounted before global body parsers to preserve raw stream) ---
+  app.use('/api/webhooks', webhookRoutes);
 
   // JSON and URL-encoded body parser limits
   app.use(express.json({ limit: '50mb' }));

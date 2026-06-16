@@ -8,6 +8,7 @@ export interface AuthResult {
     email: string;
     role: 'user' | 'admin' | 'super_admin';
     phone?: string;
+    whatsapp_number?: string;
     company_name?: string;
   };
   token: string;
@@ -22,6 +23,13 @@ export async function register(userData: any): Promise<AuthResult> {
     throw { status: 400, message: 'Email address is already in use' };
   }
 
+  if (userData.whatsapp_number) {
+    const existingWhatsapp = await userModel.findUserByWhatsappNumber(userData.whatsapp_number);
+    if (existingWhatsapp) {
+      throw { status: 400, message: 'WhatsApp number is already in use' };
+    }
+  }
+
   const hashedPassword = await hashPassword(userData.password);
   
   const userId = await userModel.createUser({
@@ -30,6 +38,7 @@ export async function register(userData: any): Promise<AuthResult> {
     password: hashedPassword,
     role: 'user', // Default register role is user
     phone: userData.phone || null,
+    whatsapp_number: userData.whatsapp_number || null,
     company_name: userData.companyName || null,
     address: userData.address || null,
     gstin: userData.gstin || null
@@ -53,6 +62,7 @@ export async function register(userData: any): Promise<AuthResult> {
       email: user.email,
       role: user.role,
       phone: user.phone,
+      whatsapp_number: user.whatsapp_number,
       company_name: user.company_name
     },
     token

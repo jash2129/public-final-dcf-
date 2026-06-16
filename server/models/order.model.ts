@@ -6,6 +6,10 @@ export interface Order {
   user_id: number;
   status: 'placed' | 'in_progress' | 'completed' | 'rejected';
   total_amount: number;
+  payment_status?: 'pending' | 'paid' | 'failed';
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  razorpay_signature?: string;
   created_at?: Date;
   // Joined fields for administrative views
   user_name?: string;
@@ -221,5 +225,27 @@ export async function updateOrderAmountAndItems(orderId: string, amount: number)
  */
 export async function deleteOrderRecord(orderId: string): Promise<boolean> {
   const [result] = await pool.execute('DELETE FROM orders WHERE id = ?', [orderId]);
+  return (result as any).affectedRows > 0;
+}
+
+/**
+ * Mark order as paid and update its status to in_progress
+ */
+export async function markOrderAsPaid(
+  orderId: string,
+  razorpayOrderId: string,
+  razorpayPaymentId: string,
+  signature: string
+): Promise<boolean> {
+  const [result] = await pool.execute(
+    `UPDATE orders 
+     SET status = 'in_progress', 
+         payment_status = 'paid', 
+         razorpay_order_id = ?, 
+         razorpay_payment_id = ?, 
+         razorpay_signature = ? 
+     WHERE id = ?`,
+    [razorpayOrderId, razorpayPaymentId, signature, orderId]
+  );
   return (result as any).affectedRows > 0;
 }

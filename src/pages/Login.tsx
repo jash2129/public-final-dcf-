@@ -7,6 +7,15 @@ import { useGoogleLogin } from '@react-oauth/google';
 export default function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [showCRMModal, setShowCRMModal] = useState(false);
+  const [tempToken, setTempToken] = useState('');
+  const [crmData, setCrmData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+  });
+  const [crmLoading, setCrmLoading] = useState(false);
+  const [crmError, setCrmError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,13 +69,24 @@ export default function Login() {
 
         if (response.ok) {
           const result = await response.json();
-          localStorage.setItem('token', result.token);
-          localStorage.setItem('user', JSON.stringify(result.user));
-          
-          if (result.user.role === 'admin' || result.user.role === 'super_admin') {
-            navigate('/admin');
+          if (result.isNewUser) {
+            setTempToken(result.token);
+            setCrmData({
+              name: result.user.name || '',
+              email: result.user.email || '',
+              phone: '',
+            });
+            setShowCRMModal(true);
+            setIsLoading(false);
           } else {
-            navigate('/dashboard');
+            localStorage.setItem('token', result.token);
+            localStorage.setItem('user', JSON.stringify(result.user));
+            
+            if (result.user.role === 'admin' || result.user.role === 'super_admin') {
+              navigate('/admin');
+            } else {
+              navigate('/dashboard');
+            }
           }
         } else {
           const result = await response.json();
@@ -84,6 +104,66 @@ export default function Login() {
       alert('Google Sign-In failed');
     }
   });
+
+  const handleCRMSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!crmData.phone.trim()) {
+      setCrmError('Phone number is required');
+      return;
+    }
+    
+    setCrmLoading(true);
+    setCrmError('');
+    
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tempToken}`,
+        },
+        body: JSON.stringify({
+          name: crmData.name,
+          email: crmData.email,
+          phone: crmData.phone,
+        }),
+      });
+      
+      if (response.ok) {
+        localStorage.setItem('token', tempToken);
+        const userRes = await fetch('/api/user/profile', {
+          headers: {
+            'Authorization': `Bearer ${tempToken}`
+          }
+        });
+        if (userRes.ok) {
+          const finalUser = await userRes.json();
+          localStorage.setItem('user', JSON.stringify(finalUser));
+          if (finalUser.role === 'admin' || finalUser.role === 'super_admin') {
+            navigate('/admin');
+          } else {
+            navigate('/dashboard');
+          }
+        } else {
+          localStorage.setItem('user', JSON.stringify({
+            name: crmData.name,
+            email: crmData.email,
+            phone: crmData.phone,
+            role: 'user'
+          }));
+          navigate('/dashboard');
+        }
+      } else {
+        const errorData = await response.json();
+        setCrmError(errorData.error || 'Failed to save profile details');
+      }
+    } catch (err) {
+      console.error(err);
+      setCrmError('An error occurred. Please try again.');
+    } finally {
+      setCrmLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex font-sans">
@@ -246,6 +326,97 @@ export default function Login() {
           </motion.div>
         </div>
       </div>
+
+      {showCRMModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-dark/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 rounded-bl-full opacity-50 blur-xl pointer-events-none" />
+            
+            <h3 className="text-2xl font-black text-dark mb-2 tracking-tight">Complete Your Profile</h3>
+            <p className="text-sm text-slate-500 mb-6 font-bold leading-relaxed">
+              We need a few details to register your account and configure CRM integration.
+            </p>
+
+            {crmError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-medium mb-4 flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0" />
+                {crmError}
+              </div>
+            )}
+
+            <form onSubmit={handleCRMSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={crmData.name}
+                  onChange={(e) => setCrmData({ ...crmData, name: e.target.value })}
+                  placeholder="Your Name"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all font-bold text-dark"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={crmData.email}
+                  onChange={(e) => setCrmData({ ...crmData, email: e.target.value })}
+                  placeholder="email@example.com"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all font-bold text-dark"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={crmData.phone}
+                  onChange={(e) => setCrmData({ ...crmData, phone: e.target.value })}
+                  placeholder="e.g. 9876543210"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all font-bold text-dark"
+                />
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCRMModal(false);
+                    setIsLoading(false);
+                  }}
+                  className="flex-1 py-3 px-4 border border-slate-200 rounded-xl text-sm font-bold text-dark hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={crmLoading}
+                  className="flex-1 py-3 px-4 bg-dark text-white rounded-xl text-sm font-bold hover:bg-dark-200 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {crmLoading ? (
+                    <>
+                      <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save & Continue"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

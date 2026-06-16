@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Briefcase, MapPin, Clock, ArrowRight, Heart, Zap, Users,
   TrendingUp, Shield, Coffee, Send, CheckCircle, AlertCircle,

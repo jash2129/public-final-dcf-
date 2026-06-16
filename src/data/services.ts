@@ -1,7 +1,7 @@
 export const serviceCategories = [
   {
-    title: "Startup Registrations",
-    slug: "startup-registrations",
+    title: "Start up Registrations",
+    slug: "start-up-registrations",
     services: [
       "Proprietorship Registration",
       "Partnership Firm Registration",
@@ -10,12 +10,12 @@ export const serviceCategories = [
       "Private Limited Company Registration",
       "Section 8 Company Registration",
       "Trust Registration",
-      "Public Limited Company Registration",
+      "Society Registration",
       "Producer Company Registration",
       "Indian Subsidiary Registration",
       "Nidhi Company Registration",
       "Foreign Company Registration",
-      "Society Registration"
+      "Public Limited Company registration"
     ]
   },
   {
@@ -27,6 +27,7 @@ export const serviceCategories = [
       "MSME/Udyam Registration",
       "Trade License",
       "FSSAI License / Food License Registration",
+      "Labour license",
       "ISO Certification",
       "Import Export Code (IEC) Registration",
       "Shop & Establishment License Registration",
@@ -52,7 +53,7 @@ export const serviceCategories = [
       "Business ITR Filing",
       "Tax Notice Handling",
       "15CA / 15CB Form Filing",
-      "Company e-Taxing",
+      "Company e-Taxing (Formerly Income Tax e-Filing)",
       "TDS Return Filing",
       "Form 16 Generation",
       "Lower TDS Certificate"
@@ -111,18 +112,18 @@ export const serviceCategories = [
       "PF/ESI Compliance",
       "PT Compliance",
       "Annual Returns",
-      "Company Compliance Calendar & Alerts",
-      "Company Compliance Software / Management",
-      "RBI Compliance Filings",
+      "Accounting & Bookkeeping",
+      "Financial Statements preparation",
+      "Payroll Processing",
       "FEMA Compliance",
-      "Board Meeting Minutes",
+      "RBI Compliances filings",
       "AGM Preparation",
       "Statutory Register Maintenance",
-      "Bookkeeping Services",
-      "Financial Statement Preparation",
+      "Company ComplianceCalendar & alerts",
+      "Company compliance Software/management",
       "Invoice Management & Reconciliation",
       "Accounting Software Integration",
-      "Payroll Processing",
+      "Board meetings Minutes",
       "HR & Payroll Management",
       "Employee Attendance Tracking",
       "PF / ESI Calculations & Returns"
@@ -159,27 +160,8 @@ export const serviceCategories = [
     title: "Global",
     slug: "global",
     services: [
-      "US Accounting",
-      "US Taxation"
-    ]
-  },
-  {
-    title: "More Services",
-    slug: "more-services",
-    services: [
-      "Partnership Deed Drafting",
-      "Shareholder Agreement",
-      "Non-Disclosure Agreement",
-      "Contract Drafting",
-      "Legal Documentation",
-      "Business Incorporation Advisory",
-      "Tax Planning & Advisory",
-      "Compliance Advisory",
-      "Valuation Services",
-      "Financial Training Services",
-      "Franchise Consulting",
-      "RERA Registration",
-      "Property Valuation Services"
+      "Us accounting",
+      "us taxation"
     ]
   }
 ];

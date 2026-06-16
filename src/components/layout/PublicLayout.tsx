@@ -141,7 +141,7 @@ export default function PublicLayout() {
       {/* Top Bar */}
       <div className="bg-dark-200 text-brand-lightest py-1.5 px-4 sm:px-6 lg:px-8 text-xs flex justify-between items-center hidden md:flex">
         <div className="flex gap-4">
-          <span className="flex items-center gap-1"><Phone className="h-3 w-3 text-brand" /> 1800-123-4567</span>
+          <span className="flex items-center gap-1"><Phone className="h-3 w-3 text-brand" /> +91 98765 43210</span>
           <span>India's Trusted Compliance Platform</span>
         </div>
         <div className="flex gap-4">
@@ -163,16 +163,16 @@ export default function PublicLayout() {
                 <img 
                   src="/logo.png" 
                   alt="Deccan Filings" 
-                  className="h-16 sm:h-20 w-auto group-hover:scale-105 transition-transform duration-300"
+                  className="h-14 lg:h-16 2xl:h-20 w-auto group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
             </div>
             
             {/* Desktop Menu */}
-            <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-2 h-full mx-2 2xl:mx-4">
-              {navCategories.slice(0, 7).map((category) => (
-                <div key={category.title} className="relative group h-full flex items-center">
-                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-slate-100/80 transition-all whitespace-nowrap">
+            <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-1.5 h-full mx-1 2xl:mx-4">
+              {navCategories.slice(0, 9).map((category, index) => (
+                <div key={category.title} className={`relative group h-full flex items-center ${index >= 7 ? 'hidden 2xl:flex' : ''}`}>
+                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-1.5 2xl:px-3 py-2 text-[13px] 2xl:text-sm rounded-full hover:bg-slate-100/80 transition-all whitespace-nowrap">
                     {category.title} 
                     {category.title === 'Finance' && (
                       <span className="relative flex h-2 w-2 ml-1">
@@ -190,7 +190,7 @@ export default function PublicLayout() {
                       <div className="absolute top-0 right-0 w-24 h-24 bg-brand/10 rounded-full blur-2xl"></div>
                       <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-secondary/5 rounded-full blur-2xl"></div>
                       <div className="relative z-10">
-                        <span className="text-[9px] font-black tracking-widest text-secondary uppercase bg-secondary/10 px-2.5 py-1 rounded-full border border-secondary/20">TRENDING</span>
+                        <span className="text-[9px] font-black tracking-widest text-brand uppercase bg-brand/10 px-2.5 py-1 rounded-full border border-brand/20">TRENDING</span>
                         <h4 className="font-bold text-sm text-dark mt-4 leading-tight">All-in-one compliance for fast-growing startups</h4>
                         <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">Book a fast-track consultation to get your business structure right from day one.</p>
                       </div>
@@ -228,8 +228,8 @@ export default function PublicLayout() {
 
               {/* More Dropdown */}
               {navCategories.length > 7 && (
-                <div className="relative group h-full flex items-center">
-                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-slate-100/80 transition-all">
+                <div className="relative group h-full flex items-center 2xl:hidden">
+                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-1.5 py-2 text-[13px] rounded-full hover:bg-slate-100/80 transition-all">
                     More <ChevronDown className="h-3.5 w-3.5 opacity-50 group-hover:rotate-180 transition-transform duration-300" />
                   </button>
                   <div className="absolute top-full right-0 w-64 bg-white/95 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 z-50">
@@ -265,7 +265,7 @@ export default function PublicLayout() {
             </nav>
 
             {/* Desktop Actions */}
-            <div className="hidden md:flex items-center gap-3 2xl:gap-5 flex-shrink-0">
+            <div className="hidden md:flex items-center gap-2 xl:gap-2.5 2xl:gap-5 flex-shrink-0">
               <button 
                 onClick={() => setIsSearchOpen(true)}
                 className="text-dark-400 hover:text-dark p-2 rounded-full hover:bg-slate-100 transition-colors" 
@@ -273,10 +273,10 @@ export default function PublicLayout() {
               >
                 <Search className="h-5 w-5" />
               </button>
-              <Link to="/login" className="flex items-center gap-2 text-dark-400 hover:text-dark font-medium text-sm px-1 whitespace-nowrap">
+              <Link to="/login" className="flex items-center gap-1.5 text-dark-400 hover:text-dark font-medium text-[13px] 2xl:text-sm px-1 whitespace-nowrap">
                 <User className="h-4 w-4" /> Login
               </Link>
-              <Link to="/contact" className="bg-dark text-white px-4 2xl:px-6 py-2.5 rounded-full font-bold text-sm hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap">
+              <Link to="/contact" className="bg-dark text-white px-3.5 xl:px-4 2xl:px-6 py-2.5 rounded-full font-bold text-[13px] 2xl:text-sm hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap">
                 Talk to Expert
               </Link>
             </div>
@@ -285,7 +285,7 @@ export default function PublicLayout() {
             <div className="flex items-center xl:hidden gap-4">
               <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="text-dark-400 hover:text-secondary p-2"
+                className="text-dark-400 hover:text-secondary p-2 md:hidden"
               >
                 <Search className="h-5 w-5" />
               </button>
@@ -415,7 +415,7 @@ export default function PublicLayout() {
       </main>
 
       {/* Footer Redesign with premium dark gradient and underline hovers */}
-      <footer className="bg-gradient-to-b from-dark-200 via-dark-300 to-black text-slate-300 pt-16 pb-8 border-t border-brand/10 relative overflow-hidden">
+      <footer className="bg-gradient-to-b from-dark via-dark-100 to-black text-slate-300 pt-16 pb-8 border-t border-brand/10 relative overflow-hidden">
         {/* Glowing bottom accent line */}
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand/20 to-transparent"></div>
 
@@ -433,7 +433,7 @@ export default function PublicLayout() {
                 Deccan Filings is India's largest cloud-based business services platform dedicated to helping Entrepreneurs easily start and grow their business, at an affordable cost.
               </p>
               <div className="space-y-2 text-sm text-slate-400">
-                <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-brand" /> 1800-123-4567</p>
+                <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-brand" /> +91 98765 43210</p>
                 <p className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-brand" /> support@deccanfilings.com</p>
               </div>
             </div>
@@ -510,9 +510,9 @@ export default function PublicLayout() {
         </span>
         <button 
           onClick={() => navigate('/contact')}
-          className="relative flex bg-secondary text-dark p-4 rounded-full shadow-xl hover:bg-secondary-hover hover:scale-105 active:scale-95 transition-all items-center justify-center cursor-pointer"
+          className="relative flex bg-brand-lightest text-dark p-4 rounded-full shadow-xl hover:bg-brand-light hover:scale-105 active:scale-95 transition-all items-center justify-center cursor-pointer"
         >
-          <span className="absolute inset-0 rounded-full bg-secondary opacity-30 animate-ping"></span>
+          <span className="absolute inset-0 rounded-full bg-brand-lightest opacity-30 animate-ping"></span>
           <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black text-white shadow-sm">1</span>
           <MessageSquare className="h-6 w-6 relative z-10" />
         </button>

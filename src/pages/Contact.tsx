@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle, AlertCircle, ChevronDown } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { serviceCategories } from '../data/services';
@@ -114,7 +114,39 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-slate-400 uppercase tracking-widest mb-1">Phone</h3>
-                    <p className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer">+91 98765 43210</p>
+                    <div className="flex flex-col gap-1">
+                      <a
+                        href="tel:+919000930453"
+                        className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer"
+                      >
+                        +91 90009 30453
+                      </a>
+                      <a
+                        href="tel:+919876543210"
+                        className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer"
+                      >
+                        +91 98765 43210
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-5 group">
+                  <div className="bg-emerald-50 p-4 rounded-2xl text-emerald-600 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+                    <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.42 1.451 5.302 1.453 5.485.002 9.948-4.461 9.952-9.953.002-2.661-1.034-5.163-2.915-7.046C17.106 1.77 14.604.735 11.944.735c-5.49 0-9.957 4.463-9.961 9.955-.001 1.93.499 3.81 1.453 5.419L2.465 20.8l4.182-1.646zm13.438-6.303c-.267-.134-1.58-.78-1.82-.866-.239-.087-.412-.13-.587.135-.176.265-.678.866-.83 1.039-.153.174-.306.195-.573.061-.267-.134-1.127-.415-2.147-1.325-.793-.707-1.329-1.582-1.485-1.85-.156-.268-.017-.413.117-.547.12-.12.267-.312.4-.467.135-.156.18-.268.27-.447.09-.179.046-.336-.023-.47-.069-.134-.588-1.42-.806-1.947-.212-.512-.446-.442-.609-.45-.16-.009-.344-.01-.528-.01-.184 0-.485.07-.74.349-.253.28-1.042 1.02-1.042 2.485 0 1.464 1.065 2.88 1.212 3.081.148.201 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.58-.646 1.8-1.238.22-.593.22-1.102.154-1.207-.066-.105-.24-.167-.507-.3z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-400 uppercase tracking-widest mb-1">WhatsApp</h3>
+                    <a
+                      href="https://wa.me/919000930453"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-dark font-bold leading-relaxed hover:text-emerald-600 transition-colors block cursor-pointer"
+                    >
+                      +91 90009 30453
+                    </a>
                   </div>
                 </div>
 
@@ -124,7 +156,12 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-slate-400 uppercase tracking-widest mb-1">Email</h3>
-                    <p className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer">hr@deccanfilings.com</p>
+                    <a
+                      href="mailto:hr@deccanfilings.com"
+                      className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors block cursor-pointer"
+                    >
+                      hr@deccanfilings.com
+                    </a>
                   </div>
                 </div>
 
@@ -186,7 +223,7 @@ export default function Contact() {
                       name="mobile"
                       type="tel"
                       className={inputClass}
-                      placeholder="+91 98765 43210"
+                      placeholder="+91 90009 30453"
                       value={form.mobile}
                       onChange={handleChange}
                       required
