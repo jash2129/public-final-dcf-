@@ -220,9 +220,9 @@ export default function ServicePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <button className="bg-brand text-dark px-8 py-4 rounded-full font-bold text-lg hover:bg-brand-hover transition-all shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:-translate-y-1">
+            <Link to="/register" className="bg-brand text-dark px-8 py-4 rounded-full font-bold text-lg hover:bg-brand-hover transition-all shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:-translate-y-1 text-center">
               Get Started Now
-            </button>
+            </Link>
             <button className="bg-white text-dark border-2 border-slate-200 px-8 py-4 rounded-full font-bold text-lg hover:border-dark hover:bg-slate-50 transition-all">
               Talk to Expert
             </button>

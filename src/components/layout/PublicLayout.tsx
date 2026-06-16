@@ -497,7 +497,7 @@ export default function PublicLayout() {
            <button className="flex-1 bg-dark text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all">
              <Phone className="h-3.5 w-3.5 text-brand" /> Call Expert
            </button>
-           <Link to="/contact" className="flex-1 bg-brand text-dark py-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm">
+           <Link to="/register" className="flex-1 bg-brand text-dark py-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm">
              Get Started &rarr;
            </Link>
          </div>
