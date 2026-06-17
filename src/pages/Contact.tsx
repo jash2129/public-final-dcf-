@@ -122,10 +122,10 @@ export default function Contact() {
                         +91 90009 30453
                       </a>
                       <a
-                        href="tel:+919876543210"
+                        href="tel:+919000930453"
                         className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer"
                       >
-                        +91 98765 43210
+                        +91 90009 30453
                       </a>
                     </div>
                   </div>
@@ -258,7 +258,6 @@ export default function Contact() {
                     >
                       <option value="">— Select a category —</option>
                       {serviceCategories
-                        .filter(cat => cat.title !== 'More Services')
                         .map(cat => (
                           <option key={cat.slug} value={cat.title}>{cat.title}</option>
                         ))}

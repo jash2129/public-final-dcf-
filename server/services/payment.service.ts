@@ -41,12 +41,19 @@ export async function initiatePayment(orderId: string, userId: number) {
     throw { status: 400, message: 'Order has already been paid.' };
   }
 
-  // Convert the order amount to paise (multiply by 100 and round to integer)
-  const amountInPaise = Math.round(order.total_amount * 100);
+  // Retrieve order items to get the service base price
+  const items = await orderModel.getOrderItems(orderId);
+  const service = {
+    basePrice: order.base_price || (items.length > 0 ? items[0].price_at_purchase : order.total_amount)
+  };
+
+  const basePrice = Number(service.basePrice); // Ensure it's handled as a number
+  const taxMultiplier = 1.18;
+  const totalAmountInPaise = Math.round(basePrice * taxMultiplier * 100);
 
   try {
     const rpOrder = await getRazorpay().orders.create({
-      amount: amountInPaise,
+      amount: totalAmountInPaise,
       currency: 'INR',
       receipt: orderId,
     });

@@ -1,17 +1,17 @@
 Category,Service Name,Service Code
-Start up Registrations,Proprietorship Registration,STARTUP001
-Start up Registrations,Partnership Firm Registration,STARTUP002
-Start up Registrations,One Person Company (OPC) Registration,STARTUP003
-Start up Registrations,Limited Liability Partnership (LLP) Registration,STARTUP004
-Start up Registrations,Private Limited Company Registration,STARTUP005
-Start up Registrations,Section 8 Company Registration,STARTUP006
-Start up Registrations,Trust Registration,STARTUP007
-Start up Registrations,Society Registration,STARTUP008
-Start up Registrations,Producer Company Registration,STARTUP009
-Start up Registrations,Indian Subsidiary Registration,STARTUP010
-Start up Registrations,Nidhi Company Registration,STARTUP011
-Start up Registrations,Foreign Company Registration,STARTUP012
-Start up Registrations,Public Limited Company registration,STARTUP013
+StartUp Registrations,Proprietorship Registration,STARTUP001
+StartUp Registrations,Partnership Firm Registration,STARTUP002
+StartUp Registrations,One Person Company (OPC) Registration,STARTUP003
+StartUp Registrations,Limited Liability Partnership (LLP) Registration,STARTUP004
+StartUp Registrations,Private Limited Company Registration,STARTUP005
+StartUp Registrations,Section 8 Company Registration,STARTUP006
+StartUp Registrations,Trust Registration,STARTUP007
+StartUp Registrations,Society Registration,STARTUP008
+StartUp Registrations,Producer Company Registration,STARTUP009
+StartUp Registrations,Indian Subsidiary Registration,STARTUP010
+StartUp Registrations,Nidhi Company Registration,STARTUP011
+StartUp Registrations,Foreign Company Registration,STARTUP012
+StartUp Registrations,Public Limited Company registration,STARTUP013
 License,Startup India,LIC001
 License,Factory Pollution,LIC002
 License,MSME/Udyam Registration,LIC003
@@ -37,7 +37,7 @@ Income Tax,Individual ITR Filing,IT002
 Income Tax,Business ITR Filing,IT003
 Income Tax,Tax Notice Handling,IT004
 Income Tax,15CA / 15CB Form Filing,IT005
-Income Tax,Company e-Taxing (Formerly Income Tax e-Filing),IT006
+Income Tax,Company e-Taxing,IT006
 Income Tax,TDS Return Filing,IT007
 Income Tax,Form 16 Generation,IT008
 Income Tax,Lower TDS Certificate,IT009
@@ -108,5 +108,5 @@ Trademark,Design Registration,TM012
 Finance,Loans,FIN001
 Finance,Insurance,FIN002
 Finance,Mutual Fund,FIN003
-Global,Us accounting,GLOB001
-Global,us taxation,GLOB002
+Global,US Accounting,GLOB001
+Global,US Taxation,GLOB002

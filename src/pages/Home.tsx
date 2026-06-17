@@ -438,7 +438,7 @@ export default function Home() {
             variants={staggerContainer}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {serviceCategories.slice(0, 8).map((category) => (
+            {serviceCategories.map((category) => (
               <motion.div key={category.title} variants={fadeInUp} className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 <h3 className="font-bold text-2xl text-dark mb-6 pb-4 border-b border-slate-100">{category.title}</h3>
                 <ul className="space-y-4 mb-8">

@@ -7,7 +7,7 @@ import { formatCurrency, formatLegacyDate, generateSlug } from '../utils/helpers
 function getCategoryForService(name: string): string {
   const lower = name.toLowerCase();
   if (lower.includes('proprietorship') || lower.includes('partnership') || lower.includes('company') || lower.includes('llp') || lower.includes('subsidiary') || lower.includes('nidhi') || lower.includes('trust')) {
-    return 'Startup';
+    return 'StartUp Registrations';
   }
   if (lower.includes('gst') || lower.includes('gstr') || lower.includes('lut')) {
     return 'GST';
@@ -27,10 +27,10 @@ function getCategoryForService(name: string): string {
   if (lower.includes('loan') || lower.includes('insurance') || lower.includes('mutual fund')) {
     return 'Finance';
   }
-  if (lower.includes('uae') || lower.includes('usa') || lower.includes('uk') || lower.includes('singapore') || lower.includes('foreign')) {
+  if (lower.includes('uae') || lower.includes('usa') || lower.includes('uk') || lower.includes('singapore') || lower.includes('foreign') || lower.includes('global') || lower.includes('accounting') || lower.includes('taxation')) {
     return 'Global';
   }
-  return 'More Services';
+  return 'StartUp Registrations';
 }
 
 /**
@@ -54,18 +54,17 @@ export async function checkout(
     if (!service) {
       const category = getCategoryForService(payload.service);
       const prefixMap: Record<string, string> = {
-        'Startup': 'START',
-        'Registrations': 'REG',
+        'StartUp Registrations': 'STARTUP',
+        'License': 'LIC',
         'Trademark': 'TM',
         'GST': 'GST',
         'Income Tax': 'IT',
         'MCA': 'MCA',
         'Compliance': 'COMP',
         'Finance': 'FIN',
-        'Global': 'GLOB',
-        'More Services': 'MORE'
+        'Global': 'GLOB'
       };
-      const prefix = prefixMap[category] || 'MORE';
+      const prefix = prefixMap[category] || 'STARTUP';
       const code = `${prefix}${Date.now().toString().slice(-4)}`;
       
       let price = 2999.00;
@@ -151,6 +150,8 @@ export async function changeOrderStatus(orderId: string, status: string): Promis
 async function triggerOrderNotification(userId: number, orderId: string, serviceName: string, amount: number) {
   try {
     const user = await userModel.findUserById(userId);
+    const order = await orderModel.findOrderById(orderId);
+    const finalAmount = order ? order.total_amount : (amount * 1.18);
     if (user) {
       await notifyOrderPlacement(
         orderId,
@@ -158,7 +159,7 @@ async function triggerOrderNotification(userId: number, orderId: string, service
         user.phone || '',
         user.name,
         serviceName,
-        amount,
+        finalAmount,
         userId
       );
     }

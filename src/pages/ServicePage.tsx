@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useMemo } from 'react';
-import { CheckCircle, ChevronRight, Star, Shield, Clock, Users } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { CheckCircle, ChevronRight, Star, Shield, Clock, Users, AlertCircle } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { serviceCategories, generateSlug } from '../data/services';
 
@@ -100,16 +100,54 @@ export default function ServicePage() {
 
   const specificContent = category === 'finance' ? financeContent[slug || ''] : null;
 
-  const [formData, setFormData] = useState({ name: '', phone: '', email: '', city: '' });
+  const [formData, setFormData] = useState({
+    fullName: '',
+    mobileNumber: '',
+    emailAddress: '',
+    city: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const formCompleteness = useMemo(() => {
     let completedCount = 0;
-    if (formData.name.trim()) completedCount++;
-    if (formData.phone.trim()) completedCount++;
-    if (formData.email.trim()) completedCount++;
+    if (formData.fullName.trim()) completedCount++;
+    if (formData.mobileNumber.trim()) completedCount++;
+    if (formData.emailAddress.trim()) completedCount++;
     if (formData.city.trim()) completedCount++;
     return (completedCount / 4) * 100;
   }, [formData]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch('/api/leads/callback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          serviceName,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setIsSuccess(true);
+      } else {
+        setErrorMessage(data.error || 'Failed to submit callback request. Please try again.');
+      }
+    } catch (err) {
+      setErrorMessage('A network error occurred. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const defaultDocs = useMemo(() => {
     return specificContent?.documents || [
@@ -238,68 +276,104 @@ export default function ServicePage() {
             <p className="text-dark-400 mb-8">Get free expert consultation for {serviceName}.</p>
             
             {/* Form Progress Indicator */}
-            <div className="mb-6 bg-slate-50 border border-slate-100 p-4 rounded-2xl shadow-sm">
-              <div className="flex justify-between items-center text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
-                <span>Form Progress</span>
-                <span>{formCompleteness}% Completed</span>
+            {isSuccess ? (
+              <div className="py-8 text-center space-y-4">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-50 text-emerald-500 mb-2 border border-emerald-100">
+                  <CheckCircle className="h-10 w-10 animate-bounce" />
+                </div>
+                <h4 className="text-2xl font-bold text-dark">Thank you!</h4>
+                <p className="text-dark-400 text-sm max-w-sm mx-auto leading-relaxed">
+                  Our experts have received your request and will contact you shortly.
+                </p>
               </div>
-              <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                <div className="h-full bg-brand rounded-full transition-all duration-300" style={{ width: `${formCompleteness}%` }}></div>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="mb-6 bg-slate-50 border border-slate-100 p-4 rounded-2xl shadow-sm">
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                    <span>Form Progress</span>
+                    <span>{formCompleteness}% Completed</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-brand rounded-full transition-all duration-300" style={{ width: `${formCompleteness}%` }}></div>
+                  </div>
+                </div>
 
-            <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <label className="block text-sm font-bold text-dark mb-2">Full Name</label>
-                <input 
-                  type="text" 
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand focus:bg-white outline-none transition-all" 
-                  placeholder="John Doe" 
-                  required 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-dark mb-2">Mobile Number</label>
-                <input 
-                  type="tel" 
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand focus:bg-white outline-none transition-all" 
-                  placeholder="+91 98765 43210" 
-                  required 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-dark mb-2">Email Address</label>
-                <input 
-                  type="email" 
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand focus:bg-white outline-none transition-all" 
-                  placeholder="john@example.com" 
-                  required 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-dark mb-2">City</label>
-                <input 
-                  type="text" 
-                  value={formData.city}
-                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                  className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand focus:bg-white outline-none transition-all" 
-                  placeholder="Mumbai" 
-                  required 
-                />
-              </div>
-              <button type="submit" className="w-full bg-dark text-white px-4 py-4 rounded-xl font-bold text-lg hover:bg-dark-200 transition-all mt-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-                Submit Details
-              </button>
-              <p className="text-xs text-center text-dark-400 mt-6">
-                By submitting, you agree to our Terms & Privacy Policy.
-              </p>
-            </form>
+                {errorMessage && (
+                  <div className="flex items-start gap-3 p-4 rounded-xl mb-6 text-sm font-medium bg-red-50 border border-red-200 text-red-800">
+                    <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                    {errorMessage}
+                  </div>
+                )}
+
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                  <div>
+                    <label className="block text-sm font-bold text-dark mb-2">Full Name</label>
+                    <input 
+                      type="text" 
+                      value={formData.fullName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                      className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand focus:bg-white outline-none transition-all" 
+                      placeholder="John Doe" 
+                      required 
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-dark mb-2">Mobile Number</label>
+                    <input 
+                      type="tel" 
+                      value={formData.mobileNumber}
+                      onChange={(e) => setFormData(prev => ({ ...prev, mobileNumber: e.target.value }))}
+                      className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand focus:bg-white outline-none transition-all" 
+                      placeholder="+91 98765 43210" 
+                      required 
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-dark mb-2">Email Address</label>
+                    <input 
+                      type="email" 
+                      value={formData.emailAddress}
+                      onChange={(e) => setFormData(prev => ({ ...prev, emailAddress: e.target.value }))}
+                      className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand focus:bg-white outline-none transition-all" 
+                      placeholder="john@example.com" 
+                      required 
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-dark mb-2">City</label>
+                    <input 
+                      type="text" 
+                      value={formData.city}
+                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                      className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand focus:bg-white outline-none transition-all" 
+                      placeholder="Mumbai" 
+                      required 
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    disabled={isLoading}
+                    className="w-full bg-dark text-white px-4 py-4 rounded-xl font-bold text-lg hover:bg-dark-200 transition-all mt-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <span className="h-5 w-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit Details'
+                    )}
+                  </button>
+                  <p className="text-xs text-center text-dark-400 mt-6">
+                    By submitting, you agree to our Terms & Privacy Policy.
+                  </p>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </section>

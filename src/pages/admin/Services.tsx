@@ -15,6 +15,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from '../../components/ui/Skeleton';
 import SuccessOverlay from '../../components/ui/SuccessOverlay';
+import { serviceCategories } from '../../data/services';
 
 interface Service {
   id: number;
@@ -138,8 +139,8 @@ export default function AdminServices() {
     }
   };
 
-  // Get distinct categories
-  const categories = ['All', ...Array.from(new Set(services.map(s => s.category))).filter(Boolean)];
+  // Get categories from serviceCategories imported from src/data/services.ts
+  const categories = ['All', ...serviceCategories.map(c => c.title)];
 
   // Filter logic
   const filteredServices = services.filter(s => {

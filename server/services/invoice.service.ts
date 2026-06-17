@@ -73,20 +73,57 @@ export function generateInvoiceBuffer(
       const rowY = doc.y;
       doc.font('Helvetica');
       doc.text(serviceName, 50, rowY, { width: 350 });
-      const formattedAmount = `INR ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      doc.text(formattedAmount, 400, rowY, { width: 162, align: 'right' });
-      doc.moveDown(1);
+      
+      const basePrice = amount / 1.18;
+      const cgst = basePrice * 0.09;
+      const sgst = basePrice * 0.09;
+      
+      const formattedBasePrice = `INR ${basePrice.toFixed(2)}`;
+      doc.text(formattedBasePrice, 400, rowY, { width: 162, align: 'right' });
+      doc.moveDown(1.2);
+
+      // Add CGST and SGST rows
+      const cgstRowY = doc.y;
+      doc.text('CGST (9%)', 50, cgstRowY, { width: 350 });
+      doc.text(`INR ${cgst.toFixed(2)}`, 400, cgstRowY, { width: 162, align: 'right' });
+      doc.moveDown(1.2);
+
+      const sgstRowY = doc.y;
+      doc.text('SGST (9%)', 50, sgstRowY, { width: 350 });
+      doc.text(`INR ${sgst.toFixed(2)}`, 400, sgstRowY, { width: 162, align: 'right' });
+      doc.moveDown(1.2);
 
       // Table Row Line
       const rowLineY = doc.y;
       doc.moveTo(50, rowLineY).lineTo(562, rowLineY).stroke();
       doc.moveDown(1);
 
-      // Total Section
-      const totalY = doc.y;
+      // Totals Summary Section
+      let currentY = doc.y;
+      doc.font('Helvetica');
+      doc.text('Base Price:', 300, currentY, { width: 100 });
+      doc.text(`INR ${basePrice.toFixed(2)}`, 400, currentY, { width: 162, align: 'right' });
+      doc.moveDown(0.4);
+
+      currentY = doc.y;
+      doc.text('CGST (9%):', 300, currentY, { width: 100 });
+      doc.text(`INR ${cgst.toFixed(2)}`, 400, currentY, { width: 162, align: 'right' });
+      doc.moveDown(0.4);
+
+      currentY = doc.y;
+      doc.text('SGST (9%):', 300, currentY, { width: 100 });
+      doc.text(`INR ${sgst.toFixed(2)}`, 400, currentY, { width: 162, align: 'right' });
+      doc.moveDown(0.6);
+
+      // Total Line
+      currentY = doc.y;
+      doc.moveTo(300, currentY).lineTo(562, currentY).stroke();
+      doc.moveDown(0.4);
+
+      currentY = doc.y;
       doc.font('Helvetica-Bold');
-      doc.text('Total Amount:', 300, totalY, { width: 100 });
-      doc.text(formattedAmount, 400, totalY, { width: 162, align: 'right' });
+      doc.text('Total Paid:', 300, currentY, { width: 100 });
+      doc.text(`INR ${amount.toFixed(2)}`, 400, currentY, { width: 162, align: 'right' });
       doc.moveDown(3);
 
       // Footer

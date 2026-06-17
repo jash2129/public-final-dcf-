@@ -1,7 +1,7 @@
 export const serviceCategories = [
   {
-    title: "Start up Registrations",
-    slug: "start-up-registrations",
+    title: "StartUp Registrations",
+    slug: "startup-registrations",
     services: [
       "Proprietorship Registration",
       "Partnership Firm Registration",
@@ -53,7 +53,7 @@ export const serviceCategories = [
       "Business ITR Filing",
       "Tax Notice Handling",
       "15CA / 15CB Form Filing",
-      "Company e-Taxing (Formerly Income Tax e-Filing)",
+      "Company e-Taxing",
       "TDS Return Filing",
       "Form 16 Generation",
       "Lower TDS Certificate"
@@ -160,8 +160,8 @@ export const serviceCategories = [
     title: "Global",
     slug: "global",
     services: [
-      "Us accounting",
-      "us taxation"
+      "US Accounting",
+      "US Taxation"
     ]
   }
 ];

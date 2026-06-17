@@ -598,6 +598,34 @@ export default function Orders() {
                     </div>
                   </div>
 
+                  {formData.amount && (() => {
+                    const basePrice = parseFloat(formData.amount) || 0;
+                    const cgst = basePrice * 0.09;
+                    const sgst = basePrice * 0.09;
+                    const totalAmount = basePrice * 1.18;
+                    return (
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2 text-sm text-slate-600 font-medium">
+                        <div className="flex justify-between">
+                          <span>Base Price:</span>
+                          <span>₹{basePrice.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>CGST (9%):</span>
+                          <span>₹{cgst.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>SGST (9%):</span>
+                          <span>₹{sgst.toFixed(2)}</span>
+                        </div>
+                        <hr className="border-slate-200/60 my-1" />
+                        <div className="flex justify-between font-bold text-dark">
+                          <span>Total Amount:</span>
+                          <span>₹{totalAmount.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   <div className="pt-4 flex gap-3">
                     <button 
                       type="button"

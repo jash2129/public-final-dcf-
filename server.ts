@@ -17,6 +17,7 @@ import complianceRouter from "./server/routes/compliance.routes";
 import documentRouter from "./server/routes/document.routes";
 import profileRouter from "./server/routes/profile.routes";
 import contactRouter from "./server/routes/contact.routes";
+import leadsRouter from "./server/routes/leads.routes";
 import webhookRoutes from "./server/routes/webhook.routes";
 import { errorHandler } from "./server/middlewares/error.middleware";
 
@@ -125,6 +126,7 @@ async function startServer() {
   app.use("/api/compliance", complianceRouter);
   app.use("/api/documents", documentRouter);
   app.use("/api/contact", contactRouter);
+  app.use("/api/leads", leadsRouter);
   app.use("/api", profileRouter); // Matches: /api/user/*, /api/invoices, /api/stats/*
 
   // Serve static files from uploads

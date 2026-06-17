@@ -124,8 +124,15 @@ export async function notifyOrderPlacement(
   amount: number,
   userId: number
 ): Promise<void> {
-  const formattedAmt = formatCurrency(amount);
-  
+  const basePrice = amount / 1.18;
+  const cgst = basePrice * 0.09;
+  const sgst = basePrice * 0.09;
+
+  const formattedBase = `₹${basePrice.toFixed(2)}`;
+  const formattedCgst = `₹${cgst.toFixed(2)}`;
+  const formattedSgst = `₹${sgst.toFixed(2)}`;
+  const formattedTotal = `₹${amount.toFixed(2)}`;
+
   // Email
   const emailSubject = `Order Placed Successfully - ${orderId}`;
   const emailBody = `Hi ${userName},\n\n` +
@@ -133,13 +140,16 @@ export async function notifyOrderPlacement(
                     `Order Details:\n` +
                     `- Order ID: ${orderId}\n` +
                     `- Services: ${serviceNames}\n` +
-                    `- Total Amount: ${formattedAmt}\n` +
+                    `- Base Price: ${formattedBase}\n` +
+                    `- CGST (9%): ${formattedCgst}\n` +
+                    `- SGST (9%): ${formattedSgst}\n` +
+                    `- Total Amount: ${formattedTotal}\n` +
                     `- Status: Placed (Our experts will start working shortly)\n\n` +
                     `Best regards,\nTeam Deccan Filings`;
   await sendEmail(userEmail, emailSubject, emailBody, userId);
 
   // SMS
-  const smsMessage = `Hi ${userName}, order ${orderId} for ${serviceNames} (Amt: ${formattedAmt}) has been placed successfully. Team Deccan Filings`;
+  const smsMessage = `Hi ${userName}, order ${orderId} for ${serviceNames} (Amt: ${formattedTotal}) has been placed successfully. Team Deccan Filings`;
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
   }
@@ -219,10 +229,23 @@ export async function notifyPaymentSuccess(
   userId: number,
   serviceName: string
 ): Promise<void> {
-  const formattedAmt = formatCurrency(amount);
+  const basePrice = amount / 1.18;
+  const cgst = basePrice * 0.09;
+  const sgst = basePrice * 0.09;
+
+  const formattedBase = `₹${basePrice.toFixed(2)}`;
+  const formattedCgst = `₹${cgst.toFixed(2)}`;
+  const formattedSgst = `₹${sgst.toFixed(2)}`;
+  const formattedTotal = `₹${amount.toFixed(2)}`;
+
   const emailSubject = `Payment Received - Invoice for Order ${orderId}`;
   const emailBody = `Hi ${userName},\n\n` +
-                    `We are pleased to confirm that your payment of ${formattedAmt} for Order ${orderId} has been successfully received.\n\n` +
+                    `We are pleased to confirm that your payment of ${formattedTotal} for Order ${orderId} has been successfully received.\n\n` +
+                    `Payment Summary:\n` +
+                    `- Base Price: ${formattedBase}\n` +
+                    `- CGST (9%): ${formattedCgst}\n` +
+                    `- SGST (9%): ${formattedSgst}\n` +
+                    `- Total Paid: ${formattedTotal}\n\n` +
                     `Thank you for choosing Deccan Filings! Our professional team has already begun processing your filing request. We will reach out to you if any additional documents or clarifications are needed.\n\n` +
                     `You can monitor the status of your request at any time by logging into your dashboard.\n\n` +
                     `Best regards,\nTeam Deccan Filings`;
@@ -249,3 +272,4 @@ export async function notifyPaymentSuccess(
 
   await sendEmail(userEmail, emailSubject, emailBody, userId, attachments);
 }
+

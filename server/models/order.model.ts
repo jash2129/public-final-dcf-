@@ -6,6 +6,9 @@ export interface Order {
   user_id: number;
   status: 'placed' | 'in_progress' | 'completed' | 'rejected';
   total_amount: number;
+  base_price?: number;
+  cgst?: number;
+  sgst?: number;
   payment_status?: 'pending' | 'paid' | 'failed';
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
@@ -66,16 +69,19 @@ export async function createOrderWithItems(
     const suffix = String(nextIndex).padStart(4, '0'); // pad to 4 digits: 0001
     const orderId = `DCF-${datePrefix}-${suffix}`;
 
-    // 2. Calculate total order amount
-    let totalAmount = 0;
+    // 2. Calculate base price and tax-inclusive total order amount
+    let basePrice = 0;
     for (const item of items) {
-      totalAmount += item.priceAtPurchase * item.quantity;
+      basePrice += item.priceAtPurchase * item.quantity;
     }
+    const cgst = basePrice * 0.09;
+    const sgst = basePrice * 0.09;
+    const totalAmount = basePrice + cgst + sgst;
 
     // 3. Insert order record
     await connection.execute(
-      'INSERT INTO orders (id, user_id, status, total_amount) VALUES (?, ?, ?, ?)',
-      [orderId, userId, 'placed', totalAmount]
+      'INSERT INTO orders (id, user_id, status, total_amount, base_price, cgst, sgst) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [orderId, userId, 'placed', totalAmount, basePrice, cgst, sgst]
     );
 
     // 4. Insert order items
@@ -112,6 +118,15 @@ export async function findOrderById(orderId: string): Promise<Order | null> {
   
   const order = rows[0];
   order.total_amount = parseFloat(order.total_amount);
+  if (order.base_price !== null && order.base_price !== undefined) {
+    order.base_price = parseFloat(order.base_price);
+  }
+  if (order.cgst !== null && order.cgst !== undefined) {
+    order.cgst = parseFloat(order.cgst);
+  }
+  if (order.sgst !== null && order.sgst !== undefined) {
+    order.sgst = parseFloat(order.sgst);
+  }
   return order as Order;
 }
 
@@ -197,16 +212,22 @@ export async function updateOrderAmountAndItems(orderId: string, amount: number)
   try {
     await connection.beginTransaction();
     
+    // Calculate new tax from the new base amount
+    const basePrice = amount;
+    const cgst = basePrice * 0.09;
+    const sgst = basePrice * 0.09;
+    const totalAmount = basePrice + cgst + sgst;
+
     // Update orders table
     const [orderResult] = await connection.execute(
-      'UPDATE orders SET total_amount = ? WHERE id = ?',
-      [amount, orderId]
+      'UPDATE orders SET total_amount = ?, base_price = ?, cgst = ?, sgst = ? WHERE id = ?',
+      [totalAmount, basePrice, cgst, sgst, orderId]
     );
 
     // Update order_items table for this order
     await connection.execute(
       'UPDATE order_items SET price_at_purchase = ? WHERE order_id = ?',
-      [amount, orderId]
+      [basePrice, orderId]
     );
 
     await connection.commit();

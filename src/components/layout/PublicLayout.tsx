@@ -55,7 +55,7 @@ export default function PublicLayout() {
     }
   };
 
-  const navCategories = serviceCategories.filter(c => c.title !== "More Services");
+  const navCategories = serviceCategories;
 
   return (
     <div className="min-h-screen flex flex-col bg-white font-sans text-dark overflow-x-hidden">
@@ -141,7 +141,7 @@ export default function PublicLayout() {
       {/* Top Bar */}
       <div className="bg-dark-200 text-brand-lightest py-1.5 px-4 sm:px-6 lg:px-8 text-xs flex justify-between items-center hidden md:flex">
         <div className="flex gap-4">
-          <span className="flex items-center gap-1"><Phone className="h-3 w-3 text-brand" /> +91 98765 43210</span>
+          <span className="flex items-center gap-1"><Phone className="h-3 w-3 text-brand" /> +91 90009 30453</span>
           <span>India's Trusted Compliance Platform</span>
         </div>
         <div className="flex gap-4">
@@ -169,10 +169,10 @@ export default function PublicLayout() {
             </div>
             
             {/* Desktop Menu */}
-            <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-1.5 h-full mx-1 2xl:mx-4">
-              {navCategories.slice(0, 9).map((category, index) => (
-                <div key={category.title} className={`relative group h-full flex items-center ${index >= 7 ? 'hidden 2xl:flex' : ''}`}>
-                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-1.5 2xl:px-3 py-2 text-[13px] 2xl:text-sm rounded-full hover:bg-slate-100/80 transition-all whitespace-nowrap">
+            <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-2 h-full mx-2 2xl:mx-4">
+              {navCategories.slice(0, 7).map((category) => (
+                <div key={category.title} className="relative group h-full flex items-center">
+                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-slate-100/80 transition-all whitespace-nowrap">
                     {category.title} 
                     {category.title === 'Finance' && (
                       <span className="relative flex h-2 w-2 ml-1">
@@ -228,8 +228,8 @@ export default function PublicLayout() {
 
               {/* More Dropdown */}
               {navCategories.length > 7 && (
-                <div className="relative group h-full flex items-center 2xl:hidden">
-                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-1.5 py-2 text-[13px] rounded-full hover:bg-slate-100/80 transition-all">
+                <div className="relative group h-full flex items-center">
+                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-slate-100/80 transition-all">
                     More <ChevronDown className="h-3.5 w-3.5 opacity-50 group-hover:rotate-180 transition-transform duration-300" />
                   </button>
                   <div className="absolute top-full right-0 w-64 bg-white/95 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 z-50">
@@ -433,7 +433,7 @@ export default function PublicLayout() {
                 Deccan Filings is India's largest cloud-based business services platform dedicated to helping Entrepreneurs easily start and grow their business, at an affordable cost.
               </p>
               <div className="space-y-2 text-sm text-slate-400">
-                <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-brand" /> +91 98765 43210</p>
+                <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-brand" /> +91 90009 30453</p>
                 <p className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-brand" /> support@deccanfilings.com</p>
               </div>
             </div>

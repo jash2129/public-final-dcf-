@@ -220,6 +220,9 @@ async function setupDatabase() {
         user_id INT NOT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'placed',
         total_amount DECIMAL(10, 2) NOT NULL,
+        base_price DECIMAL(10, 2) NULL,
+        cgst DECIMAL(10, 2) NULL,
+        sgst DECIMAL(10, 2) NULL,
         payment_status VARCHAR(20) NOT NULL DEFAULT 'pending',
         razorpay_order_id VARCHAR(255) NULL,
         razorpay_payment_id VARCHAR(255) NULL,
@@ -246,6 +249,21 @@ async function setupDatabase() {
       }
     } catch (e) {
       console.error("Failed to alter orders table:", e.message);
+    }
+    try {
+      const [cols] = await pool.query('SHOW COLUMNS FROM orders LIKE "base_price"');
+      if (cols.length === 0) {
+        console.log("Adding base_price, cgst, and sgst columns to orders table...");
+        await pool.query(`
+          ALTER TABLE orders 
+          ADD COLUMN base_price DECIMAL(10, 2) NULL,
+          ADD COLUMN cgst DECIMAL(10, 2) NULL,
+          ADD COLUMN sgst DECIMAL(10, 2) NULL
+        `);
+        console.log("base_price, cgst, and sgst columns added successfully to orders table.");
+      }
+    } catch (e) {
+      console.error("Failed to alter orders table to add tax columns:", e.message);
     }
     await pool.query(`
       CREATE TABLE IF NOT EXISTS order_items (
@@ -671,16 +689,43 @@ function generateInvoiceBuffer(orderId, amount, userName, userEmail, serviceName
       const rowY = doc.y;
       doc.font("Helvetica");
       doc.text(serviceName, 50, rowY, { width: 350 });
-      const formattedAmount = `INR ${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      doc.text(formattedAmount, 400, rowY, { width: 162, align: "right" });
-      doc.moveDown(1);
+      const basePrice = amount / 1.18;
+      const cgst = basePrice * 0.09;
+      const sgst = basePrice * 0.09;
+      const formattedBasePrice = `INR ${basePrice.toFixed(2)}`;
+      doc.text(formattedBasePrice, 400, rowY, { width: 162, align: "right" });
+      doc.moveDown(1.2);
+      const cgstRowY = doc.y;
+      doc.text("CGST (9%)", 50, cgstRowY, { width: 350 });
+      doc.text(`INR ${cgst.toFixed(2)}`, 400, cgstRowY, { width: 162, align: "right" });
+      doc.moveDown(1.2);
+      const sgstRowY = doc.y;
+      doc.text("SGST (9%)", 50, sgstRowY, { width: 350 });
+      doc.text(`INR ${sgst.toFixed(2)}`, 400, sgstRowY, { width: 162, align: "right" });
+      doc.moveDown(1.2);
       const rowLineY = doc.y;
       doc.moveTo(50, rowLineY).lineTo(562, rowLineY).stroke();
       doc.moveDown(1);
-      const totalY = doc.y;
+      let currentY = doc.y;
+      doc.font("Helvetica");
+      doc.text("Base Price:", 300, currentY, { width: 100 });
+      doc.text(`INR ${basePrice.toFixed(2)}`, 400, currentY, { width: 162, align: "right" });
+      doc.moveDown(0.4);
+      currentY = doc.y;
+      doc.text("CGST (9%):", 300, currentY, { width: 100 });
+      doc.text(`INR ${cgst.toFixed(2)}`, 400, currentY, { width: 162, align: "right" });
+      doc.moveDown(0.4);
+      currentY = doc.y;
+      doc.text("SGST (9%):", 300, currentY, { width: 100 });
+      doc.text(`INR ${sgst.toFixed(2)}`, 400, currentY, { width: 162, align: "right" });
+      doc.moveDown(0.6);
+      currentY = doc.y;
+      doc.moveTo(300, currentY).lineTo(562, currentY).stroke();
+      doc.moveDown(0.4);
+      currentY = doc.y;
       doc.font("Helvetica-Bold");
-      doc.text("Total Amount:", 300, totalY, { width: 100 });
-      doc.text(formattedAmount, 400, totalY, { width: 162, align: "right" });
+      doc.text("Total Paid:", 300, currentY, { width: 100 });
+      doc.text(`INR ${amount.toFixed(2)}`, 400, currentY, { width: 162, align: "right" });
       doc.moveDown(3);
       doc.fontSize(10).font("Helvetica-Oblique").text("Thank you for your business!", 50, 700, { align: "center", width: 512 });
       doc.end();
@@ -775,7 +820,13 @@ Message: ${message}
   return true;
 }
 async function notifyOrderPlacement(orderId, userEmail, userPhone, userName, serviceNames, amount, userId) {
-  const formattedAmt = formatCurrency(amount);
+  const basePrice = amount / 1.18;
+  const cgst = basePrice * 0.09;
+  const sgst = basePrice * 0.09;
+  const formattedBase = `\u20B9${basePrice.toFixed(2)}`;
+  const formattedCgst = `\u20B9${cgst.toFixed(2)}`;
+  const formattedSgst = `\u20B9${sgst.toFixed(2)}`;
+  const formattedTotal = `\u20B9${amount.toFixed(2)}`;
   const emailSubject = `Order Placed Successfully - ${orderId}`;
   const emailBody = `Hi ${userName},
 
@@ -784,13 +835,16 @@ Thank you for choosing Deccan Filings! We have received your order.
 Order Details:
 - Order ID: ${orderId}
 - Services: ${serviceNames}
-- Total Amount: ${formattedAmt}
+- Base Price: ${formattedBase}
+- CGST (9%): ${formattedCgst}
+- SGST (9%): ${formattedSgst}
+- Total Amount: ${formattedTotal}
 - Status: Placed (Our experts will start working shortly)
 
 Best regards,
 Team Deccan Filings`;
   await sendEmail(userEmail, emailSubject, emailBody, userId);
-  const smsMessage = `Hi ${userName}, order ${orderId} for ${serviceNames} (Amt: ${formattedAmt}) has been placed successfully. Team Deccan Filings`;
+  const smsMessage = `Hi ${userName}, order ${orderId} for ${serviceNames} (Amt: ${formattedTotal}) has been placed successfully. Team Deccan Filings`;
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
   }
@@ -827,11 +881,23 @@ Team Deccan Filings`;
   }
 }
 async function notifyPaymentSuccess(orderId, amount, userEmail, userName, userId, serviceName) {
-  const formattedAmt = formatCurrency(amount);
+  const basePrice = amount / 1.18;
+  const cgst = basePrice * 0.09;
+  const sgst = basePrice * 0.09;
+  const formattedBase = `\u20B9${basePrice.toFixed(2)}`;
+  const formattedCgst = `\u20B9${cgst.toFixed(2)}`;
+  const formattedSgst = `\u20B9${sgst.toFixed(2)}`;
+  const formattedTotal = `\u20B9${amount.toFixed(2)}`;
   const emailSubject = `Payment Received - Invoice for Order ${orderId}`;
   const emailBody = `Hi ${userName},
 
-We are pleased to confirm that your payment of ${formattedAmt} for Order ${orderId} has been successfully received.
+We are pleased to confirm that your payment of ${formattedTotal} for Order ${orderId} has been successfully received.
+
+Payment Summary:
+- Base Price: ${formattedBase}
+- CGST (9%): ${formattedCgst}
+- SGST (9%): ${formattedSgst}
+- Total Paid: ${formattedTotal}
 
 Thank you for choosing Deccan Filings! Our professional team has already begun processing your filing request. We will reach out to you if any additional documents or clarifications are needed.
 
@@ -1577,13 +1643,16 @@ async function createOrderWithItems(userId, items) {
     }
     const suffix = String(nextIndex).padStart(4, "0");
     const orderId = `DCF-${datePrefix}-${suffix}`;
-    let totalAmount = 0;
+    let basePrice = 0;
     for (const item of items) {
-      totalAmount += item.priceAtPurchase * item.quantity;
+      basePrice += item.priceAtPurchase * item.quantity;
     }
+    const cgst = basePrice * 0.09;
+    const sgst = basePrice * 0.09;
+    const totalAmount = basePrice + cgst + sgst;
     await connection.execute(
-      "INSERT INTO orders (id, user_id, status, total_amount) VALUES (?, ?, ?, ?)",
-      [orderId, userId, "placed", totalAmount]
+      "INSERT INTO orders (id, user_id, status, total_amount, base_price, cgst, sgst) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [orderId, userId, "placed", totalAmount, basePrice, cgst, sgst]
     );
     for (const item of items) {
       await connection.execute(
@@ -1612,6 +1681,15 @@ async function findOrderById(orderId) {
   if (rows.length === 0) return null;
   const order = rows[0];
   order.total_amount = parseFloat(order.total_amount);
+  if (order.base_price !== null && order.base_price !== void 0) {
+    order.base_price = parseFloat(order.base_price);
+  }
+  if (order.cgst !== null && order.cgst !== void 0) {
+    order.cgst = parseFloat(order.cgst);
+  }
+  if (order.sgst !== null && order.sgst !== void 0) {
+    order.sgst = parseFloat(order.sgst);
+  }
   return order;
 }
 async function getOrderItems(orderId) {
@@ -1670,13 +1748,17 @@ async function updateOrderAmountAndItems(orderId, amount) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    const basePrice = amount;
+    const cgst = basePrice * 0.09;
+    const sgst = basePrice * 0.09;
+    const totalAmount = basePrice + cgst + sgst;
     const [orderResult] = await connection.execute(
-      "UPDATE orders SET total_amount = ? WHERE id = ?",
-      [amount, orderId]
+      "UPDATE orders SET total_amount = ?, base_price = ?, cgst = ?, sgst = ? WHERE id = ?",
+      [totalAmount, basePrice, cgst, sgst, orderId]
     );
     await connection.execute(
       "UPDATE order_items SET price_at_purchase = ? WHERE order_id = ?",
-      [amount, orderId]
+      [basePrice, orderId]
     );
     await connection.commit();
     return orderResult.affectedRows > 0;
@@ -1710,7 +1792,7 @@ async function markOrderAsPaid(orderId, razorpayOrderId, razorpayPaymentId, sign
 function getCategoryForService(name) {
   const lower = name.toLowerCase();
   if (lower.includes("proprietorship") || lower.includes("partnership") || lower.includes("company") || lower.includes("llp") || lower.includes("subsidiary") || lower.includes("nidhi") || lower.includes("trust")) {
-    return "Startup";
+    return "StartUp Registrations";
   }
   if (lower.includes("gst") || lower.includes("gstr") || lower.includes("lut")) {
     return "GST";
@@ -1730,10 +1812,10 @@ function getCategoryForService(name) {
   if (lower.includes("loan") || lower.includes("insurance") || lower.includes("mutual fund")) {
     return "Finance";
   }
-  if (lower.includes("uae") || lower.includes("usa") || lower.includes("uk") || lower.includes("singapore") || lower.includes("foreign")) {
+  if (lower.includes("uae") || lower.includes("usa") || lower.includes("uk") || lower.includes("singapore") || lower.includes("foreign") || lower.includes("global") || lower.includes("accounting") || lower.includes("taxation")) {
     return "Global";
   }
-  return "More Services";
+  return "StartUp Registrations";
 }
 async function checkout(userId, payload) {
   const quantity = payload.quantity || 1;
@@ -1745,18 +1827,17 @@ async function checkout(userId, payload) {
     if (!service) {
       const category = getCategoryForService(payload.service);
       const prefixMap = {
-        "Startup": "START",
-        "Registrations": "REG",
+        "StartUp Registrations": "STARTUP",
+        "License": "LIC",
         "Trademark": "TM",
         "GST": "GST",
         "Income Tax": "IT",
         "MCA": "MCA",
         "Compliance": "COMP",
         "Finance": "FIN",
-        "Global": "GLOB",
-        "More Services": "MORE"
+        "Global": "GLOB"
       };
-      const prefix = prefixMap[category] || "MORE";
+      const prefix = prefixMap[category] || "STARTUP";
       const code = `${prefix}${Date.now().toString().slice(-4)}`;
       let price = 2999;
       if (payload.amount) {
@@ -1813,6 +1894,8 @@ async function changeOrderStatus(orderId, status) {
 async function triggerOrderNotification(userId, orderId, serviceName, amount) {
   try {
     const user = await findUserById(userId);
+    const order = await findOrderById(orderId);
+    const finalAmount = order ? order.total_amount : amount * 1.18;
     if (user) {
       await notifyOrderPlacement(
         orderId,
@@ -1820,7 +1903,7 @@ async function triggerOrderNotification(userId, orderId, serviceName, amount) {
         user.phone || "",
         user.name,
         serviceName,
-        amount,
+        finalAmount,
         userId
       );
     }
@@ -1886,10 +1969,16 @@ async function initiatePayment(orderId, userId) {
   if (order.payment_status === "paid") {
     throw { status: 400, message: "Order has already been paid." };
   }
-  const amountInPaise = Math.round(order.total_amount * 100);
+  const items = await getOrderItems(orderId);
+  const service = {
+    basePrice: order.base_price || (items.length > 0 ? items[0].price_at_purchase : order.total_amount)
+  };
+  const basePrice = Number(service.basePrice);
+  const taxMultiplier = 1.18;
+  const totalAmountInPaise = Math.round(basePrice * taxMultiplier * 100);
   try {
     const rpOrder = await getRazorpay().orders.create({
-      amount: amountInPaise,
+      amount: totalAmountInPaise,
       currency: "INR",
       receipt: orderId
     });
@@ -2869,11 +2958,90 @@ router8.post("/", async (req, res) => {
 });
 var contact_routes_default = router8;
 
-// server/routes/webhook.routes.ts
+// server/routes/leads.routes.ts
 import { Router as Router9 } from "express";
-import express from "express";
+import nodemailer3 from "nodemailer";
 var router9 = Router9();
-router9.post(
+router9.post("/callback", async (req, res) => {
+  const { fullName, mobileNumber, emailAddress, city, serviceName } = req.body;
+  if (!fullName || !mobileNumber || !emailAddress || !city || !serviceName) {
+    return res.status(400).json({ error: "Please fill in all required fields." });
+  }
+  try {
+    let transporter2;
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      transporter2 = nodemailer3.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || "587", 10),
+        secure: process.env.SMTP_SECURE === "true",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+    } else {
+      console.log("=== CALLBACK REQUEST SUBMISSION (no SMTP configured) ===");
+      console.log({ fullName, mobileNumber, emailAddress, city, serviceName });
+      console.log("Would send to: deccanfilings@gmail.com");
+      console.log("========================================================");
+      return res.json({ success: true, message: "Callback request received! (SMTP not configured \u2014 logged to console)" });
+    }
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #f9fafb; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <h2 style="color: #b91c1c; border-bottom: 2px solid #fee2e2; padding-bottom: 12px; margin-top: 0; font-size: 20px;">
+          \u{1F6A8} New Callback Request
+        </h2>
+        <p style="color: #475569; font-size: 14px; margin-bottom: 20px;">
+          A visitor has requested a callback for <strong>${serviceName}</strong>. Details are below:
+        </p>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+          <tr style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px 16px; font-weight: bold; color: #64748b; width: 160px; font-size: 14px;">Full Name</td>
+            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px;">${fullName}</td>
+          </tr>
+          <tr style="background: #f8fafc; border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px 16px; font-weight: bold; color: #64748b; font-size: 14px;">Mobile Number</td>
+            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px;">${mobileNumber}</td>
+          </tr>
+          <tr style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px 16px; font-weight: bold; color: #64748b; font-size: 14px;">Email Address</td>
+            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px;"><a href="mailto:${emailAddress}" style="color: #2563eb; text-decoration: none;">${emailAddress}</a></td>
+          </tr>
+          <tr style="background: #f8fafc; border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px 16px; font-weight: bold; color: #64748b; font-size: 14px;">City</td>
+            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px;">${city}</td>
+          </tr>
+          <tr style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px 16px; font-weight: bold; color: #64748b; font-size: 14px;">Requested Service</td>
+            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px; font-weight: 600;">${serviceName}</td>
+          </tr>
+        </table>
+        <p style="margin-top: 24px; font-size: 12px; color: #94a3b8; text-align: center;">
+          Sent from Deccan Filings Website \xB7 ${(/* @__PURE__ */ new Date()).toLocaleString("en-IN")}
+        </p>
+      </div>
+    `;
+    const fromEmail = process.env.SYSTEM_EMAIL_FROM || process.env.SMTP_USER || "support@deccanfilings.com";
+    await transporter2.sendMail({
+      from: `"Deccan Filings Lead" <${fromEmail}>`,
+      to: process.env.TEAM_EMAIL || "deccanfilings@gmail.com",
+      replyTo: emailAddress,
+      subject: `\u{1F6A8} New Callback Request: ${serviceName}`,
+      html: htmlBody
+    });
+    return res.status(200).json({ success: true, message: "Callback request received and email sent successfully." });
+  } catch (err) {
+    console.error("Callback lead email error:", err);
+    return res.status(500).json({ error: "Failed to submit callback request. Please try again." });
+  }
+});
+var leads_routes_default = router9;
+
+// server/routes/webhook.routes.ts
+import { Router as Router10 } from "express";
+import express from "express";
+var router10 = Router10();
+router10.post(
   "/razorpay",
   express.raw({ type: "application/json" }),
   async (req, res) => {
@@ -2889,7 +3057,7 @@ router9.post(
     }
   }
 );
-var webhook_routes_default = router9;
+var webhook_routes_default = router10;
 
 // server/middlewares/error.middleware.ts
 function errorHandler(err, req, res, next) {
@@ -2990,6 +3158,7 @@ async function startServer() {
   app.use("/api/compliance", compliance_routes_default);
   app.use("/api/documents", document_routes_default);
   app.use("/api/contact", contact_routes_default);
+  app.use("/api/leads", leads_routes_default);
   app.use("/api", profile_routes_default);
   app.use("/uploads", express2.static(uploadsDir3));
   if (process.env.NODE_ENV !== "production") {

@@ -177,6 +177,9 @@ export async function setupDatabase(): Promise<mysql.Pool> {
         user_id INT NOT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'placed',
         total_amount DECIMAL(10, 2) NOT NULL,
+        base_price DECIMAL(10, 2) NULL,
+        cgst DECIMAL(10, 2) NULL,
+        sgst DECIMAL(10, 2) NULL,
         payment_status VARCHAR(20) NOT NULL DEFAULT 'pending',
         razorpay_order_id VARCHAR(255) NULL,
         razorpay_payment_id VARCHAR(255) NULL,
@@ -205,6 +208,23 @@ export async function setupDatabase(): Promise<mysql.Pool> {
       }
     } catch (e: any) {
       console.error("Failed to alter orders table:", e.message);
+    }
+
+    // Alter orders table to add base_price, cgst, and sgst columns if they do not exist
+    try {
+      const [cols] = await pool.query<mysql.RowDataPacket[]>('SHOW COLUMNS FROM orders LIKE "base_price"');
+      if (cols.length === 0) {
+        console.log("Adding base_price, cgst, and sgst columns to orders table...");
+        await pool.query(`
+          ALTER TABLE orders 
+          ADD COLUMN base_price DECIMAL(10, 2) NULL,
+          ADD COLUMN cgst DECIMAL(10, 2) NULL,
+          ADD COLUMN sgst DECIMAL(10, 2) NULL
+        `);
+        console.log("base_price, cgst, and sgst columns added successfully to orders table.");
+      }
+    } catch (e: any) {
+      console.error("Failed to alter orders table to add tax columns:", e.message);
     }
 
     // 4. Create order_items table

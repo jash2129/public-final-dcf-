@@ -5,7 +5,7 @@ import { serviceCategories, generateSlug } from '../data/services';
 import { useState, useEffect } from 'react';
 
 const categoryIcons: Record<string, any> = {
-  "Registrations": Building2,
+  "StartUp Registrations": Building2,
   "License": FileText,
   "Income Tax": BookOpen,
   "GST": Calculator,
@@ -13,8 +13,7 @@ const categoryIcons: Record<string, any> = {
   "Compliance": CheckCircle,
   "Trademark": Briefcase,
   "Finance": Wallet,
-  "Global": Globe,
-  "More Services": Scale
+  "Global": Globe
 };
 
 function getServiceDescription(serviceName: string): string {
