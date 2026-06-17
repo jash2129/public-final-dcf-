@@ -2943,9 +2943,11 @@ router8.post("/", async (req, res) => {
         </p>
       </div>
     `;
+    const fromEmail = process.env.SYSTEM_EMAIL_FROM || process.env.SMTP_USER || "support@deccanfilings.com";
+    const toEmail = process.env.TEAM_EMAIL || "deccanfilings@gmail.com";
     await transporter2.sendMail({
-      from: `"Deccan Filings Website" <${process.env.SMTP_USER}>`,
-      to: "hr@deccanfilings.com",
+      from: `"Deccan Filings Website" <${fromEmail}>`,
+      to: toEmail,
       replyTo: email,
       subject: `New Enquiry: ${category}${service ? " \u2013 " + service : ""} from ${name}`,
       html: htmlBody
