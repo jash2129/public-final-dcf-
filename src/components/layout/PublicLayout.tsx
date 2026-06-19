@@ -147,6 +147,7 @@ export default function PublicLayout() {
         <div className="flex gap-4">
           <Link to="/tools/compliance-calendar" className="hover:text-brand transition-colors">Compliance Calendar</Link>
           <Link to="/blog" className="hover:text-brand transition-colors">Blog</Link>
+          <Link to="/careers" className="hover:text-brand transition-colors">Careers</Link>
           <Link to="/about" className="hover:text-brand transition-colors">About Us</Link>
           <Link to="/contact" className="hover:text-brand transition-colors">Contact</Link>
         </div>
@@ -345,6 +346,18 @@ export default function PublicLayout() {
                         <span className="flex items-center gap-2">
                           <CalendarIcon className="h-5 w-5" />
                           Compliance Calendar 2026
+                        </span>
+                        <ChevronRight className="h-5 w-5 text-slate-400" />
+                      </Link>
+                    </div>
+                    <div className="border-b border-slate-100">
+                      <Link 
+                        to="/careers" 
+                        onClick={() => setIsMenuOpen(false)}
+                        className="w-full flex items-center justify-between py-4 text-base font-bold text-dark"
+                      >
+                        <span className="flex items-center gap-2">
+                          Careers
                         </span>
                         <ChevronRight className="h-5 w-5 text-slate-400" />
                       </Link>
