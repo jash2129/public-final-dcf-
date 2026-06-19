@@ -105,7 +105,7 @@ export default function NotificationsDropdown() {
         icon: AlertCircle,
         action: {
           label: 'Renew Now',
-          onClick: () => navigate('/dashboard/services')
+          onClick: () => navigate('/services#trademark')
         }
       }, ...prev]);
 

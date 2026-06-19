@@ -118,13 +118,14 @@ export default function ServicesCatalog() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.hash) {
+    if (!loading && location.hash) {
       const slug = location.hash.replace('#', '');
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         scrollToCategory(slug);
-      }, 100); // slight delay for smooth scrolling after render
+      }, 150); // slight delay to ensure DOM paint is complete
+      return () => clearTimeout(timer);
     }
-  }, [location.hash]);
+  }, [loading, location.hash]);
 
   return (
     <div className="bg-[#fafafa] min-h-screen py-20 relative overflow-hidden">

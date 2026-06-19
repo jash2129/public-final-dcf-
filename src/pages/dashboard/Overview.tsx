@@ -267,15 +267,15 @@ export default function Overview() {
               <p className="text-slate-400 text-sm mb-6">Explore our catalog of 100+ business services.</p>
               
               <div className="space-y-3">
-                <Link to="/services/startup" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
+                <Link to="/services#startup-registrations" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
                   <span className="font-medium text-sm">Company Registration</span>
                   <ChevronRight className="h-4 w-4 text-slate-400" />
                 </Link>
-                <Link to="/services/trademark" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
+                <Link to="/services#trademark" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
                   <span className="font-medium text-sm">Trademark Filing</span>
                   <ChevronRight className="h-4 w-4 text-slate-400" />
                 </Link>
-                <Link to="/services/gst" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
+                <Link to="/services#gst" className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
                   <span className="font-medium text-sm">GST Registration</span>
                   <ChevronRight className="h-4 w-4 text-slate-400" />
                 </Link>
