@@ -260,15 +260,17 @@ export default function Orders() {
   };
 
   // Filtered Orders Logic
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.service.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const filteredOrders = React.useMemo(() => {
+    return orders.filter(order => {
+      const matchesSearch = 
+        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.service.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [orders, searchTerm, statusFilter]);
 
   const handleExport = () => {
     if (filteredOrders.length === 0) return;
@@ -443,7 +445,10 @@ export default function Orders() {
                       <div className="flex items-center justify-end gap-3">
                         {order.status === 'Placed' && (
                           <button
-                            onClick={() => handlePayment(order.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePayment(order.id);
+                            }}
                             className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl transition-all shadow-[0_0_10px_rgba(0,87,255,0.3)] hover:shadow-[0_0_15px_rgba(0,87,255,0.5)] hover:-translate-y-0.5"
                           >
                             Pay Now
@@ -451,7 +456,8 @@ export default function Orders() {
                         )}
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button 
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setSelectedOrder(order);
                               setIsDetailModalOpen(true);
                             }}
