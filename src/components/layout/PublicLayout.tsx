@@ -439,7 +439,12 @@ export default function PublicLayout() {
                   <span className="text-slate-600">/</span>
                   <a href="tel:+919000243270" className="hover:text-brand transition-colors">+91 90002 43270</a>
                 </p>
-                <p className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-brand" /> support@deccanfilings.com</p>
+                <p className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-brand" />
+                  <a href="mailto:support@deccanfilings.com" className="hover:text-brand transition-colors">
+                    support@deccanfilings.com
+                  </a>
+                </p>
               </div>
             </div>
             
