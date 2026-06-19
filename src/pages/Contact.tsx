@@ -117,13 +117,13 @@ export default function Contact() {
                     <div className="flex flex-col gap-1">
                       <a
                         href="tel:+919000930453"
-                        className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer"
+                        className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer btn-tap"
                       >
                         +91 90009 30453
                       </a>
                       <a
                         href="tel:+919000243270"
-                        className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer"
+                        className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer btn-tap"
                       >
                         +91 90002 43270
                       </a>
@@ -143,7 +143,7 @@ export default function Contact() {
                       href="https://wa.me/919000930453"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-dark font-bold leading-relaxed hover:text-emerald-600 transition-colors block cursor-pointer"
+                      className="text-dark font-bold leading-relaxed hover:text-emerald-600 transition-colors block cursor-pointer btn-tap"
                     >
                       +91 90009 30453
                     </a>
@@ -158,7 +158,7 @@ export default function Contact() {
                     <h3 className="font-bold text-sm text-slate-400 uppercase tracking-widest mb-1">Email</h3>
                     <a
                       href="mailto:hr@deccanfilings.com"
-                      className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors block cursor-pointer"
+                      className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors block cursor-pointer btn-tap"
                     >
                       hr@deccanfilings.com
                     </a>
@@ -309,7 +309,7 @@ export default function Contact() {
                   id="contact-submit"
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-dark text-white px-4 py-4 rounded-xl font-bold text-lg hover:bg-dark-200 transition-all mt-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0"
+                  className="w-full bg-dark text-white px-4 py-4 rounded-xl font-bold text-lg hover:bg-dark-200 transition-all mt-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 btn-tap"
                 >
                   {loading ? (
                     <>

@@ -161,7 +161,7 @@ export default function Home() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                 />
-                <button type="submit" className="w-full sm:w-auto bg-brand text-dark px-8 py-3.5 rounded-xl font-bold hover:bg-brand-hover transition-all shrink-0 shadow-[0_0_20px_rgba(229,255,143,0.3)] hover:shadow-[0_0_30px_rgba(229,255,143,0.5)] cursor-pointer text-sm">
+                <button type="submit" className="w-full sm:w-auto bg-brand text-dark px-8 py-3.5 rounded-xl font-bold hover:bg-brand-hover transition-all shrink-0 shadow-[0_0_20px_rgba(229,255,143,0.3)] hover:shadow-[0_0_30px_rgba(229,255,143,0.5)] cursor-pointer text-sm btn-tap">
                   Search Services
                 </button>
               </form>
@@ -317,7 +317,7 @@ export default function Home() {
           >
             {/* Bento Card 1 - Double Width */}
             <motion.div variants={fadeInUp} className="md:col-span-2 lg:col-span-2">
-              <Link to="/services#startup-registrations" className="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full relative overflow-hidden">
+              <Link to="/services#startup-registrations" className="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full relative overflow-hidden btn-tap">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-bl-full group-hover:bg-brand/10 transition-colors"></div>
                 <div>
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-8">
@@ -336,7 +336,7 @@ export default function Home() {
 
             {/* Bento Card 2 - Standard */}
             <motion.div variants={fadeInUp} className="col-span-1">
-              <Link to="/services/gst/gst-registration" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full">
+              <Link to="/services/gst/gst-registration" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full btn-tap">
                 <div>
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-6">
                     <FileText className="h-7 w-7" />
@@ -350,7 +350,7 @@ export default function Home() {
 
             {/* Bento Card 3 - Standard */}
             <motion.div variants={fadeInUp} className="col-span-1">
-              <Link to="/services#mca" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full">
+              <Link to="/services#mca" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col justify-between h-full btn-tap">
                 <div>
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-6">
                     <Briefcase className="h-7 w-7" />
@@ -364,7 +364,7 @@ export default function Home() {
 
             {/* Bento Card 4 - Full Width Row */}
             <motion.div variants={fadeInUp} className="md:col-span-3 lg:col-span-4">
-              <Link to="/services#income-tax" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 h-full relative overflow-hidden">
+              <Link to="/services#income-tax" className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 h-full relative overflow-hidden btn-tap">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-brand/5 rounded-full blur-3xl group-hover:bg-brand/10 transition-colors -z-10"></div>
                 <div className="flex items-start sm:items-center gap-6">
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 shrink-0">
@@ -482,7 +482,7 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-bold text-dark mb-6">Popular Services</h2>
               <p className="text-xl text-dark-400">Most frequently requested services by our clients.</p>
             </div>
-            <Link to="/services" className="inline-flex items-center gap-2 bg-slate-100 text-dark px-6 py-3 rounded-full font-bold hover:bg-slate-200 transition-colors">
+            <Link to="/services" className="inline-flex items-center gap-2 bg-slate-100 text-dark px-6 py-3 rounded-full font-bold hover:bg-slate-200 transition-colors btn-tap">
               View All Catalogue <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -494,7 +494,7 @@ export default function Home() {
                 <Link 
                   to="/contact" 
                   key={index}
-                  className="group bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 flex flex-col h-full cursor-pointer"
+                  className="group bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 flex flex-col h-full cursor-pointer btn-tap"
                 >
                   <div className="w-14 h-14 bg-slate-50 text-brand rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand group-hover:text-dark transition-colors">
                     <Icon className="w-7 h-7" />

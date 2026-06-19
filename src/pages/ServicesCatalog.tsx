@@ -94,6 +94,12 @@ const itemVariants = {
 
 export default function ServicesCatalog() {
   const [activeCategory, setActiveCategory] = useState(serviceCategories[0]?.slug || '');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 450);
+    return () => clearTimeout(timer);
+  }, []);
 
   const scrollToCategory = (slug: string) => {
     setActiveCategory(slug);
@@ -192,32 +198,40 @@ export default function ServicesCatalog() {
                 </div>
               </motion.div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {category.services.map((service) => (
-                  <motion.div 
-                    variants={itemVariants}
-                    key={service} 
-                    className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden flex flex-col hover:border-brand/50 hover:shadow-2xl hover:shadow-brand/5 transition-all duration-500 group relative"
-                  >
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-brand-lightest/80 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="p-8 flex-grow relative z-10">
-                      <div className="h-14 w-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-brand group-hover:border-brand group-hover:text-dark transition-all duration-300 text-dark-400 shadow-sm">
-                        <Icon className="h-7 w-7" />
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-48 bg-slate-100 animate-pulse rounded-3xl border border-slate-200/60" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {category.services.map((service) => (
+                    <motion.div 
+                      variants={itemVariants}
+                      key={service} 
+                      className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden flex flex-col hover:border-brand/50 hover:shadow-2xl hover:shadow-brand/5 transition-all duration-500 group relative"
+                    >
+                      <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-brand-lightest/80 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="p-8 flex-grow relative z-10">
+                        <div className="h-14 w-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-brand group-hover:border-brand group-hover:text-dark transition-all duration-300 text-dark-400 shadow-sm">
+                          <Icon className="h-7 w-7" />
+                        </div>
+                        <h3 className="font-bold text-xl mb-3 text-dark group-hover:text-brand-hover transition-colors leading-tight">{service}</h3>
+                        <p className="text-dark-400 text-sm leading-relaxed">{getServiceDescription(service)}</p>
                       </div>
-                      <h3 className="font-bold text-xl mb-3 text-dark group-hover:text-brand-hover transition-colors leading-tight">{service}</h3>
-                      <p className="text-dark-400 text-sm leading-relaxed">{getServiceDescription(service)}</p>
-                    </div>
-                    <div className="px-8 pb-8 pt-2 relative z-10 mt-auto">
-                      <Link to={`/services/${category.slug}/${generateSlug(service)}`} className="inline-flex items-center gap-2 text-dark font-bold hover:text-brand transition-colors group/link">
-                        View Details 
-                        <span className="bg-slate-100 p-1.5 rounded-full group-hover/link:bg-brand group-hover/link:text-dark transition-colors">
-                          <ArrowRight className="h-4 w-4 group-hover/link:translate-x-0.5 transition-transform" />
-                        </span>
-                      </Link>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                      <div className="px-8 pb-8 pt-2 relative z-10 mt-auto">
+                        <Link to={`/services/${category.slug}/${generateSlug(service)}`} className="inline-flex items-center gap-2 text-dark font-bold hover:text-brand transition-colors group/link">
+                          View Details 
+                          <span className="bg-slate-100 p-1.5 rounded-full group-hover/link:bg-brand group-hover/link:text-dark transition-colors">
+                            <ArrowRight className="h-4 w-4 group-hover/link:translate-x-0.5 transition-transform" />
+                          </span>
+                        </Link>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           );
         })}

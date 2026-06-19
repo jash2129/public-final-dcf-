@@ -78,12 +78,19 @@
 }
 
 @layer base {
+  html, body {
+    overscroll-behavior-y: none; /* Stops the browser bounce */
+    height: 100%;
+  }
   html {
     scroll-behavior: smooth;
   }
   body {
     @apply font-sans antialiased text-[var(--color-text-primary)] bg-[var(--color-background)];
     font-size: 15px;
+  }
+  input, select, textarea {
+    font-size: 16px !important; /* Forces iOS to stop auto-zooming */
   }
   h1 {
     @apply font-display tracking-tight font-black;
@@ -236,6 +243,12 @@
       radial-gradient(at 0% 0%, rgba(255, 111, 67, 0.08) 0px, transparent 50%),
       radial-gradient(at 100% 100%, rgba(255, 240, 235, 0.08) 0px, transparent 50%),
       radial-gradient(at 50% 50%, rgba(0, 0, 0, 0.5) 0px, transparent 50%);
+  }
+}
+
+@layer components {
+  .btn-tap {
+    @apply active:scale-[0.98] transition-transform duration-75;
   }
 }
 

@@ -277,7 +277,7 @@ export default function PublicLayout() {
               <Link to="/login" className="flex items-center gap-1.5 text-dark-400 hover:text-dark font-medium text-[13px] 2xl:text-sm px-1 whitespace-nowrap">
                 <User className="h-4 w-4" /> Login
               </Link>
-              <Link to="/contact" className="bg-dark text-white px-3.5 xl:px-4 2xl:px-6 py-2.5 rounded-full font-bold text-[13px] 2xl:text-sm hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap">
+              <Link to="/contact" className="bg-dark text-white px-3.5 xl:px-4 2xl:px-6 py-2.5 rounded-full font-bold text-[13px] 2xl:text-sm hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap btn-tap">
                 Talk to Expert
               </Link>
             </div>
@@ -364,10 +364,10 @@ export default function PublicLayout() {
                     </div>
                   </div>
                   <div className="pt-8 pb-24 flex flex-col gap-3">
-                    <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center justify-center gap-2 border border-slate-300 text-dark px-4 py-3.5 rounded-xl font-bold">
+                    <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center justify-center gap-2 border border-slate-300 text-dark px-4 py-3.5 rounded-xl font-bold btn-tap">
                       <User className="h-5 w-5" /> Login
                     </Link>
-                    <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="w-full text-center bg-brand text-dark px-4 py-3.5 rounded-xl font-bold">
+                    <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="w-full text-center bg-brand text-dark px-4 py-3.5 rounded-xl font-bold btn-tap">
                       Talk to Expert
                     </Link>
                   </div>
@@ -531,7 +531,7 @@ export default function PublicLayout() {
         href="https://wa.me/919000930453?text=Hi,%20I'm%20interested%20in%20your%20services."
         target="_blank"
         rel="noopener noreferrer"
-        className="md:hidden fixed bottom-24 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:bg-[#20ba5a] transition-all transform hover:scale-110 flex items-center justify-center"
+        className="md:hidden fixed bottom-24 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:bg-[#20ba5a] transition-all transform hover:scale-110 flex items-center justify-center btn-tap"
         aria-label="Chat on WhatsApp"
       >
         <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -546,7 +546,7 @@ export default function PublicLayout() {
         </span>
         <button 
           onClick={() => navigate('/contact')}
-          className="relative flex bg-brand-lightest text-dark p-4 rounded-full shadow-xl hover:bg-brand-light hover:scale-105 active:scale-95 transition-all items-center justify-center cursor-pointer"
+          className="relative flex bg-brand-lightest text-dark p-4 rounded-full shadow-xl hover:bg-brand-light hover:scale-105 active:scale-95 transition-all items-center justify-center cursor-pointer btn-tap"
         >
           <span className="absolute inset-0 rounded-full bg-brand-lightest opacity-30 animate-ping"></span>
           <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black text-white shadow-sm">1</span>
