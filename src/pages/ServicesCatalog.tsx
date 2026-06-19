@@ -206,7 +206,12 @@ export default function ServicesCatalog() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <motion.div 
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
                   {category.services.map((service) => (
                     <motion.div 
                       variants={itemVariants}
@@ -231,7 +236,7 @@ export default function ServicesCatalog() {
                       </div>
                     </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
             </motion.div>
           );
