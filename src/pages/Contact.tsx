@@ -222,6 +222,8 @@ export default function Contact() {
                       id="contact-mobile"
                       name="mobile"
                       type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       className={inputClass}
                       placeholder="+91 90009 30453"
                       value={form.mobile}

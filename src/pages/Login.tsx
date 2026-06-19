@@ -373,6 +373,8 @@ export default function Login() {
                 </label>
                 <input
                   type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   value={crmData.phone}
                   onChange={(e) => setCrmData({ ...crmData, phone: e.target.value })}

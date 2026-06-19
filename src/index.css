@@ -3,6 +3,9 @@
 @source "./src/**/*.{html,js,jsx,ts,tsx}";
 
 @layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
   :root {
     --ds-coral: #FF6F43;
     --ds-coral-hover: #E85A30;

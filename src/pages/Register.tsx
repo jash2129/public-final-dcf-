@@ -221,6 +221,7 @@ export default function Register() {
                   id="whatsapp_number"
                   name="whatsapp_number"
                   type="tel"
+                  inputMode="numeric"
                   required
                   pattern="^\+?[0-9]{10,15}$"
                   title="Please enter a valid WhatsApp number (10-15 digits)"
@@ -377,6 +378,8 @@ export default function Register() {
                 </label>
                 <input
                   type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   value={crmData.phone}
                   onChange={(e) => setCrmData({ ...crmData, phone: e.target.value })}
