@@ -32,6 +32,29 @@ export default function Invoices() {
         setLoading(false);
       });
   }, []);
+  const calculateYTDSpent = (invoicesList: Invoice[]) => {
+    return invoicesList
+      .filter(invoice => invoice.status === 'Paid')
+      .reduce((sum, invoice) => {
+        // Remove '₹' and ',' then convert to float
+        const amount = parseFloat(invoice.amount.replace(/[₹,]/g, '')) || 0;
+        return sum + amount;
+      }, 0);
+  };
+
+  const calculateOutstandingBalance = (invoicesList: Invoice[]) => {
+    return invoicesList
+      .filter(invoice => invoice.status !== 'Paid')
+      .reduce((sum, invoice) => {
+        // Remove '₹' and ',' then convert to float
+        const amount = parseFloat(invoice.amount.replace(/[₹,]/g, '')) || 0;
+        return sum + amount;
+      }, 0);
+  };
+
+  const totalSpentYTD = calculateYTDSpent(invoices);
+  const outstandingBalance = calculateOutstandingBalance(invoices);
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -54,7 +77,7 @@ export default function Invoices() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Total Spent (YTD)</p>
-              <p className="text-2xl font-bold text-dark">₹38,995</p>
+              <p className="text-2xl font-bold text-dark">₹{totalSpentYTD.toLocaleString('en-IN')}</p>
             </div>
           </div>
         </div>
@@ -66,7 +89,7 @@ export default function Invoices() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Outstanding Balance</p>
-              <p className="text-2xl font-bold text-dark">₹1,499</p>
+              <p className="text-2xl font-bold text-dark">₹{outstandingBalance.toLocaleString('en-IN')}</p>
             </div>
           </div>
           <button className="w-full bg-brand text-white text-sm font-bold py-2 rounded-lg hover:bg-brand-hover transition-colors shadow-[0_0_15px_rgba(0,87,255,0.4)] hover:shadow-[0_0_25px_rgba(0,87,255,0.6)]">

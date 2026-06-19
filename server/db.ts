@@ -559,6 +559,26 @@ async function seedTestData() {
       await pool.execute('INSERT INTO activity_stats (name, requests) VALUES (?, ?)', [s.name, s.requests]);
     }
   }
+
+  // Seed default invoices data if empty
+  const [invCount] = await pool.query<mysql.RowDataPacket[]>('SELECT COUNT(*) as count FROM invoices');
+  if (invCount[0].count === 0) {
+    const [allUsers] = await pool.query<mysql.RowDataPacket[]>('SELECT id FROM users');
+    for (const u of allUsers) {
+      const defaultInvoices = [
+        { id: `INV-2026-001-${u.id}`, date: 'Apr 10, 2026', amount: '₹15,000', status: 'Paid', service: 'Private Limited Company Registration' },
+        { id: `INV-2026-002-${u.id}`, date: 'May 15, 2026', amount: '₹23,995', status: 'Paid', service: 'GST Filing & Compliance Support' },
+        { id: `INV-2026-003-${u.id}`, date: 'Jun 01, 2026', amount: '₹1,499', status: 'Pending', service: 'Trademark Registration Filing' }
+      ];
+      for (const inv of defaultInvoices) {
+        await pool.execute(
+          'INSERT INTO invoices (id, date, amount, status, service, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+          [inv.id, inv.date, inv.amount, inv.status, inv.service, u.id]
+        );
+      }
+    }
+    console.log('Invoices seeded for all users.');
+  }
 }
 
 /**
