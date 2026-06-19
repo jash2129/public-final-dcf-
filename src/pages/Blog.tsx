@@ -1,9 +1,32 @@
-import { Calendar, User, ArrowRight, Search } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, User, ArrowRight, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { blogPosts } from '../data/blogPosts';
 
 export default function Blog() {
   const categories = ['All', 'Startup', 'GST', 'Income Tax', 'Trademark', 'MCA', 'Global'];
+  
+  // State variables
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const POSTS_PER_PAGE = 6;
+
+  // Filter logic
+  const filteredPosts = blogPosts.filter(post => {
+    const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
+    const matchesSearch = !searchQuery.trim() || 
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
+  const currentPosts = filteredPosts.slice(
+    (currentPage - 1) * POSTS_PER_PAGE,
+    currentPage * POSTS_PER_PAGE
+  );
 
   return (
     <div className="bg-slate-50 min-h-screen pb-20">
@@ -18,6 +41,11 @@ export default function Blog() {
             <input 
               type="text" 
               placeholder="Search articles..." 
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-12 pr-4 py-3 rounded-lg text-dark focus:outline-none focus:ring-2 focus:ring-brand"
             />
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
@@ -34,8 +62,12 @@ export default function Blog() {
             {categories.map((category, index) => (
               <button 
                 key={index}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  index === 0 
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setCurrentPage(1);
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+                  selectedCategory === category 
                     ? 'bg-brand text-dark' 
                     : 'bg-white text-slate-600 border border-slate-200 hover:border-brand hover:text-dark'
                 }`}
@@ -46,53 +78,90 @@ export default function Blog() {
           </div>
 
           {/* Blog Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => (
-              <article key={post.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex flex-col">
-                <div className="h-48 overflow-hidden relative">
-                  <Link to={`/blog/${post.id}`} className="block h-full">
-                    <img 
-                      src={post.image} 
-                      alt={post.title} 
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                    />
-                  </Link>
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-dark">
-                    {post.category}
-                  </div>
-                </div>
-                <div className="p-6 flex-grow flex flex-col">
-                  <Link to={`/blog/${post.id}`}>
-                    <h2 className="text-xl font-bold text-dark mb-3 line-clamp-2 hover:text-brand transition-colors cursor-pointer">
-                      {post.title}
-                    </h2>
-                  </Link>
-                  <p className="text-slate-600 mb-4 line-clamp-3 flex-grow text-sm">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-slate-500 mt-auto pt-4 border-t border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> {post.author}</span>
-                      <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {post.date}</span>
-                    </div>
-                    <Link to={`/blog/${post.id}`} className="text-brand hover:text-brand-hover font-bold flex items-center gap-1 transition-colors">
-                      Read More <ArrowRight className="h-3.5 w-3.5" />
+          {currentPosts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {currentPosts.map((post) => (
+                <article key={post.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex flex-col">
+                  <div className="h-48 overflow-hidden relative">
+                    <Link to={`/blog/${post.id}`} className="block h-full">
+                      <img 
+                        src={post.image} 
+                        alt={post.title} 
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      />
                     </Link>
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-dark">
+                      {post.category}
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
-          </div>
+                  <div className="p-6 flex-grow flex flex-col">
+                    <Link to={`/blog/${post.id}`}>
+                      <h2 className="text-xl font-bold text-dark mb-3 line-clamp-2 hover:text-brand transition-colors cursor-pointer">
+                        {post.title}
+                      </h2>
+                    </Link>
+                    <p className="text-slate-600 mb-4 line-clamp-3 flex-grow text-sm">
+                      {post.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-slate-500 mt-auto pt-4 border-t border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> {post.author}</span>
+                        <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {post.date}</span>
+                      </div>
+                      <Link to={`/blog/${post.id}`} className="text-brand hover:text-brand-hover font-bold flex items-center gap-1 transition-colors">
+                        Read More <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white border border-slate-200 rounded-3xl shadow-sm max-w-xl mx-auto flex flex-col items-center justify-center gap-3">
+              <p className="text-slate-500 font-bold text-lg font-sans">No articles found matching your criteria.</p>
+              <button 
+                onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setCurrentPage(1); }}
+                className="text-brand font-black text-sm hover:underline"
+              >
+                Clear Search Filters
+              </button>
+            </div>
+          )}
 
-          {/* Pagination (Mock) */}
-          <div className="mt-16 flex justify-center gap-2">
-            <button className="w-10 h-10 rounded-lg flex items-center justify-center bg-brand text-dark font-bold">1</button>
-            <button className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">2</button>
-            <button className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">3</button>
-            <button className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50">
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-16 flex justify-center items-center gap-2">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-colors cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-brand text-dark'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
 
         </div>
       </section>
