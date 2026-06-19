@@ -122,10 +122,10 @@ export default function Contact() {
                         +91 90009 30453
                       </a>
                       <a
-                        href="tel:+919000930453"
+                        href="tel:+919000243270"
                         className="text-dark font-bold leading-relaxed hover:text-secondary transition-colors cursor-pointer"
                       >
-                        +91 90009 30453
+                        +91 90002 43270
                       </a>
                     </div>
                   </div>
@@ -327,14 +327,14 @@ export default function Contact() {
 
           {/* Map */}
           <div className="bg-slate-100 p-2.5 rounded-3xl shadow-xl border border-slate-200/60 h-full min-h-[500px] lg:min-h-0 relative group">
-            <div className="absolute top-8 left-8 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-lg z-10 border border-slate-200/60 max-w-xs hidden sm:block">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="flex h-2.5 w-2.5 rounded-full bg-brand relative">
+            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-md z-10 border border-slate-200/60 max-w-[200px] hidden sm:block">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="flex h-2 w-2 rounded-full bg-brand relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75" />
                 </span>
-                <h3 className="font-black text-dark text-sm">Tor Business Solutions</h3>
+                <h3 className="font-black text-dark text-xs">Tor Business Solutions</h3>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed font-bold">Visit our office for an in-person compliance consultation with senior CA experts.</p>
+              <p className="text-[11px] text-slate-500 leading-relaxed font-bold">Visit our office for an in-person compliance consultation with senior CA experts.</p>
             </div>
             <iframe
               title="Deccan Filings Office Location"

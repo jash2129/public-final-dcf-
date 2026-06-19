@@ -67,7 +67,8 @@ export async function sendEmail(
   subject: string,
   body: string,
   userId?: number,
-  attachments?: any[]
+  attachments?: any[],
+  html?: string
 ): Promise<boolean> {
   const smtpHost = process.env.SMTP_HOST;
   
@@ -79,6 +80,7 @@ export async function sendEmail(
         to,
         subject,
         text: body,
+        html,
         attachments,
       });
       console.log(`[SMTP] Email sent successfully to ${to}`);
@@ -92,8 +94,8 @@ export async function sendEmail(
   }
 
   // Graceful fallback to mock logging
-  console.log(`[SMTP MOCK] Sending Email to ${to}:\nSubject: ${subject}\nBody: ${body}\n`);
-  logNotificationToFile('EMAIL', to, subject, body);
+  console.log(`[SMTP MOCK] Sending Email to ${to}:\nSubject: ${subject}\nBody: ${body}\n${html ? `HTML: ${html.substring(0, 100)}...\n` : ''}`);
+  logNotificationToFile('EMAIL', to, subject, html ? `TEXT:\n${body}\n\nHTML:\n${html}` : body);
   if (userId) {
     await logToActivityDB(userId, 'Email Dispatched (Mock)', `Subject: ${subject}`);
   }
@@ -271,5 +273,87 @@ export async function notifyPaymentSuccess(
   }
 
   await sendEmail(userEmail, emailSubject, emailBody, userId, attachments);
+}
+
+/**
+ * Send welcome email and SMS to a newly registered user
+ */
+export async function notifyWelcome(
+  email: string,
+  name: string,
+  userId: number,
+  phone?: string | null
+): Promise<void> {
+  const subject = `Welcome to Deccan Filings, ${name}!`;
+  
+  const textBody = `Hi ${name},\n\n` +
+                   `Welcome to Deccan Filings! We're excited to help you launch and grow your business.\n\n` +
+                   `Here is what you can do next:\n` +
+                   `1. Explore our services: Private Limited registration, GST filings, Trademark filing, and more.\n` +
+                   `2. Access your Customer Dashboard to place orders, upload documents, and track compliance status.\n` +
+                   `3. Schedule a free consultation with our CA/CS experts.\n\n` +
+                   `If you have any questions, feel free to reply to this email or call our team at +91 90009 30453 / +91 90002 43270.\n\n` +
+                   `Best regards,\nTeam Deccan Filings`;
+
+  const htmlBody = `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 24px; background-color: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0; color: #0f172a;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #0f172a; font-size: 28px; font-weight: 800; margin: 0; tracking-tight">Deccan Filings</h1>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">India's Trusted Compliance Platform</p>
+      </div>
+      
+      <div style="background-color: #ffffff; padding: 32px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <h2 style="color: #0f172a; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px;">Hello ${name},</h2>
+        <p style="color: #334155; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+          Welcome to Deccan Filings! We are thrilled to have you join our platform. Whether you are incorporating a new startup, registering a trademark, or keeping up with corporate tax filings, our team of CA/CS experts is here to make compliance simple, fast, and affordable.
+        </p>
+
+        <h3 style="color: #0f172a; font-size: 15px; font-weight: 700; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">What's Next?</h3>
+        
+        <div style="margin-bottom: 16px;">
+          <strong style="color: #0f172a; font-size: 14px;">🚀 Start Your Business</strong>
+          <p style="color: #475569; font-size: 13px; margin: 4px 0 0 0; line-height: 1.5;">Incorporate a Private Limited, LLP, or OPC with hassle-free professional support.</p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <strong style="color: #0f172a; font-size: 14px;">📋 Track Compliance & Orders</strong>
+          <p style="color: #475569; font-size: 13px; margin: 4px 0 0 0; line-height: 1.5;">Log into your dashboard to upload documents, view invoice records, and check status in real-time.</p>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <strong style="color: #0f172a; font-size: 14px;">📞 Talk to an Expert</strong>
+          <p style="color: #475569; font-size: 13px; margin: 4px 0 0 0; line-height: 1.5;">Schedule a dedicated compliance session with our specialists to streamline your regulatory workflow.</p>
+        </div>
+
+        <div style="text-align: center; margin: 32px 0 16px 0;">
+          <a href="https://www.deccanfilings.com/login" style="background-color: #fca311; color: #000000; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(252, 163, 17, 0.25);">Go to Dashboard</a>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 32px; padding: 0 16px;">
+        <p style="color: #64748b; font-size: 13px; line-height: 1.6;">
+          Need immediate assistance? Feel free to reach out to us at:
+        </p>
+        <p style="color: #475569; font-size: 13px; font-weight: bold; margin: 8px 0 0 0;">
+          📞 +91 90009 30453 / +91 90002 43270
+        </p>
+        <p style="color: #475569; font-size: 13px; font-weight: bold; margin: 4px 0 0 0;">
+          ✉️ support@deccanfilings.com
+        </p>
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="color: #94a3b8; font-size: 11px; margin-bottom: 0;">
+          © 2026 Deccan Filings. All rights reserved. <br/>
+          Owned and operated by TOR BUSINESS SOLUTIONS PRIVATE LIMITED.
+        </p>
+      </div>
+    </div>
+  `;
+
+  await sendEmail(email, subject, textBody, userId, undefined, htmlBody);
+
+  if (phone) {
+    const smsMessage = `Hi ${name}, welcome to Deccan Filings! We're excited to partner with you. Track your business filings & consult experts at deccanfilings.com.`;
+    await sendSMS(phone, smsMessage, userId);
+  }
 }
 

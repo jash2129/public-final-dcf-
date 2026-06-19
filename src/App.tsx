@@ -5,12 +5,15 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PublicLayout from './components/layout/PublicLayout';
+import ScrollToTop from './components/layout/ScrollToTop';
 import DashboardLayout from './components/layout/DashboardLayout';
 import Home from './pages/Home';
 import ServicePage from './pages/ServicePage';
 import ServicesCatalog from './pages/ServicesCatalog';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import DashboardOverview from './pages/dashboard/Overview';
 import DashboardOrders from './pages/dashboard/Orders';
 import DashboardDocuments from './pages/dashboard/Documents';
@@ -41,6 +44,7 @@ import ComplianceCalendar from './pages/tools/ComplianceCalendar';
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
@@ -64,6 +68,8 @@ export default function App() {
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Dashboard Routes (Protected) */}
         <Route 

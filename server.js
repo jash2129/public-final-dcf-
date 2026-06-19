@@ -151,6 +151,8 @@ async function setupDatabase() {
         gstin VARCHAR(20) NULL,
         notification_prefs TEXT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        reset_password_token VARCHAR(255) NULL,
+        reset_password_expires DATETIME NULL,
         UNIQUE KEY idx_users_email (email),
         UNIQUE KEY idx_users_whatsapp_number (whatsapp_number)
       ) ENGINE=InnoDB;
@@ -164,6 +166,26 @@ async function setupDatabase() {
       }
     } catch (e) {
       console.error("Failed to alter users table:", e.message);
+    }
+    try {
+      const [cols] = await rawPool.query('SHOW COLUMNS FROM users LIKE "reset_password_token"');
+      if (cols.length === 0) {
+        console.log("Adding reset_password_token column to users table...");
+        await rawPool.query("ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(255) NULL");
+        console.log("reset_password_token column added successfully.");
+      }
+    } catch (e) {
+      console.error("Failed to alter users table for reset_password_token:", e.message);
+    }
+    try {
+      const [cols] = await rawPool.query('SHOW COLUMNS FROM users LIKE "reset_password_expires"');
+      if (cols.length === 0) {
+        console.log("Adding reset_password_expires column to users table...");
+        await rawPool.query("ALTER TABLE users ADD COLUMN reset_password_expires DATETIME NULL");
+        console.log("reset_password_expires column added successfully.");
+      }
+    } catch (e) {
+      console.error("Failed to alter users table for reset_password_expires:", e.message);
     }
     await pool.query(`
       CREATE TABLE IF NOT EXISTS services (
@@ -1077,6 +1099,10 @@ async function findUserByWhatsappNumber(whatsappNumber) {
   if (rows.length === 0) return null;
   return rows[0];
 }
+async function updateUserPassword(id, passwordHash) {
+  const [result] = await pool.execute("UPDATE users SET password = ? WHERE id = ?", [passwordHash, id]);
+  return result.affectedRows > 0;
+}
 async function updateUserAvatar(id, avatarUrl) {
   const [result] = await pool.execute("UPDATE users SET avatar = ? WHERE id = ?", [avatarUrl, id]);
   return result.affectedRows > 0;
@@ -1088,6 +1114,21 @@ async function listAllUsers() {
 async function updateUserRole(id, role) {
   const [result] = await pool.execute('UPDATE users SET role = ? WHERE id = ? AND role != "super_admin"', [role, id]);
   return result.affectedRows > 0;
+}
+async function savePasswordResetToken(email, token, expiresAt) {
+  const [result] = await pool.execute(
+    "UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE email = ?",
+    [token, expiresAt, email]
+  );
+  return result.affectedRows > 0;
+}
+async function findUserByResetToken(token) {
+  const [rows] = await pool.query(
+    "SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > NOW()",
+    [token]
+  );
+  if (rows.length === 0) return null;
+  return rows[0];
 }
 
 // server/utils/security.ts
@@ -1310,6 +1351,8 @@ var requireSuperAdmin = requireRole(["super_admin"]);
 import { OAuth2Client } from "google-auth-library";
 import jwt2 from "jsonwebtoken";
 import bcrypt3 from "bcryptjs";
+import crypto from "crypto";
+import nodemailer2 from "nodemailer";
 var router = Router();
 var JWT_SECRET2 = process.env.JWT_SECRET || "deccan-filings-secret-key-123";
 async function logActivity(userId, action, details) {
@@ -1452,6 +1495,96 @@ router.get("/me", authenticate, async (req, res, next) => {
       return res.status(404).json({ error: "User profile not found" });
     }
     return res.json(user);
+  } catch (error) {
+    next(error);
+  }
+});
+router.post("/forgot-password", async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: "Email address is required" });
+  }
+  try {
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ error: "No account found with this email address" });
+    }
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 36e5);
+    await savePasswordResetToken(email, token, expiresAt);
+    let transporter2 = null;
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      transporter2 = nodemailer2.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || "587", 10),
+        secure: process.env.SMTP_SECURE === "true",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+    }
+    const resetLink = `https://www.deccanfilings.com/reset-password?token=${token}`;
+    const mailOptions = {
+      from: `"Deccan Filings Support" <support@deccanfilings.com>`,
+      to: email,
+      subject: "Reset your Deccan Filings password",
+      text: `Hello ${user.name},
+
+You requested a password reset. Please click on the link below or copy and paste it into your browser to reset your password:
+
+${resetLink}
+
+This link is valid for 1 hour.
+
+Best regards,
+Deccan Filings Support Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; background-color: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+          <h2 style="color: #0f172a; font-size: 22px; font-weight: bold; margin-top: 0; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">Password Reset Request</h2>
+          <p style="color: #334155; font-size: 16px; line-height: 1.6;">Hello ${user.name},</p>
+          <p style="color: #334155; font-size: 16px; line-height: 1.6;">We received a request to reset the password for your Deccan Filings account. Click the button below to set a new password:</p>
+          <div style="margin: 32px 0; text-align: center;">
+            <a href="${resetLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block;">Reset Password</a>
+          </div>
+          <p style="color: #64748b; font-size: 14px; line-height: 1.6;">If the button above does not work, copy and paste this URL into your browser:</p>
+          <p style="color: #2563eb; font-size: 14px; word-break: break-all;"><a href="${resetLink}" style="color: #2563eb; text-decoration: underline;">${resetLink}</a></p>
+          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
+          <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; margin-bottom: 0;">This link is valid for 1 hour. If you did not request a password reset, you can safely ignore this email.</p>
+        </div>
+      `
+    };
+    if (transporter2) {
+      await transporter2.sendMail(mailOptions);
+    } else {
+      console.log("=== SMTP NOT CONFIGURABLE - PRINTING PASSWORD RESET MAIL ===");
+      console.log(`To: ${email}`);
+      console.log(`Reset Link: ${resetLink}`);
+      console.log("============================================================");
+    }
+    return res.json({ success: true, message: "Password reset link has been sent to your email." });
+  } catch (error) {
+    next(error);
+  }
+});
+router.post("/reset-password", async (req, res, next) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: "Token and new password are required" });
+  }
+  try {
+    const user = await findUserByResetToken(token);
+    if (!user) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
+    const hashedPassword = await bcrypt3.hash(newPassword, 10);
+    await updateUserPassword(user.id, hashedPassword);
+    await pool.execute(
+      "UPDATE users SET reset_password_token = NULL, reset_password_expires = NULL WHERE id = ?",
+      [user.id]
+    );
+    await logActivity(user.id, "PASSWORD_RESET", "Successfully reset account password");
+    return res.json({ success: true, message: "Password has been reset successfully." });
   } catch (error) {
     next(error);
   }
@@ -1942,7 +2075,7 @@ function mapToLegacyOrder(dbOrder) {
 
 // server/services/payment.service.ts
 import Razorpay from "razorpay";
-import crypto from "crypto";
+import crypto2 from "crypto";
 var razorpayInstance = null;
 function getRazorpay() {
   if (!razorpayInstance) {
@@ -2001,8 +2134,8 @@ async function verifyPaymentSignature(orderId, razorpayOrderId, razorpayPaymentI
     return false;
   }
   const text = razorpayOrderId + "|" + razorpayPaymentId;
-  const expectedSignature = crypto.createHmac("sha256", secret).update(text).digest("hex");
-  const isAuthentic = crypto.timingSafeEqual(
+  const expectedSignature = crypto2.createHmac("sha256", secret).update(text).digest("hex");
+  const isAuthentic = crypto2.timingSafeEqual(
     Buffer.from(expectedSignature, "utf-8"),
     Buffer.from(razorpaySignature, "utf-8")
   );
@@ -2041,7 +2174,7 @@ async function verifyPaymentSignature(orderId, razorpayOrderId, razorpayPaymentI
   return false;
 }
 async function processWebhook(rawBody, signature, payload) {
-  const expectedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET || "").update(rawBody).digest("hex");
+  const expectedSignature = crypto2.createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET || "").update(rawBody).digest("hex");
   if (expectedSignature !== signature) {
     throw new Error("Invalid Webhook Signature");
   }
@@ -2881,7 +3014,7 @@ var profile_routes_default = router7;
 
 // server/routes/contact.routes.ts
 import { Router as Router8 } from "express";
-import nodemailer2 from "nodemailer";
+import nodemailer3 from "nodemailer";
 var router8 = Router8();
 router8.post("/", async (req, res) => {
   const { name, mobile, email, category, service, address } = req.body;
@@ -2891,7 +3024,7 @@ router8.post("/", async (req, res) => {
   try {
     let transporter2;
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      transporter2 = nodemailer2.createTransport({
+      transporter2 = nodemailer3.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || "587", 10),
         secure: process.env.SMTP_SECURE === "true",
@@ -2962,7 +3095,7 @@ var contact_routes_default = router8;
 
 // server/routes/leads.routes.ts
 import { Router as Router9 } from "express";
-import nodemailer3 from "nodemailer";
+import nodemailer4 from "nodemailer";
 var router9 = Router9();
 router9.post("/callback", async (req, res) => {
   const { fullName, mobileNumber, emailAddress, city, serviceName } = req.body;
@@ -2972,7 +3105,7 @@ router9.post("/callback", async (req, res) => {
   try {
     let transporter2;
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      transporter2 = nodemailer3.createTransport({
+      transporter2 = nodemailer4.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || "587", 10),
         secure: process.env.SMTP_SECURE === "true",

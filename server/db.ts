@@ -96,6 +96,8 @@ export async function setupDatabase(): Promise<mysql.Pool> {
         gstin VARCHAR(20) NULL,
         notification_prefs TEXT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        reset_password_token VARCHAR(255) NULL,
+        reset_password_expires DATETIME NULL,
         UNIQUE KEY idx_users_email (email),
         UNIQUE KEY idx_users_whatsapp_number (whatsapp_number)
       ) ENGINE=InnoDB;
@@ -111,6 +113,30 @@ export async function setupDatabase(): Promise<mysql.Pool> {
       }
     } catch (e: any) {
       console.error("Failed to alter users table:", e.message);
+    }
+
+    // Alter users table to add reset_password_token if it doesn't exist (migration for existing db)
+    try {
+      const [cols] = await rawPool.query<mysql.RowDataPacket[]>('SHOW COLUMNS FROM users LIKE "reset_password_token"');
+      if (cols.length === 0) {
+        console.log("Adding reset_password_token column to users table...");
+        await rawPool.query('ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(255) NULL');
+        console.log("reset_password_token column added successfully.");
+      }
+    } catch (e: any) {
+      console.error("Failed to alter users table for reset_password_token:", e.message);
+    }
+
+    // Alter users table to add reset_password_expires if it doesn't exist (migration for existing db)
+    try {
+      const [cols] = await rawPool.query<mysql.RowDataPacket[]>('SHOW COLUMNS FROM users LIKE "reset_password_expires"');
+      if (cols.length === 0) {
+        console.log("Adding reset_password_expires column to users table...");
+        await rawPool.query('ALTER TABLE users ADD COLUMN reset_password_expires DATETIME NULL');
+        console.log("reset_password_expires column added successfully.");
+      }
+    } catch (e: any) {
+      console.error("Failed to alter users table for reset_password_expires:", e.message);
     }
 
     // 2. Create services table

@@ -15,6 +15,8 @@ export interface User {
   gstin?: string;
   notification_prefs?: string;
   created_at?: Date;
+  reset_password_token?: string;
+  reset_password_expires?: Date;
 }
 
 /**
@@ -128,3 +130,27 @@ export async function updateUserRole(id: number, role: 'user' | 'admin'): Promis
   const [result] = await pool.execute('UPDATE users SET role = ? WHERE id = ? AND role != "super_admin"', [role, id]);
   return (result as any).affectedRows > 0;
 }
+
+/**
+ * Save password reset token for a user
+ */
+export async function savePasswordResetToken(email: string, token: string, expiresAt: Date): Promise<boolean> {
+  const [result] = await pool.execute(
+    'UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE email = ?',
+    [token, expiresAt, email]
+  );
+  return (result as any).affectedRows > 0;
+}
+
+/**
+ * Find user by reset token that is not expired
+ */
+export async function findUserByResetToken(token: string): Promise<User | null> {
+  const [rows] = await pool.query<mysql.RowDataPacket[]>(
+    'SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > NOW()',
+    [token]
+  );
+  if (rows.length === 0) return null;
+  return rows[0] as User;
+}
+

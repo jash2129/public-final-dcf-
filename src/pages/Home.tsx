@@ -54,7 +54,7 @@ export default function Home() {
         }
       });
     });
-    return results.slice(0, 6);
+    return results;
   }, [searchQuery]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -167,7 +167,7 @@ export default function Home() {
                     className="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 text-left"
                   >
                     {searchResults.length > 0 ? (
-                      <div className="py-2">
+                      <div className="py-2 max-h-[50vh] overflow-y-auto overscroll-contain">
                         {searchResults.map((result, idx) => (
                           <Link 
                             key={idx}

@@ -39,7 +39,7 @@ export default function PublicLayout() {
         }
       });
     });
-    return results.slice(0, 8);
+    return results;
   }, [searchQuery]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -97,7 +97,7 @@ export default function PublicLayout() {
                   className="mt-4 bg-white rounded-2xl shadow-2xl overflow-hidden"
                 >
                   {searchResults.length > 0 ? (
-                    <div className="py-2 max-h-[60vh] overflow-y-auto">
+                    <div className="py-2 max-h-[60vh] overflow-y-auto overscroll-contain">
                       {searchResults.map((result, idx) => (
                         <Link 
                           key={idx}
@@ -170,7 +170,7 @@ export default function PublicLayout() {
             
             {/* Desktop Menu */}
             <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-2 h-full mx-2 2xl:mx-4">
-              {navCategories.slice(0, 7).map((category) => (
+              {navCategories.slice(0, 7).map((category, index) => (
                 <div key={category.title} className="relative group h-full flex items-center">
                   <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-slate-100/80 transition-all whitespace-nowrap">
                     {category.title} 
@@ -184,7 +184,7 @@ export default function PublicLayout() {
                   </button>
                   
                   {/* Mega Menu with Premium Glassmorphism and 3-Column Layout */}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-[820px] bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-2xl rounded-3xl py-7 px-7 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 z-50 grid grid-cols-12 gap-6">
+                  <div className={`absolute top-full ${index <= 1 ? 'left-0' : index >= 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'} w-[820px] bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-2xl rounded-3xl py-7 px-7 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 z-50 grid grid-cols-12 gap-6`}>
                     {/* Left Column Promo Card */}
                     <div className="col-span-4 bg-slate-50/80 rounded-2xl p-5 border border-slate-100/80 flex flex-col justify-between relative overflow-hidden group/promo">
                       <div className="absolute top-0 right-0 w-24 h-24 bg-brand/10 rounded-full blur-2xl"></div>
@@ -241,7 +241,7 @@ export default function PublicLayout() {
                         </button>
                         
                         {/* Sub dropdown with slide-in transition */}
-                        <div className="absolute left-full top-0 ml-1 w-64 bg-white border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover/sub:opacity-100 group-hover/sub:pointer-events-auto transform translate-x-4 group-hover/sub:translate-x-0 transition-all duration-300 z-50">
+                        <div className="absolute right-full top-0 mr-1 w-64 bg-white border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover/sub:opacity-100 group-hover/sub:pointer-events-auto transform -translate-x-4 group-hover/sub:translate-x-0 transition-all duration-300 z-50">
                           {category.services.slice(0, 8).map((service) => (
                             <Link 
                               key={service} 
@@ -433,7 +433,12 @@ export default function PublicLayout() {
                 Deccan Filings is India's largest cloud-based business services platform dedicated to helping Entrepreneurs easily start and grow their business, at an affordable cost.
               </p>
               <div className="space-y-2 text-sm text-slate-400">
-                <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-brand" /> +91 90009 30453</p>
+                <p className="flex items-center gap-2 flex-wrap">
+                  <Phone className="h-4 w-4 text-brand" />
+                  <a href="tel:+919000930453" className="hover:text-brand transition-colors">+91 90009 30453</a>
+                  <span className="text-slate-600">/</span>
+                  <a href="tel:+919000243270" className="hover:text-brand transition-colors">+91 90002 43270</a>
+                </p>
                 <p className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-brand" /> support@deccanfilings.com</p>
               </div>
             </div>
@@ -494,9 +499,9 @@ export default function PublicLayout() {
       {/* Sticky Contact CTA (Mobile Only) */}
       <div className="fixed bottom-0 left-0 w-full p-4 md:hidden z-40 bg-gradient-to-t from-white via-white/90 to-transparent pb-safe">
          <div className="glass shadow-premium rounded-2xl p-2 flex gap-2">
-           <button className="flex-1 bg-dark text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all">
+           <a href="tel:+919000930453" className="flex-1 bg-dark text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all">
              <Phone className="h-3.5 w-3.5 text-brand" /> Call Expert
-           </button>
+           </a>
            <Link to="/register" className="flex-1 bg-brand text-dark py-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm">
              Get Started &rarr;
            </Link>

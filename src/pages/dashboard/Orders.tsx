@@ -28,6 +28,14 @@ export default function Orders() {
     service: '',
     amount: ''
   });
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      setSelectedCategory('');
+      setFormData({ service: '', amount: '' });
+    }
+  }, [isModalOpen]);
 
   // Filter & Search State
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +49,13 @@ export default function Orders() {
   // Date Filter State
   const [dateRange, setDateRange] = useState<{start: string | null, end: string | null}>({start: null, end: null});
 
-  const allServices = serviceCategories.flatMap(cat => cat.services).sort();
+  const uniqueCategories = React.useMemo(() => {
+    return Array.from(new Set(servicesCatalog.map(s => s.category))).filter(Boolean).sort();
+  }, [servicesCatalog]);
+
+  const availableServices = React.useMemo(() => {
+    return selectedCategory ? servicesCatalog.filter(s => s.category === selectedCategory).sort((a, b) => a.name.localeCompare(b.name)) : [];
+  }, [selectedCategory, servicesCatalog]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -552,35 +566,65 @@ export default function Orders() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-dark ml-1">Select Service</label>
-                    <select 
-                      required
-                      value={formData.service}
-                      onChange={(e) => {
-                        const serviceName = e.target.value;
-                        const matched = servicesCatalog.find(s => s.name.toLowerCase() === serviceName.toLowerCase());
-                        let matchedPrice = '';
-                        if (matched && matched.price > 0) {
-                          matchedPrice = matched.price.toString();
-                        } else {
-                          // if prices are not there make some random amount
-                          const randomPrice = Math.floor(10 + Math.random() * 40) * 100; // e.g. 1000 to 4900
-                          matchedPrice = randomPrice.toString();
-                        }
-                        setFormData({
-                          ...formData,
-                          service: serviceName,
-                          amount: matchedPrice
-                        });
-                      }}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand transition-all appearance-none cursor-pointer"
-                    >
-                      <option value="">Choose a service...</option>
-                      {allServices.map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Step 1: Category Dropdown */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        1. Select Category
+                      </label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => {
+                          setSelectedCategory(e.target.value);
+                          setFormData({ service: '', amount: '' });
+                        }}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-brand transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="" disabled>-- Choose Category --</option>
+                        {uniqueCategories.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Step 2: Service Dropdown */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        2. Select Service
+                      </label>
+                      <select
+                        disabled={!selectedCategory}
+                        value={formData.service}
+                        onChange={(e) => {
+                          const serviceName = e.target.value;
+                          const matched = availableServices.find(s => s.name === serviceName);
+                          let matchedPrice = '';
+                          if (matched && matched.price > 0) {
+                            matchedPrice = matched.price.toString();
+                          } else {
+                            const randomPrice = Math.floor(10 + Math.random() * 40) * 100;
+                            matchedPrice = randomPrice.toString();
+                          }
+                          setFormData({
+                            ...formData,
+                            service: serviceName,
+                            amount: matchedPrice
+                          });
+                        }}
+                        className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-bold outline-none transition-all appearance-none cursor-pointer ${
+                          !selectedCategory ? 'opacity-50 cursor-not-allowed border-slate-200' : 'border-slate-200 focus:ring-2 focus:ring-brand hover:border-slate-300'
+                        }`}
+                      >
+                        <option value="" disabled>
+                          {!selectedCategory ? '-- Select Category First --' : '-- Choose Service --'}
+                        </option>
+                        {availableServices.map(service => (
+                          <option key={service.id} value={service.name}>
+                            {service.name} (₹{service.price})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <div className="space-y-2">

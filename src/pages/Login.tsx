@@ -235,9 +235,9 @@ export default function Login() {
                 </div>
 
                 <div className="text-sm">
-                  <a href="#" className="font-bold text-dark hover:text-secondary transition-colors">
+                  <Link to="/forgot-password" className="font-bold text-dark hover:text-secondary transition-colors">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -264,7 +264,7 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="mt-8">
                 <button
                   type="button"
                   onClick={() => loginWithGoogle()}
@@ -278,12 +278,6 @@ export default function Login() {
                   </svg>
                   Google
                 </button>
-                <a
-                  href="#"
-                  className="inline-flex w-full justify-center items-center gap-2 rounded-xl border border-slate-200 bg-white py-3 px-4 text-sm font-bold text-dark shadow-sm hover:bg-slate-50 transition-colors"
-                >
-                  OTP Login
-                </a>
               </div>
             </div>
           </div>
