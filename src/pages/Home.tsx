@@ -1,11 +1,20 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Building, FileText, Briefcase, CheckCircle, Star, ArrowRight, Shield, Clock, Users, Quote, ChevronRight, Play } from 'lucide-react';
+import { Search, Building, FileText, Briefcase, CheckCircle, Star, ArrowRight, Shield, Clock, Users, Quote, ChevronRight, Play, Calculator, Building2, ShieldCheck, Utensils } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { serviceCategories, generateSlug } from '../data/services';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 
 export default function Home() {
+  const popularServices = [
+    { name: "ITR Filing", price: "999", icon: FileText, desc: "Expert assisted income tax return filing" },
+    { name: "GST Registration", price: "2,999", icon: Calculator, desc: "Complete GST registration and compliance" },
+    { name: "Partnership Firm", price: "5,999", icon: Users, desc: "Quick and compliant partnership registration" },
+    { name: "Private Limited Company", price: "14,999", icon: Building2, desc: "End-to-end Pvt Ltd incorporation" },
+    { name: "Trademark Registration", price: "9,499", icon: ShieldCheck, desc: "Protect your brand identity legally" },
+    { name: "FSSAI License", price: "3,499", icon: Utensils, desc: "Food safety license for your business" }
+  ];
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -478,37 +487,33 @@ export default function Home() {
             </Link>
           </div>
           
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {[
-              { title: 'Private Limited Company', price: '₹5,999', path: '/services/startup-registrations/private-limited-company-registration', category: 'Startup' },
-              { title: 'GST Registration', price: '₹1,499', path: '/services/gst/gst-registration', category: 'Registrations' },
-              { title: 'Trademark Registration', price: '₹1,999', path: '/services/trademark/trademark-registration-indian', category: 'Trademark' },
-              { title: 'FSSAI License', price: '₹2,499', path: '/services/license/fssai-license-food-license-registration', category: 'Registrations' },
-            ].map((service) => (
-              <motion.div key={service.title} variants={fadeInUp} className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col hover:border-brand hover:shadow-2xl transition-all duration-300 group">
-                <div className="p-8 flex-grow">
-                  <div className="inline-block px-3 py-1 bg-slate-100 text-dark text-xs font-bold rounded-full mb-6">{service.category}</div>
-                  <h3 className="font-bold text-2xl mb-6 text-dark group-hover:text-secondary transition-colors leading-tight">{service.title}</h3>
-                  <div className="text-sm text-dark-400 mb-2">Professional fees starting at</div>
-                  <div className="text-3xl font-bold text-dark">{service.price}</div>
-                </div>
-                <div className="p-6 bg-slate-50 border-t border-slate-100 group-hover:bg-brand-lightest transition-colors">
-                  <Link to={service.path} className="flex items-center justify-between text-dark font-bold group/link">
-                    Get Started 
-                    <div className="bg-white p-2 rounded-full shadow-sm group-hover/link:bg-brand group-hover/link:scale-110 transition-all">
-                      <ArrowRight className="h-4 w-4" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mt-12">
+            {popularServices.map((service, index) => {
+              const Icon = service.icon;
+              return (
+                <Link 
+                  to="/contact" 
+                  key={index}
+                  className="group bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 hover:border-brand hover:shadow-xl transition-all duration-300 flex flex-col h-full cursor-pointer"
+                >
+                  <div className="w-14 h-14 bg-slate-50 text-brand rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand group-hover:text-dark transition-colors">
+                    <Icon className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-dark mb-2">{service.name}</h3>
+                  <p className="text-slate-500 text-sm mb-6 flex-grow">{service.desc}</p>
+                  <div className="mt-auto pt-6 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Starting at</p>
+                      <p className="text-xl sm:text-2xl font-black text-dark">₹{service.price}</p>
                     </div>
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-dark group-hover:text-brand transition-colors">
+                      <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 
