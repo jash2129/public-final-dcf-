@@ -534,6 +534,24 @@ async function seedTestData() {
       await pool.execute("INSERT INTO activity_stats (name, requests) VALUES (?, ?)", [s.name, s.requests]);
     }
   }
+  const [invCount] = await pool.query("SELECT COUNT(*) as count FROM invoices");
+  if (invCount[0].count === 0) {
+    const [allUsers] = await pool.query("SELECT id FROM users");
+    for (const u of allUsers) {
+      const defaultInvoices = [
+        { id: `INV-2026-001-${u.id}`, date: "Apr 10, 2026", amount: "\u20B915,000", status: "Paid", service: "Private Limited Company Registration" },
+        { id: `INV-2026-002-${u.id}`, date: "May 15, 2026", amount: "\u20B923,995", status: "Paid", service: "GST Filing & Compliance Support" },
+        { id: `INV-2026-003-${u.id}`, date: "Jun 01, 2026", amount: "\u20B91,499", status: "Pending", service: "Trademark Registration Filing" }
+      ];
+      for (const inv of defaultInvoices) {
+        await pool.execute(
+          "INSERT INTO invoices (id, date, amount, status, service, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+          [inv.id, inv.date, inv.amount, inv.status, inv.service, u.id]
+        );
+      }
+    }
+    console.log("Invoices seeded for all users.");
+  }
 }
 async function seedBlogPosts() {
   try {
@@ -800,7 +818,7 @@ async function logToActivityDB(userId, action, details) {
     console.error("Failed to write notification audit to activity_log:", error);
   }
 }
-async function sendEmail(to, subject, body, userId, attachments) {
+async function sendEmail(to, subject, body, userId, attachments, html) {
   const smtpHost = process.env.SMTP_HOST;
   if (smtpHost) {
     try {
@@ -810,6 +828,7 @@ async function sendEmail(to, subject, body, userId, attachments) {
         to,
         subject,
         text: body,
+        html,
         attachments
       });
       console.log(`[SMTP] Email sent successfully to ${to}`);
@@ -824,8 +843,13 @@ async function sendEmail(to, subject, body, userId, attachments) {
   console.log(`[SMTP MOCK] Sending Email to ${to}:
 Subject: ${subject}
 Body: ${body}
-`);
-  logNotificationToFile("EMAIL", to, subject, body);
+${html ? `HTML: ${html.substring(0, 100)}...
+` : ""}`);
+  logNotificationToFile("EMAIL", to, subject, html ? `TEXT:
+${body}
+
+HTML:
+${html}` : body);
   if (userId) {
     await logToActivityDB(userId, "Email Dispatched (Mock)", `Subject: ${subject}`);
   }
@@ -947,6 +971,80 @@ Team Deccan Filings`;
     console.error(`Failed to generate invoice PDF for order ${orderId}:`, err);
   }
   await sendEmail(userEmail, emailSubject, emailBody, userId, attachments);
+}
+async function notifyWelcome(email, name, userId, phone) {
+  const subject = `Welcome to Deccan Filings, ${name}!`;
+  const textBody = `Hi ${name},
+
+Welcome to Deccan Filings! We're excited to help you launch and grow your business.
+
+Here is what you can do next:
+1. Explore our services: Private Limited registration, GST filings, Trademark filing, and more.
+2. Access your Customer Dashboard to place orders, upload documents, and track compliance status.
+3. Schedule a free consultation with our CA/CS experts.
+
+If you have any questions, feel free to reply to this email or call our team at +91 90009 30453 / +91 90002 43270.
+
+Best regards,
+Team Deccan Filings`;
+  const htmlBody = `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 24px; background-color: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0; color: #0f172a;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #0f172a; font-size: 28px; font-weight: 800; margin: 0; tracking-tight">Deccan Filings</h1>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">India's Trusted Compliance Platform</p>
+      </div>
+      
+      <div style="background-color: #ffffff; padding: 32px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <h2 style="color: #0f172a; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 16px;">Hello ${name},</h2>
+        <p style="color: #334155; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+          Welcome to Deccan Filings! We are thrilled to have you join our platform. Whether you are incorporating a new startup, registering a trademark, or keeping up with corporate tax filings, our team of CA/CS experts is here to make compliance simple, fast, and affordable.
+        </p>
+
+        <h3 style="color: #0f172a; font-size: 15px; font-weight: 700; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">What's Next?</h3>
+        
+        <div style="margin-bottom: 16px;">
+          <strong style="color: #0f172a; font-size: 14px;">\u{1F680} Start Your Business</strong>
+          <p style="color: #475569; font-size: 13px; margin: 4px 0 0 0; line-height: 1.5;">Incorporate a Private Limited, LLP, or OPC with hassle-free professional support.</p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <strong style="color: #0f172a; font-size: 14px;">\u{1F4CB} Track Compliance & Orders</strong>
+          <p style="color: #475569; font-size: 13px; margin: 4px 0 0 0; line-height: 1.5;">Log into your dashboard to upload documents, view invoice records, and check status in real-time.</p>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <strong style="color: #0f172a; font-size: 14px;">\u{1F4DE} Talk to an Expert</strong>
+          <p style="color: #475569; font-size: 13px; margin: 4px 0 0 0; line-height: 1.5;">Schedule a dedicated compliance session with our specialists to streamline your regulatory workflow.</p>
+        </div>
+
+        <div style="text-align: center; margin: 32px 0 16px 0;">
+          <a href="https://www.deccanfilings.com/login" style="background-color: #fca311; color: #000000; padding: 14px 32px; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(252, 163, 17, 0.25);">Go to Dashboard</a>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 32px; padding: 0 16px;">
+        <p style="color: #64748b; font-size: 13px; line-height: 1.6;">
+          Need immediate assistance? Feel free to reach out to us at:
+        </p>
+        <p style="color: #475569; font-size: 13px; font-weight: bold; margin: 8px 0 0 0;">
+          \u{1F4DE} +91 90009 30453 / +91 90002 43270
+        </p>
+        <p style="color: #475569; font-size: 13px; font-weight: bold; margin: 4px 0 0 0;">
+          \u2709\uFE0F support@deccanfilings.com
+        </p>
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="color: #94a3b8; font-size: 11px; margin-bottom: 0;">
+          \xA9 2026 Deccan Filings. All rights reserved. <br/>
+          Owned and operated by TOR BUSINESS SOLUTIONS PRIVATE LIMITED.
+        </p>
+      </div>
+    </div>
+  `;
+  await sendEmail(email, subject, textBody, userId, void 0, htmlBody);
+  if (phone) {
+    const smsMessage = `Hi ${name}, welcome to Deccan Filings! We're excited to partner with you. Track your business filings & consult experts at deccanfilings.com.`;
+    await sendSMS(phone, smsMessage, userId);
+  }
 }
 
 // server/services/scheduler.service.ts
@@ -1374,6 +1472,16 @@ router.post("/register", async (req, res, next) => {
     }
     const result = await register(req.body);
     await logActivity(result.user.id, "REGISTER", "Registered new user account");
+    try {
+      await notifyWelcome(
+        result.user.email,
+        result.user.name,
+        result.user.id,
+        result.user.phone
+      );
+    } catch (notifErr) {
+      console.error("Failed to dispatch welcome notification:", notifErr);
+    }
     return res.status(201).json(result);
   } catch (error) {
     if (error.status) {
@@ -1475,6 +1583,18 @@ router.post("/google", async (req, res, next) => {
       });
       user = await findUserById(userId);
       await logActivity(userId, "REGISTER_GOOGLE", "Registered using Google OAuth");
+      if (user) {
+        try {
+          await notifyWelcome(
+            user.email,
+            user.name,
+            user.id,
+            user.phone
+          );
+        } catch (notifErr) {
+          console.error("Failed to dispatch welcome notification for Google user:", notifErr);
+        }
+      }
     }
     if (!user) {
       return res.status(500).json({ error: "Failed to create user from Google profile." });
@@ -1525,8 +1645,9 @@ router.post("/forgot-password", async (req, res, next) => {
       });
     }
     const resetLink = `https://www.deccanfilings.com/reset-password?token=${token}`;
+    const fromEmail = process.env.SYSTEM_EMAIL_FROM || process.env.SMTP_USER || "support@deccanfilings.com";
     const mailOptions = {
-      from: `"Deccan Filings Support" <support@deccanfilings.com>`,
+      from: `"Deccan Filings Support" <${fromEmail}>`,
       to: email,
       subject: "Reset your Deccan Filings password",
       text: `Hello ${user.name},
@@ -1920,6 +2041,21 @@ async function markOrderAsPaid(orderId, razorpayOrderId, razorpayPaymentId, sign
   );
   return result.affectedRows > 0;
 }
+async function findOrdersByUserId(userId) {
+  const [rows] = await pool.query(
+    `SELECT o.*, u.name as user_name, u.email as user_email,
+      (SELECT GROUP_CONCAT(s.name SEPARATOR ', ') 
+       FROM order_items oi 
+       JOIN services s ON oi.service_id = s.id 
+       WHERE oi.order_id = o.id) as service_names
+     FROM orders o
+     JOIN users u ON o.user_id = u.id
+     WHERE o.user_id = ?
+     ORDER BY o.created_at DESC`,
+    [userId]
+  );
+  return rows.map((r) => ({ ...r, total_amount: parseFloat(r.total_amount) }));
+}
 
 // server/services/order.service.ts
 function getCategoryForService(name) {
@@ -2064,10 +2200,13 @@ async function triggerStatusChangeNotification(userId, orderId, status) {
 function mapToLegacyOrder(dbOrder) {
   return {
     id: dbOrder.id,
+    user_id: dbOrder.user_id,
     user_name: dbOrder.user_name,
     user_email: dbOrder.user_email,
     service: dbOrder.service_names || "General Filing Services",
+    service_names: dbOrder.service_names || "General Filing Services",
     date: dbOrder.created_at ? formatLegacyDate(new Date(dbOrder.created_at)) : formatLegacyDate(/* @__PURE__ */ new Date()),
+    created_at: dbOrder.created_at,
     amount: formatCurrency(dbOrder.total_amount),
     status: dbOrder.status === "placed" ? "Placed" : dbOrder.status === "in_progress" ? "Processing" : dbOrder.status === "completed" ? "Completed" : "Action Required"
   };
@@ -2332,7 +2471,19 @@ router4.use(authenticate);
 router4.use(requireAdmin);
 router4.get("/orders", async (req, res, next) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, userId } = req.query;
+    if (userId !== void 0) {
+      const parsedUserId = parseInt(userId, 10);
+      if (isNaN(parsedUserId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      const orders2 = await getClientOrders(
+        parsedUserId,
+        startDate,
+        endDate
+      );
+      return res.json(orders2);
+    }
     const orders = await getAllClientOrders(
       startDate,
       endDate
@@ -2434,6 +2585,14 @@ router4.delete("/orders/:order_id", async (req, res, next) => {
       return res.status(404).json({ error: `Order ${orderId} not found.` });
     }
     return res.json({ message: `Order ${orderId} deleted successfully.` });
+  } catch (error) {
+    next(error);
+  }
+});
+router4.get("/services", async (req, res, next) => {
+  try {
+    const services = await getServicesCatalog();
+    return res.json(services);
   } catch (error) {
     next(error);
   }
@@ -2555,6 +2714,21 @@ router4.get("/users", async (req, res, next) => {
     next(error);
   }
 });
+router4.get("/users/:id", async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: "Invalid user ID format" });
+    const user = await findUserById(id);
+    if (!user) {
+      return res.status(404).json({ error: `User with ID ${id} not found.` });
+    }
+    const [documents] = await pool.query("SELECT * FROM documents WHERE user_id = ?", [id]);
+    user.documents = documents;
+    return res.json(user);
+  } catch (error) {
+    next(error);
+  }
+});
 var updateUserRoleHandler = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -2576,11 +2750,87 @@ router4.put("/users/:id/role", requireSuperAdmin, updateUserRoleHandler);
 router4.patch("/users/:id/role", requireSuperAdmin, updateUserRoleHandler);
 var admin_routes_default = router4;
 
-// server/routes/compliance.routes.ts
+// server/routes/invoice.routes.ts
 import { Router as Router5 } from "express";
 var router5 = Router5();
 router5.use(authenticate);
-router5.get("/", async (req, res, next) => {
+router5.use(requireAdmin);
+router5.get("/user/:userId", async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+    const orders = await findOrdersByUserId(userId);
+    const orderInvoices = orders.map((o) => ({
+      id: o.id,
+      orderId: o.id,
+      date: o.created_at ? new Date(o.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "",
+      amount: `\u20B9${o.total_amount.toLocaleString("en-IN")}`,
+      status: o.payment_status === "paid" ? "Paid" : "Pending",
+      service: o.service_names || "General Filing Services"
+    }));
+    const [dbInvoices] = await pool.query("SELECT * FROM invoices WHERE user_id = ?", [userId]);
+    const dbInvoicesMapped = dbInvoices.map((inv) => ({
+      ...inv,
+      orderId: inv.id
+    }));
+    return res.json([...orderInvoices, ...dbInvoicesMapped]);
+  } catch (error) {
+    next(error);
+  }
+});
+router5.get("/:orderId/download", async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    if (orderId.startsWith("INV-")) {
+      const [rows] = await pool.query("SELECT * FROM invoices WHERE id = ?", [orderId]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Invoice not found" });
+      }
+      const invoice = rows[0];
+      const [userRows] = await pool.query("SELECT name, email FROM users WHERE id = ?", [invoice.user_id]);
+      const user = userRows[0];
+      const cleanAmountStr = invoice.amount.replace(/[₹,]/g, "");
+      const numericAmount = parseFloat(cleanAmountStr) || 0;
+      const pdfBuffer2 = await generateInvoiceBuffer(
+        invoice.id,
+        numericAmount,
+        user?.name || "Client",
+        user?.email || "",
+        invoice.service || "General Filing Services"
+      );
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename=Invoice_${orderId}.pdf`);
+      return res.send(pdfBuffer2);
+    }
+    const order = await findOrderById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    const items = await getOrderItems(orderId);
+    const serviceName = items.length > 0 && items[0].service_name ? items[0].service_name : "General Filing Services";
+    const pdfBuffer = await generateInvoiceBuffer(
+      order.id,
+      order.total_amount,
+      order.user_name || "Client",
+      order.user_email || "",
+      serviceName
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=Invoice_${orderId}.pdf`);
+    return res.send(pdfBuffer);
+  } catch (error) {
+    next(error);
+  }
+});
+var invoice_routes_default = router5;
+
+// server/routes/compliance.routes.ts
+import { Router as Router6 } from "express";
+var router6 = Router6();
+router6.use(authenticate);
+router6.get("/", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const tasks = await listUserComplianceTasks(req.user.id);
@@ -2589,7 +2839,7 @@ router5.get("/", async (req, res, next) => {
     next(error);
   }
 });
-router5.post("/", async (req, res, next) => {
+router6.post("/", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const { title, dueDate, type, penalty } = req.body;
@@ -2613,14 +2863,14 @@ router5.post("/", async (req, res, next) => {
     next(error);
   }
 });
-var compliance_routes_default = router5;
+var compliance_routes_default = router6;
 
 // server/routes/document.routes.ts
-import { Router as Router6 } from "express";
+import { Router as Router7 } from "express";
 import multer from "multer";
 import path3 from "path";
 import fs3 from "fs";
-var router6 = Router6();
+var router7 = Router7();
 var uploadsDir = path3.join(process.cwd(), "uploads");
 if (!fs3.existsSync(uploadsDir)) fs3.mkdirSync(uploadsDir, { recursive: true });
 var storage = multer.diskStorage({
@@ -2644,8 +2894,8 @@ async function logActivity2(userId, action, details) {
     console.error("Failed to log activity:", error);
   }
 }
-router6.use(authenticate);
-router6.get("/", async (req, res, next) => {
+router7.use(authenticate);
+router7.get("/", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const [documents] = await pool.query("SELECT * FROM documents WHERE user_id = ?", [req.user.id]);
@@ -2654,7 +2904,7 @@ router6.get("/", async (req, res, next) => {
     next(error);
   }
 });
-router6.post("/", upload.single("file"), async (req, res, next) => {
+router7.post("/", upload.single("file"), async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const { folder, order_id } = req.body;
@@ -2695,7 +2945,7 @@ router6.post("/", upload.single("file"), async (req, res, next) => {
     next(error);
   }
 });
-router6.patch("/:id/rename", async (req, res, next) => {
+router7.patch("/:id/rename", async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.body;
   if (!name) return res.status(400).json({ error: "Name is required" });
@@ -2712,7 +2962,7 @@ router6.patch("/:id/rename", async (req, res, next) => {
     next(error);
   }
 });
-router6.get("/:id/file", async (req, res, next) => {
+router7.get("/:id/file", async (req, res, next) => {
   const { id } = req.params;
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
@@ -2727,7 +2977,7 @@ router6.get("/:id/file", async (req, res, next) => {
     next(error);
   }
 });
-router6.delete("/:id", async (req, res, next) => {
+router7.delete("/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
@@ -2747,7 +2997,7 @@ router6.delete("/:id", async (req, res, next) => {
     next(error);
   }
 });
-router6.get("/admin/list", requireAdmin, async (_req, res, next) => {
+router7.get("/admin/list", requireAdmin, async (_req, res, next) => {
   try {
     const [documents] = await pool.query(
       `SELECT d.*, u.name as user_name, u.email as user_email 
@@ -2760,7 +3010,7 @@ router6.get("/admin/list", requireAdmin, async (_req, res, next) => {
     next(error);
   }
 });
-router6.patch("/admin/:id/rename", requireAdmin, async (req, res, next) => {
+router7.patch("/admin/:id/rename", requireAdmin, async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.body;
   if (!req.user) return res.status(401).json({ error: "Unauthorized" });
@@ -2773,7 +3023,7 @@ router6.patch("/admin/:id/rename", requireAdmin, async (req, res, next) => {
     next(error);
   }
 });
-router6.delete("/admin/:id", requireAdmin, async (req, res, next) => {
+router7.delete("/admin/:id", requireAdmin, async (req, res, next) => {
   const { id } = req.params;
   if (!req.user) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -2790,7 +3040,7 @@ router6.delete("/admin/:id", requireAdmin, async (req, res, next) => {
     next(error);
   }
 });
-router6.get("/admin/:id/file", requireAdmin, async (req, res, next) => {
+router7.get("/admin/:id/file", requireAdmin, async (req, res, next) => {
   const { id } = req.params;
   try {
     const [rows] = await pool.query("SELECT * FROM documents WHERE id = ?", [id]);
@@ -2801,15 +3051,27 @@ router6.get("/admin/:id/file", requireAdmin, async (req, res, next) => {
     next(error);
   }
 });
-var document_routes_default = router6;
+router7.get("/admin/user/:userId", requireAdmin, async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const [documents] = await pool.query(
+      `SELECT * FROM documents WHERE user_id = ? ORDER BY id DESC`,
+      [userId]
+    );
+    return res.json(documents);
+  } catch (error) {
+    next(error);
+  }
+});
+var document_routes_default = router7;
 
 // server/routes/profile.routes.ts
-import { Router as Router7 } from "express";
+import { Router as Router8 } from "express";
 import multer2 from "multer";
 import path4 from "path";
 import fs4 from "fs";
 import bcrypt4 from "bcryptjs";
-var router7 = Router7();
+var router8 = Router8();
 var uploadsDir2 = path4.join(process.cwd(), "uploads");
 var avatarsDir = path4.join(uploadsDir2, "avatars");
 if (!fs4.existsSync(avatarsDir)) fs4.mkdirSync(avatarsDir, { recursive: true });
@@ -2842,8 +3104,8 @@ async function logActivity3(userId, action, details) {
     console.error("Failed to log activity:", error);
   }
 }
-router7.use(authenticate);
-router7.get("/user/profile", async (req, res, next) => {
+router8.use(authenticate);
+router8.get("/user/profile", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const [users] = await pool.query(
@@ -2866,7 +3128,7 @@ router7.get("/user/profile", async (req, res, next) => {
     next(error);
   }
 });
-router7.patch("/user/profile", async (req, res, next) => {
+router8.patch("/user/profile", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const { name, email, phone, whatsapp_number, company_name, address, gstin } = req.body;
@@ -2892,7 +3154,7 @@ router7.patch("/user/profile", async (req, res, next) => {
     next(error);
   }
 });
-router7.patch("/user/password", async (req, res, next) => {
+router8.patch("/user/password", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const { currentPassword, newPassword } = req.body;
@@ -2911,7 +3173,7 @@ router7.patch("/user/password", async (req, res, next) => {
     next(error);
   }
 });
-router7.patch("/user/notifications", async (req, res, next) => {
+router8.patch("/user/notifications", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const { email, sms } = req.body;
@@ -2922,7 +3184,7 @@ router7.patch("/user/notifications", async (req, res, next) => {
     next(error);
   }
 });
-router7.post("/user/avatar", uploadAvatar.single("avatar"), async (req, res, next) => {
+router8.post("/user/avatar", uploadAvatar.single("avatar"), async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     if (!req.file) return res.status(400).json({ error: "No image uploaded" });
@@ -2934,7 +3196,7 @@ router7.post("/user/avatar", uploadAvatar.single("avatar"), async (req, res, nex
     next(error);
   }
 });
-router7.get("/invoices", async (req, res, next) => {
+router8.get("/invoices", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const [invoices] = await pool.query("SELECT * FROM invoices WHERE user_id = ?", [req.user.id]);
@@ -2943,7 +3205,7 @@ router7.get("/invoices", async (req, res, next) => {
     next(error);
   }
 });
-router7.get("/stats/activity", async (req, res, next) => {
+router8.get("/stats/activity", async (req, res, next) => {
   try {
     const [stats] = await pool.query("SELECT name, requests FROM activity_stats ORDER BY id ASC");
     return res.json(stats);
@@ -2951,7 +3213,7 @@ router7.get("/stats/activity", async (req, res, next) => {
     next(error);
   }
 });
-router7.get("/stats/summary", async (req, res, next) => {
+router8.get("/stats/summary", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const [orderStats] = await pool.query(
@@ -2982,7 +3244,7 @@ router7.get("/stats/summary", async (req, res, next) => {
     next(error);
   }
 });
-router7.get("/admin/activity", requireSuperAdmin, async (_req, res, next) => {
+router8.get("/admin/activity", requireSuperAdmin, async (_req, res, next) => {
   try {
     const [logs] = await pool.query("SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 200");
     return res.json(logs);
@@ -2990,7 +3252,7 @@ router7.get("/admin/activity", requireSuperAdmin, async (_req, res, next) => {
     next(error);
   }
 });
-router7.patch("/admin/users/:id/password", requireSuperAdmin, async (req, res, next) => {
+router8.patch("/admin/users/:id/password", requireSuperAdmin, async (req, res, next) => {
   const { id } = req.params;
   const { newPassword } = req.body;
   if (!req.user) return res.status(401).json({ error: "Unauthorized" });
@@ -3010,13 +3272,13 @@ router7.patch("/admin/users/:id/password", requireSuperAdmin, async (req, res, n
     next(error);
   }
 });
-var profile_routes_default = router7;
+var profile_routes_default = router8;
 
 // server/routes/contact.routes.ts
-import { Router as Router8 } from "express";
+import { Router as Router9 } from "express";
 import nodemailer3 from "nodemailer";
-var router8 = Router8();
-router8.post("/", async (req, res) => {
+var router9 = Router9();
+router9.post("/", async (req, res) => {
   const { name, mobile, email, category, service, address } = req.body;
   if (!name || !mobile || !email || !category || !address) {
     return res.status(400).json({ error: "Please fill in all required fields." });
@@ -3091,13 +3353,13 @@ router8.post("/", async (req, res) => {
     return res.status(500).json({ error: "Failed to send message. Please try again." });
   }
 });
-var contact_routes_default = router8;
+var contact_routes_default = router9;
 
 // server/routes/leads.routes.ts
-import { Router as Router9 } from "express";
+import { Router as Router10 } from "express";
 import nodemailer4 from "nodemailer";
-var router9 = Router9();
-router9.post("/callback", async (req, res) => {
+var router10 = Router10();
+router10.post("/callback", async (req, res) => {
   const { fullName, mobileNumber, emailAddress, city, serviceName } = req.body;
   if (!fullName || !mobileNumber || !emailAddress || !city || !serviceName) {
     return res.status(400).json({ error: "Please fill in all required fields." });
@@ -3170,13 +3432,13 @@ router9.post("/callback", async (req, res) => {
     return res.status(500).json({ error: "Failed to submit callback request. Please try again." });
   }
 });
-var leads_routes_default = router9;
+var leads_routes_default = router10;
 
 // server/routes/webhook.routes.ts
-import { Router as Router10 } from "express";
+import { Router as Router11 } from "express";
 import express from "express";
-var router10 = Router10();
-router10.post(
+var router11 = Router11();
+router11.post(
   "/razorpay",
   express.raw({ type: "application/json" }),
   async (req, res) => {
@@ -3192,7 +3454,7 @@ router10.post(
     }
   }
 );
-var webhook_routes_default = router10;
+var webhook_routes_default = router11;
 
 // server/middlewares/error.middleware.ts
 function errorHandler(err, req, res, next) {
@@ -3290,6 +3552,7 @@ async function startServer() {
   app.use("/api/services", service_routes_default);
   app.use("/api/orders", order_routes_default);
   app.use("/api/admin", admin_routes_default);
+  app.use("/api/admin/invoices", invoice_routes_default);
   app.use("/api/compliance", compliance_routes_default);
   app.use("/api/documents", document_routes_default);
   app.use("/api/contact", contact_routes_default);

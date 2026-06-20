@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Users, Shield, ShieldCheck, ShieldOff, Search, RefreshCw, Crown, UserCheck, UserX, Key, X } from 'lucide-react';
 
@@ -28,6 +29,7 @@ const RoleBadge = ({ role }: { role: string }) => {
 };
 
 export default function ManageAdmins() {
+  const { id } = useParams<{ id: string }>();
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -128,11 +130,13 @@ export default function ManageAdmins() {
     }
   };
 
-  const filteredUsers = users.filter(
-    (u) =>
+  const filteredUsers = users.filter((u) => {
+    if (id && u.id.toString() !== id) return false;
+    return (
       u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    );
+  });
 
   const stats = {
     total: users.length,

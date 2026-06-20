@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useState, useEffect } from 'react';
 import Skeleton from '../../components/ui/Skeleton';
 import SuccessOverlay from '../../components/ui/SuccessOverlay';
+import GlobalSearch from '../../components/admin/GlobalSearch';
 
 const data7Days = [
   { name: 'Mon', revenue: 45000 },
@@ -52,10 +53,7 @@ export default function AdminOverview() {
           setStats({
             totalOrders: orders.length,
             pendingCompliance: compliance.filter((c: any) => c.status !== 'completed').length,
-            totalRevenue: '₹' + orders.reduce((acc: number, o: any) => {
-              const val = parseInt(o.amount.replace(/[^0-9]/g, '')) || 0;
-              return acc + val;
-            }, 0).toLocaleString(),
+            totalRevenue: '₹' + orders.reduce((sum: number, o: any) => sum + (parseFloat(o.amount.replace(/[₹,]/g, '')) || 0), 0).toLocaleString('en-IN'),
             activeUsers: new Set(orders.map((o: any) => o.user_id)).size
           });
         }
@@ -117,9 +115,14 @@ export default function AdminOverview() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-dark">Administrative Overview</h1>
-        <p className="text-slate-500">Global insights across all Deccan Filings users.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h1 className="text-2xl font-bold text-dark">Administrative Overview</h1>
+          <p className="text-slate-500">Global insights across all Deccan Filings users.</p>
+        </div>
+        <div className="w-full md:w-auto md:min-w-[400px]">
+          <GlobalSearch />
+        </div>
       </div>
 
       {/* KPI Cards */}

@@ -1,14 +1,26 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronDown, MessageSquare, Search, Phone, User, ChevronRight, ArrowRight, Calendar as CalendarIcon } from 'lucide-react';
+import { Menu, X, ChevronDown, MessageSquare, Search, Phone, User, ChevronRight, ArrowRight, Sun, Moon, Calendar as CalendarIcon } from 'lucide-react';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { serviceCategories, generateSlug } from '../../data/services';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
+
+interface SearchResult {
+  id?: number | string;
+  name: string;
+  category: string;
+  slug?: string;
+  catSlug?: string;
+  type: 'service' | 'user';
+}
 
 export default function PublicLayout() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMobileCategory, setActiveMobileCategory] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [users, setUsers] = useState<any[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -22,10 +34,45 @@ export default function PublicLayout() {
     }
   }, [isSearchOpen]);
 
+  useEffect(() => {
+    const fetchUsersIfAdmin = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userStr = localStorage.getItem('user');
+        if (token && userStr) {
+          const user = JSON.parse(userStr);
+          if (user.role === 'admin' || user.role === 'super_admin') {
+            const res = await fetch('/api/admin/users', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setUsers(data);
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch users for global search:', err);
+      }
+      // Fallback mock users list
+      setUsers([
+        { id: 1, name: 'Jashwanth Gunde', email: 'jashwanth1801@gmail.com' },
+        { id: 2, name: 'System Admin', email: 'admin@deccanfilings.com' },
+        { id: 3, name: 'Rahul Sharma', email: 'rahul.sharma@example.com' },
+        { id: 4, name: 'Priya Patel', email: 'priya.patel@example.com' }
+      ]);
+    };
+
+    if (isSearchOpen) {
+      fetchUsersIfAdmin();
+    }
+  }, [isSearchOpen]);
+
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    const results: { name: string; category: string; slug: string; catSlug: string }[] = [];
+    const results: SearchResult[] = [];
     
     serviceCategories.forEach(cat => {
       cat.services.forEach(srv => {
@@ -34,18 +81,40 @@ export default function PublicLayout() {
             name: srv,
             category: cat.title,
             slug: generateSlug(srv),
-            catSlug: cat.slug
+            catSlug: cat.slug,
+            type: 'service'
           });
         }
       });
     });
+
+    users.forEach(u => {
+      if (u.name?.toLowerCase().includes(query) || u.email?.toLowerCase().includes(query)) {
+        results.push({
+          id: u.id,
+          name: u.name,
+          category: u.email || 'Client Profile',
+          type: 'user'
+        });
+      }
+    });
+
     return results;
-  }, [searchQuery]);
+  }, [searchQuery, users]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchResults.length > 0) {
-      navigate(`/services/${searchResults[0].catSlug}/${searchResults[0].slug}`);
+      const firstResult = searchResults[0];
+      if (firstResult.type === 'user') {
+        navigate(`/admin/users?id=${firstResult.id}`);
+      } else {
+        const hasValidSlug = firstResult.catSlug && firstResult.slug;
+        if (!hasValidSlug) {
+          console.error("First search result missing catSlug or slug:", firstResult);
+        }
+        navigate(hasValidSlug ? `/services/${firstResult.catSlug}/${firstResult.slug}` : '/services');
+      }
       setIsSearchOpen(false);
       setSearchQuery('');
     } else if (searchQuery.trim()) {
@@ -98,23 +167,49 @@ export default function PublicLayout() {
                 >
                   {searchResults.length > 0 ? (
                     <div className="py-2 max-h-[60vh] overflow-y-auto overscroll-contain">
-                      {searchResults.map((result, idx) => (
-                        <Link 
-                          key={idx}
-                          to={`/services/${result.catSlug}/${result.slug}`}
-                          className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 group"
-                          onClick={() => {
-                            setIsSearchOpen(false);
-                            setSearchQuery('');
-                          }}
-                        >
-                          <div>
-                            <div className="text-lg font-bold text-dark group-hover:text-secondary transition-colors">{result.name}</div>
-                            <div className="text-sm text-dark-400">{result.category}</div>
-                          </div>
-                          <ChevronRight className="h-6 w-6 text-slate-300 group-hover:text-secondary transition-colors" />
-                        </Link>
-                      ))}
+                      {searchResults.map((result, idx) => {
+                        let toPath = '/services';
+                        if (result.type === 'user') {
+                          toPath = `/admin/users?id=${result.id}`;
+                        } else {
+                          const hasValidSlug = result.catSlug && result.slug;
+                          if (!hasValidSlug) {
+                            console.error("Search result missing catSlug or slug:", result);
+                            toPath = '/services';
+                          } else {
+                            toPath = `/services/${result.catSlug}/${result.slug}`;
+                          }
+                        }
+                        
+                        return (
+                          <Link 
+                            key={idx}
+                            to={toPath}
+                            className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 group"
+                            onClick={() => {
+                              setIsSearchOpen(false);
+                              setSearchQuery('');
+                            }}
+                          >
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-lg font-bold text-dark group-hover:text-secondary transition-colors">{result.name}</span>
+                                {result.type === 'user' ? (
+                                  <span className="text-[10px] font-black tracking-widest text-tds uppercase bg-tds/10 px-2 py-0.5 rounded-full border border-tds/25 transition-colors">
+                                    USER
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-black tracking-widest text-brand uppercase bg-brand/10 px-2 py-0.5 rounded-full border border-brand/25 transition-colors">
+                                    SERVICE
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-sm text-dark-400">{result.category}</div>
+                            </div>
+                            <ChevronRight className="h-6 w-6 text-slate-300 group-hover:text-secondary transition-colors" />
+                          </Link>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="p-8 text-center text-dark-400">
@@ -274,6 +369,19 @@ export default function PublicLayout() {
               >
                 <Search className="h-5 w-5" />
               </button>
+              
+              <button
+                onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
+                className="p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl transition-all duration-300 relative group flex items-center justify-center cursor-pointer"
+                title={`Switch to ${resolvedTheme === 'light' ? 'Dark' : 'Light'} Mode`}
+              >
+                {resolvedTheme === 'light' ? (
+                  <Moon className="h-5 w-5 transition-transform group-hover:rotate-12" />
+                ) : (
+                  <Sun className="h-5 w-5 transition-transform group-hover:rotate-45" />
+                )}
+              </button>
+
               <Link to="/login" className="flex items-center gap-1.5 text-dark-400 hover:text-dark font-medium text-[13px] 2xl:text-sm px-1 whitespace-nowrap">
                 <User className="h-4 w-4" /> Login
               </Link>

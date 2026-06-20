@@ -261,10 +261,13 @@ export default function Orders() {
 
   // Filtered Orders Logic
   const filteredOrders = React.useMemo(() => {
+    if (!orders) return [];
+    const term = searchTerm.toLowerCase().trim();
+    
     return orders.filter(order => {
       const matchesSearch = 
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.service.toLowerCase().includes(searchTerm.toLowerCase());
+        order.id.toLowerCase().includes(term) ||
+        order.service.toLowerCase().includes(term);
       
       const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
       

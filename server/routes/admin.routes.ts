@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { pool } from '../db';
 import * as orderService from '../services/order.service';
 import * as orderModel from '../models/order.model';
 import * as serviceService from '../services/service.service';
@@ -22,7 +23,20 @@ router.use(requireAdmin);
  */
 router.get('/orders', async (req, res, next) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, userId } = req.query;
+    if (userId !== undefined) {
+      const parsedUserId = parseInt(userId as string, 10);
+      if (isNaN(parsedUserId)) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+      }
+      const orders = await orderService.getClientOrders(
+        parsedUserId,
+        startDate as string | undefined,
+        endDate as string | undefined
+      );
+      return res.json(orders);
+    }
+
     const orders = await orderService.getAllClientOrders(
       startDate as string | undefined, 
       endDate as string | undefined
@@ -160,6 +174,19 @@ router.delete('/orders/:order_id', async (req, res, next) => {
 });
 
 // --- Administrative Service Management ---
+
+/**
+ * GET /api/admin/services
+ * List all service catalog records
+ */
+router.get('/services', async (req, res, next) => {
+  try {
+    const services = await serviceService.getServicesCatalog();
+    return res.json(services);
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
  * POST /api/admin/services
@@ -327,6 +354,30 @@ router.get('/users', async (req, res, next) => {
   try {
     const users = await userModel.listAllUsers();
     return res.json(users);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/admin/users/:id
+ * Retrieve a specific client's profile details along with their uploaded documents
+ */
+router.get('/users/:id', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid user ID format' });
+
+    const user: any = await userModel.findUserById(id);
+    if (!user) {
+      return res.status(404).json({ error: `User with ID ${id} not found.` });
+    }
+
+    // Fetch user documents to return with profile
+    const [documents] = await pool.query('SELECT * FROM documents WHERE user_id = ?', [id]);
+    user.documents = documents;
+
+    return res.json(user);
   } catch (error) {
     next(error);
   }

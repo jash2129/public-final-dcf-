@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
@@ -21,9 +22,11 @@ import SuccessOverlay from '../../components/ui/SuccessOverlay';
 import DateRangeFilter from '../../components/orders/DateRangeFilter';
 
 export default function AdminOrders() {
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('id') || searchParams.get('search') || '';
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState('All');
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -178,6 +181,7 @@ export default function AdminOrders() {
 
   const getStatusStyle = (status: string) => {
     switch (status) {
+      case 'Placed': return 'bg-slate-50 text-slate-600 border-slate-100';
       case 'Completed': return 'bg-green-50 text-green-600 border-green-100';
       case 'Processing': return 'bg-blue-50 text-blue-600 border-blue-100';
       case 'Action Required': return 'bg-brand-lightest text-dark border-brand/20';
@@ -185,16 +189,23 @@ export default function AdminOrders() {
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user_name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const filteredOrders = React.useMemo(() => {
+    return orders.filter(order => {
+      const matchesSearch = 
+        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.service_names?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
+      
+      // Date Range Logic
+      const orderDate = new Date(order.created_at);
+      const matchesDate = (!dateRange.start || orderDate >= new Date(dateRange.start)) &&
+                          (!dateRange.end || orderDate <= new Date(dateRange.end));
+
+      return matchesSearch && matchesStatus && matchesDate;
+    });
+  }, [orders, searchTerm, statusFilter, dateRange]);
 
   return (
     <div className="space-y-6">
@@ -225,7 +236,7 @@ export default function AdminOrders() {
           />
         </div>
         <div className="flex gap-2">
-          {['All', 'Processing', 'Action Required', 'Completed'].map((status) => (
+          {['All', 'Placed', 'Processing', 'Action Required', 'Completed'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
@@ -301,7 +312,12 @@ export default function AdminOrders() {
                             <User className="h-4 w-4 text-slate-400" />
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-dark">{order.user_name}</p>
+                            <Link 
+                              to={`/admin/users/${order.user_id}`} 
+                              className="text-sm font-bold text-dark hover:text-brand transition-colors"
+                            >
+                              {order.user_name}
+                            </Link>
                             <p className="text-xs text-slate-400">{order.user_email}</p>
                           </div>
                         </div>
@@ -317,6 +333,7 @@ export default function AdminOrders() {
                           onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                           className={`text-xs font-bold px-3 py-1.5 rounded-full border outline-none cursor-pointer ${getStatusStyle(order.status)}`}
                         >
+                          <option value="Placed">Placed</option>
                           <option value="Processing">Processing</option>
                           <option value="Action Required">Action Required</option>
                           <option value="Completed">Completed</option>

@@ -2,6 +2,8 @@
 @import "tailwindcss";
 @source "./src/**/*.{html,js,jsx,ts,tsx}";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
@@ -14,6 +16,10 @@
     --ds-text: #1A1715;
     --ds-text-muted: #8C8480;
     --ds-border: #EAE6DF;
+    
+    --ds-surface: #FFFFFF;
+    --ds-surface-hover: #F8F6F0;
+    --ds-card: #FFFFFF;
 
     --color-primary: var(--ds-coral);
     --color-secondary-bg: var(--ds-coral-soft);
@@ -22,6 +28,19 @@
     --color-text-primary: var(--ds-text);
     --color-link: var(--ds-coral);
   }
+
+  .dark {
+    --ds-bg: #0F0E0E;
+    --ds-text: #F8F6F0;
+    --ds-text-muted: #9E9692;
+    --ds-border: #242220;
+    --ds-coral-soft: #2E150F;
+    
+    --ds-surface: #171514;
+    --ds-surface-hover: #221F1E;
+    --ds-card: #171514;
+  }
+
 
   @media (prefers-reduced-motion: reduce) {
     *, ::before, ::after {
@@ -52,6 +71,9 @@
   --color-dark-400: #8C8480;
   
   --color-accent: var(--color-accent);
+  --color-surface: var(--ds-surface);
+  --color-surface-hover: var(--ds-surface-hover);
+  --color-card: var(--ds-card);
   
   --color-positive: #10B981;
   --color-danger: #EF4444;
@@ -153,11 +175,11 @@
   }
 
   .mobile-card {
-    @apply bg-white p-4 rounded-2xl border border-slate-100 shadow-soft active:scale-[0.98] transition-all;
+    @apply bg-surface p-4 rounded-2xl border border-[var(--ds-border)] shadow-soft active:scale-[0.98] transition-all;
   }
 
   .calendar-day {
-    @apply aspect-square border-r border-b border-slate-100 p-2 sm:p-4 hover:bg-slate-50 transition-colors relative;
+    @apply aspect-square border-r border-b border-[var(--ds-border)] p-2 sm:p-4 hover:bg-[var(--ds-surface-hover)] transition-colors relative;
   }
 
   /* Premium Underline Animation */
@@ -225,7 +247,7 @@
 
   /* High Contrast Light Theme Clean Cards */
   .clean-card-premium {
-    @apply bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[var(--ds-border)];
+    @apply bg-surface rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[var(--ds-border)];
   }
 
   /* Mesh Gradient Utilities */
@@ -243,6 +265,74 @@
       radial-gradient(at 0% 0%, rgba(255, 111, 67, 0.08) 0px, transparent 50%),
       radial-gradient(at 100% 100%, rgba(255, 240, 235, 0.08) 0px, transparent 50%),
       radial-gradient(at 50% 50%, rgba(0, 0, 0, 0.5) 0px, transparent 50%);
+  }
+
+  .dark .mesh-gradient-light {
+    background-color: var(--color-background);
+    background-image: 
+      radial-gradient(at 10% 20%, rgba(255, 111, 67, 0.08) 0px, transparent 50%),
+      radial-gradient(at 90% 10%, rgba(255, 240, 235, 0.03) 0px, transparent 50%),
+      radial-gradient(at 50% 80%, rgba(0, 0, 0, 0.5) 0px, transparent 50%);
+  }
+
+  /* Universal Dark Mode Utility Class Overrides */
+  .dark body {
+    background-color: var(--ds-bg);
+    color: var(--ds-text);
+  }
+  .dark .bg-white {
+    background-color: var(--ds-surface) !important;
+  }
+  .dark .bg-slate-50 {
+    background-color: var(--ds-surface-hover) !important;
+  }
+  .dark .bg-slate-100 {
+    background-color: var(--ds-surface-hover) !important;
+  }
+  .dark .border-slate-100,
+  .dark .border-slate-200,
+  .dark .border-slate-200\/40,
+  .dark .border-slate-200\/50,
+  .dark .border-slate-200\/60 {
+    border-color: var(--ds-border) !important;
+  }
+  .dark .text-dark {
+    color: var(--ds-text) !important;
+  }
+  .dark .text-slate-900 {
+    color: var(--ds-text) !important;
+  }
+  .dark .text-slate-800 {
+    color: var(--ds-text) !important;
+  }
+  .dark .text-slate-700 {
+    color: var(--ds-text-muted) !important;
+  }
+  .dark .text-slate-600 {
+    color: var(--ds-text-muted) !important;
+  }
+  .dark .text-slate-500 {
+    color: var(--ds-text-muted) !important;
+  }
+  .dark .text-slate-400 {
+    color: var(--ds-text-muted) !important;
+  }
+  .dark .hover\:bg-slate-50:hover {
+    background-color: var(--ds-surface-hover) !important;
+  }
+  .dark .hover\:bg-slate-100:hover {
+    background-color: var(--ds-surface-hover) !important;
+  }
+  .dark input, .dark select, .dark textarea {
+    background-color: var(--ds-surface-hover) !important;
+    border-color: var(--ds-border) !important;
+    color: var(--ds-text) !important;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: #3e3835 !important;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background-color: #554d49 !important;
   }
 }
 

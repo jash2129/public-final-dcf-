@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { User, Shield, Bell, CreditCard, Save, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Shield, Bell, CreditCard, Save, CheckCircle, AlertCircle, Loader2, Palette, Sun, Moon, Monitor } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SuccessOverlay from '../../components/ui/SuccessOverlay';
 import Skeleton from '../../components/ui/Skeleton';
+import { useTheme } from '../../context/ThemeContext';
 
-type Tab = 'profile' | 'security' | 'notifications' | 'billing';
+type Tab = 'profile' | 'security' | 'notifications' | 'billing' | 'appearance';
 
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -298,6 +300,7 @@ export default function Settings() {
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'billing', label: 'Billing Details', icon: CreditCard },
+    { id: 'appearance', label: 'Appearance', icon: Palette },
   ];
 
   return (
@@ -581,6 +584,96 @@ export default function Settings() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          )}
+
+          {activeTab === 'appearance' && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <h2 className="text-xl font-bold text-dark mb-6">Appearance Settings</h2>
+              <p className="text-slate-500 text-sm mb-8">Customize how Deccan Filings looks on your device.</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {/* Light Mode Option */}
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`flex flex-col items-start p-4 rounded-2xl border text-left transition-all relative cursor-pointer ${
+                    theme === 'light'
+                      ? 'border-brand ring-2 ring-brand/10 bg-brand/5'
+                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                  }`}
+                >
+                  <div className="h-24 w-full bg-slate-50 rounded-xl mb-4 border border-slate-200 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-y-0 left-0 w-8 bg-white border-r border-slate-200 flex flex-col p-1 gap-1">
+                      <div className="h-2 w-full bg-slate-100 rounded-sm"></div>
+                      <div className="h-2 w-full bg-slate-100 rounded-sm"></div>
+                    </div>
+                    <div className="flex-1 p-2 flex flex-col gap-1.5">
+                      <div className="h-3 w-16 bg-slate-200 rounded-md"></div>
+                      <div className="h-8 w-full bg-white rounded-lg border border-slate-200 p-1 flex flex-col gap-1">
+                        <div className="h-1 w-full bg-slate-100 rounded-sm"></div>
+                        <div className="h-1 w-2/3 bg-slate-100 rounded-sm"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Sun className={`h-4 w-4 ${theme === 'light' ? 'text-brand' : 'text-slate-500'}`} />
+                    <span className="font-bold text-sm text-dark">Light Mode</span>
+                  </div>
+                </button>
+
+                {/* Dark Mode Option */}
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`flex flex-col items-start p-4 rounded-2xl border text-left transition-all relative cursor-pointer ${
+                    theme === 'dark'
+                      ? 'border-brand ring-2 ring-brand/10 bg-[var(--ds-coral-soft)]'
+                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                  }`}
+                >
+                  <div className="h-24 w-full bg-[#121212] rounded-xl mb-4 border border-[#242220] flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-y-0 left-0 w-8 bg-[#171514] border-r border-[#242220] flex flex-col p-1 gap-1">
+                      <div className="h-2 w-full bg-[#242220] rounded-sm"></div>
+                      <div className="h-2 w-full bg-[#242220] rounded-sm"></div>
+                    </div>
+                    <div className="flex-1 p-2 flex flex-col gap-1.5">
+                      <div className="h-3 w-16 bg-[#242220] rounded-md"></div>
+                      <div className="h-8 w-full bg-[#171514] rounded-lg border border-[#242220] p-1 flex flex-col gap-1">
+                        <div className="h-1 w-full bg-[#242220] rounded-sm"></div>
+                        <div className="h-1 w-2/3 bg-[#242220] rounded-sm"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Moon className={`h-4 w-4 ${theme === 'dark' ? 'text-brand' : 'text-slate-500'}`} />
+                    <span className="font-bold text-sm text-dark">Dark Mode</span>
+                  </div>
+                </button>
+
+                {/* System Mode Option */}
+                <button
+                  onClick={() => setTheme('system')}
+                  className={`flex flex-col items-start p-4 rounded-2xl border text-left transition-all relative cursor-pointer ${
+                    theme === 'system'
+                      ? 'border-brand ring-2 ring-brand/10 bg-brand/5'
+                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                  }`}
+                >
+                  <div className="h-24 w-full bg-slate-50 rounded-xl mb-4 border border-slate-200 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 flex">
+                      <div className="flex-1 bg-slate-100 flex items-center justify-center border-r border-slate-200">
+                        <Sun className="h-5 w-5 text-slate-400" />
+                      </div>
+                      <div className="flex-1 bg-[#121212] flex items-center justify-center">
+                        <Moon className="h-5 w-5 text-slate-500" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Monitor className={`h-4 w-4 ${theme === 'system' ? 'text-brand' : 'text-slate-500'}`} />
+                    <span className="font-bold text-sm text-dark">System Default</span>
+                  </div>
+                </button>
+              </div>
             </motion.div>
           )}
         </div>

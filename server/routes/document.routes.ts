@@ -260,4 +260,21 @@ router.get('/admin/:id/file', requireAdmin, async (req, res, next) => {
   }
 });
 
+/**
+ * GET /api/documents/admin/user/:userId
+ * Admin list documents for a specific user
+ */
+router.get('/admin/user/:userId', requireAdmin, async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const [documents] = await pool.query(
+      `SELECT * FROM documents WHERE user_id = ? ORDER BY id DESC`,
+      [userId]
+    );
+    return res.json(documents);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

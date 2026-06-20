@@ -13,6 +13,7 @@ import authRouter from "./server/routes/auth.routes";
 import serviceRouter from "./server/routes/service.routes";
 import orderRouter from "./server/routes/order.routes";
 import adminRouter from "./server/routes/admin.routes";
+import invoiceRouter from "./server/routes/invoice.routes";
 import complianceRouter from "./server/routes/compliance.routes";
 import documentRouter from "./server/routes/document.routes";
 import profileRouter from "./server/routes/profile.routes";
@@ -123,6 +124,7 @@ async function startServer() {
   app.use("/api/services", serviceRouter);
   app.use("/api/orders", orderRouter);
   app.use("/api/admin", adminRouter);
+  app.use("/api/admin/invoices", invoiceRouter);
   app.use("/api/compliance", complianceRouter);
   app.use("/api/documents", documentRouter);
   app.use("/api/contact", contactRouter);

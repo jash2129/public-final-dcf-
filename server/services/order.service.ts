@@ -195,10 +195,13 @@ async function triggerStatusChangeNotification(userId: number, orderId: string, 
 export function mapToLegacyOrder(dbOrder: any) {
   return {
     id: dbOrder.id,
+    user_id: dbOrder.user_id,
     user_name: dbOrder.user_name,
     user_email: dbOrder.user_email,
     service: dbOrder.service_names || 'General Filing Services',
+    service_names: dbOrder.service_names || 'General Filing Services',
     date: dbOrder.created_at ? formatLegacyDate(new Date(dbOrder.created_at)) : formatLegacyDate(new Date()),
+    created_at: dbOrder.created_at,
     amount: formatCurrency(dbOrder.total_amount),
     status: dbOrder.status === 'placed' ? 'Placed' :
             dbOrder.status === 'in_progress' ? 'Processing' :

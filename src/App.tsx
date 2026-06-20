@@ -36,6 +36,7 @@ import ManageAdmins from './pages/admin/ManageAdmins';
 import AdminDocuments from './pages/admin/Documents';
 import ActivityLog from './pages/admin/ActivityLog';
 import AdminServices from './pages/admin/Services';
+import UserDetail from './pages/admin/UserDetail';
 import About from './pages/About';
 import GSTCalculator from './pages/tools/GSTCalculator';
 import ComplianceCalendar from './pages/tools/ComplianceCalendar';
@@ -104,6 +105,7 @@ export default function App() {
           <Route path="documents" element={<AdminDocuments />} />
           <Route path="compliance" element={<AdminCompliance />} />
           <Route path="services" element={<AdminServices />} />
+          <Route path="users/:userId" element={<UserDetail />} />
           <Route path="tools/gst-calculator" element={<GSTCalculator />} />
           <Route path="tools" element={<Navigate to="tools/gst-calculator" replace />} />
         </Route>
@@ -118,6 +120,7 @@ export default function App() {
           }
         >
           <Route index element={<ManageAdmins />} />
+          <Route path=":id" element={<ManageAdmins />} />
           <Route path="activity" element={<ActivityLog />} />
         </Route>
 

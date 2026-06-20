@@ -99,10 +99,14 @@ export default function Documents() {
     fetchOrders();
   }, []);
 
-  const filteredDocuments = useMemo(() => {
+  const filteredDocuments = React.useMemo(() => {
+    if (!documents) return [];
+    const term = searchTerm.toLowerCase().trim();
+    
     return documents.filter(doc => {
-      const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = doc.name.toLowerCase().includes(term);
       const matchesFolder = selectedFolder ? doc.folder === selectedFolder : true;
+      
       return matchesSearch && matchesFolder;
     });
   }, [documents, searchTerm, selectedFolder]);
@@ -383,7 +387,10 @@ export default function Documents() {
                     <td className="px-6 py-4 text-right">
                       <div className="relative inline-block text-left">
                         <button 
-                          onClick={() => setActiveMenuId(activeMenuId === file.id ? null : file.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveMenuId(activeMenuId === file.id ? null : file.id);
+                          }}
                           className="p-2 text-slate-400 hover:text-dark transition-colors rounded-lg hover:bg-slate-100 opacity-0 group-hover:opacity-100"
                         >
                           <MoreVertical className="h-4 w-4" />
@@ -400,19 +407,28 @@ export default function Documents() {
                                 className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-2 overflow-hidden"
                               >
                                 <button 
-                                  onClick={() => handleDownload(file)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownload(file);
+                                  }}
                                   className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2"
                                 >
                                   <Download className="h-4 w-4" /> Download
                                 </button>
                                 <button 
-                                  onClick={() => handleRename(file)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRename(file);
+                                  }}
                                   className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2"
                                 >
                                   <Edit2 className="h-4 w-4" /> Rename
                                 </button>
                                 <button 
-                                  onClick={() => handleDelete(file.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(file.id);
+                                  }}
                                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                 >
                                   <Trash2 className="h-4 w-4" /> Delete
@@ -462,7 +478,13 @@ export default function Documents() {
                   </div>
                 </div>
                 <div className="relative">
-                  <button className="p-2 text-slate-400">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveMenuId(activeMenuId === file.id ? null : file.id);
+                    }}
+                    className="p-2 text-slate-400"
+                  >
                     <MoreVertical className="h-4 w-4" />
                   </button>
                   <AnimatePresence>
@@ -473,13 +495,31 @@ export default function Documents() {
                         exit={{ opacity: 0, scale: 0.95 }}
                         className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-premium z-20 py-2 overflow-hidden"
                       >
-                        <button onClick={() => handleDownload(file)} className="w-full text-left px-4 py-3 text-sm font-bold text-slate-600 flex items-center gap-3 active:bg-slate-50">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownload(file);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm font-bold text-slate-600 flex items-center gap-3 active:bg-slate-50"
+                        >
                           <Download className="h-4 w-4" /> Download
                         </button>
-                        <button onClick={() => handleRename(file)} className="w-full text-left px-4 py-3 text-sm font-bold text-slate-600 flex items-center gap-3 active:bg-slate-50">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRename(file);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm font-bold text-slate-600 flex items-center gap-3 active:bg-slate-50"
+                        >
                           <Edit2 className="h-4 w-4" /> Rename
                         </button>
-                        <button onClick={() => handleDelete(file.id)} className="w-full text-left px-4 py-3 text-sm font-bold text-red-600 flex items-center gap-3 active:bg-slate-50">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(file.id);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm font-bold text-red-600 flex items-center gap-3 active:bg-slate-50"
+                        >
                           <Trash2 className="h-4 w-4" /> Delete
                         </button>
                       </motion.div>

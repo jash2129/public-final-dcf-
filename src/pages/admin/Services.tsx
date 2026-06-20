@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
@@ -31,9 +32,11 @@ interface Service {
 }
 
 export default function AdminServices() {
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || searchParams.get('code') || '';
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState('All');
   
   // Modals & Actions State

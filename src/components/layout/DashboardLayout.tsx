@@ -18,15 +18,19 @@ import {
   Wrench,
   Calculator,
   Tag,
-  X
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NotificationsDropdown from './NotificationsDropdown';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function DashboardLayout() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState<{ name: string; email: string; role?: string }>({ 
@@ -338,6 +342,18 @@ export default function DashboardLayout() {
               />
             </div>
             
+            <button
+              onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
+              className="p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl transition-all duration-300 relative group flex items-center justify-center cursor-pointer"
+              title={`Switch to ${resolvedTheme === 'light' ? 'Dark' : 'Light'} Mode`}
+            >
+              {resolvedTheme === 'light' ? (
+                <Moon className="h-5 w-5 transition-transform group-hover:rotate-12" />
+              ) : (
+                <Sun className="h-5 w-5 transition-transform group-hover:rotate-45" />
+              )}
+            </button>
+
             <NotificationsDropdown />
           </div>
         </header>
