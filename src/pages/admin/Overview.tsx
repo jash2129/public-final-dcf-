@@ -4,7 +4,6 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useState, useEffect } from 'react';
 import Skeleton from '../../components/ui/Skeleton';
 import SuccessOverlay from '../../components/ui/SuccessOverlay';
-import GlobalSearch from '../../components/admin/GlobalSearch';
 
 const data7Days = [
   { name: 'Mon', revenue: 45000 },
@@ -119,9 +118,6 @@ export default function AdminOverview() {
         <div>
           <h1 className="text-2xl font-bold text-dark">Administrative Overview</h1>
           <p className="text-slate-500">Global insights across all Deccan Filings users.</p>
-        </div>
-        <div className="w-full md:w-auto md:min-w-[400px]">
-          <GlobalSearch />
         </div>
       </div>
 

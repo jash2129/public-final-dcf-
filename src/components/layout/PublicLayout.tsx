@@ -24,6 +24,25 @@ export default function PublicLayout() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('user');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    if (token && userStr) {
+      setIsLoggedIn(true);
+      try {
+        const u = JSON.parse(userStr);
+        setUserRole(u.role || 'user');
+      } catch (e) {
+        setUserRole('user');
+      }
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
   const handleMobileNavClick = (categoryTitle: string) => {
     setActiveMobileCategory(activeMobileCategory === categoryTitle ? null : categoryTitle);
   };
@@ -472,8 +491,12 @@ export default function PublicLayout() {
                     </div>
                   </div>
                   <div className="pt-8 pb-24 flex flex-col gap-3">
-                    <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center justify-center gap-2 border border-slate-300 text-dark px-4 py-3.5 rounded-xl font-bold btn-tap">
-                      <User className="h-5 w-5" /> Login
+                    <Link 
+                      to="/login" 
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full bg-slate-100 hover:bg-slate-200 text-dark py-3.5 rounded-xl font-bold text-center text-sm transition-all"
+                    >
+                      Login
                     </Link>
                     <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="w-full text-center bg-brand text-dark px-4 py-3.5 rounded-xl font-bold btn-tap">
                       Talk to Expert

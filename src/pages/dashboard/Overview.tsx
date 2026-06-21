@@ -204,7 +204,11 @@ export default function Overview() {
                 <div className="p-6 text-center text-slate-500">No recent orders.</div>
               ) : (
                 recentOrders.map((order: any) => (
-                  <div key={order.id} className="p-4 sm:p-6 flex items-center justify-between hover:bg-white/50 transition-colors group cursor-pointer active:bg-white/70">
+                  <div 
+                    key={order.id} 
+                    onClick={() => navigate(`/dashboard/orders?id=${order.id}`)}
+                    className="p-4 sm:p-6 flex items-center justify-between hover:bg-white/50 transition-colors group cursor-pointer active:bg-white/70"
+                  >
                     <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                       <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-brand group-hover:text-dark transition-colors shrink-0">
                         <FileText className="h-5 w-5 sm:h-6 sm:w-6" />

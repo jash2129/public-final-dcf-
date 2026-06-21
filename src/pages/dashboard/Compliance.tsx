@@ -69,7 +69,7 @@ export default function Compliance() {
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={() => navigate('/tools/compliance-calendar?personalized=true')}
+            onClick={() => navigate('/dashboard/tools/compliance-calendar?personalized=true')}
             className="bg-white border border-slate-200 text-dark px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
           >
             <CalendarIcon className="h-4 w-4" />
@@ -176,9 +176,12 @@ export default function Compliance() {
               
               <div className="flex items-center gap-3 sm:ml-auto pl-14 sm:pl-0">
                 {task.status !== 'completed' && (
-                  <button className="bg-dark text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-dark-200 transition-colors">
+                  <a 
+                    href="tel:+919000243270"
+                    className="bg-dark text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-dark-200 transition-colors inline-flex items-center justify-center cursor-pointer"
+                  >
                     Take Action
-                  </button>
+                  </a>
                 )}
                 <button 
                   onClick={() => window.open(generateGoogleCalendarUrl(task), '_blank')}

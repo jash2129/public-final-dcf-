@@ -384,7 +384,13 @@ export async function setupDatabase(): Promise<mysql.Pool> {
     }
 
     // Database Seeding Engine: Parse CSV and populate Services catalog
-    await seedServices();
+    const [serviceCountRows] = await pool.query<mysql.RowDataPacket[]>('SELECT COUNT(*) as count FROM services');
+    if (serviceCountRows[0].count === 0) {
+      await seedServices();
+    } else {
+      // Clean up template row from services.sql if it exists
+      await pool.execute("DELETE FROM services WHERE code = 'code'");
+    }
 
     // Seed test orders, compliance, and stats for the first user if empty
     await seedTestData();

@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CheckCircle, ChevronRight, Star, Shield, Clock, Users, AlertCircle } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { serviceCategories, generateSlug } from '../data/services';
@@ -149,17 +149,49 @@ export default function ServicePage() {
     }
   };
 
+  const [checkedDocs, setCheckedDocs] = useState<Record<number, boolean>>({});
+  const [dbDocuments, setDbDocuments] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    setCheckedDocs({});
+    setDbDocuments(null);
+    
+    if (category !== 'finance' && slug) {
+      fetch('/api/services')
+        .then(res => res.json())
+        .then((data: any[]) => {
+          const matched = data.find(s => generateSlug(s.name) === slug || s.slug === slug);
+          if (matched && matched.documents_required) {
+            const docs = matched.documents_required
+              .split(',')
+              .map((d: string) => d.trim())
+              .filter(Boolean);
+            if (docs.length > 0) {
+              setDbDocuments(docs);
+            }
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching service details:", err);
+        });
+    }
+  }, [category, slug]);
+
   const defaultDocs = useMemo(() => {
-    return specificContent?.documents || [
+    if (specificContent?.documents) {
+      return specificContent.documents;
+    }
+    if (dbDocuments) {
+      return dbDocuments;
+    }
+    return [
       'PAN Card of Directors/Partners',
       'Aadhaar Card / Voter ID',
       'Passport size photographs',
       'Address Proof (Electricity Bill / Rent Agreement)',
       'Bank Statement'
     ];
-  }, [specificContent, serviceName]);
-
-  const [checkedDocs, setCheckedDocs] = useState<Record<number, boolean>>({});
+  }, [specificContent, dbDocuments]);
 
   const checklistProgress = useMemo(() => {
     const total = defaultDocs.length;

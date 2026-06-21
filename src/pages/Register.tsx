@@ -7,6 +7,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 export default function Register() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+
   const [showCRMModal, setShowCRMModal] = useState(false);
   const [tempToken, setTempToken] = useState('');
   const [crmData, setCrmData] = useState({

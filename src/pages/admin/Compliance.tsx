@@ -266,7 +266,7 @@ export default function AdminCompliance() {
           </button>
 
           <button 
-            onClick={() => navigate('/tools/compliance-calendar')}
+            onClick={() => navigate('/admin/tools/compliance-calendar')}
             className="flex items-center gap-2 px-4 py-2.5 bg-dark text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-xl hover:bg-dark-200 transition-all cursor-pointer"
           >
             <Calendar className="h-4 w-4 text-brand" />
@@ -364,6 +364,14 @@ export default function AdminCompliance() {
                 <div className="h-10 w-px bg-slate-100 hidden md:block"></div>
                 
                 <div className="flex items-center gap-2">
+                  {task.status !== 'completed' && (
+                    <a 
+                      href="tel:+919000243270"
+                      className="bg-dark text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-dark-200 transition-colors inline-block text-center cursor-pointer mr-2"
+                    >
+                      Take Action
+                    </a>
+                  )}
                   <button 
                     onClick={() => handleDeleteTask(task.id)}
                     className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-slate-200 cursor-pointer"

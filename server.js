@@ -1,15 +1,17 @@
-// server.ts
-import dotenv from "dotenv";
-import express2 from "express";
-import { createServer as createViteServer } from "vite";
-import path5 from "path";
-import fs5 from "fs";
-
-// server/db.ts
-import mysql from "mysql2/promise";
-import bcrypt from "bcryptjs";
-import fs from "fs";
-import path from "path";
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res, err) => function __init() {
+  if (err) throw err[0];
+  try {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  } catch (e) {
+    throw err = [e], e;
+  }
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
 
 // server/utils/helpers.ts
 function formatCurrency(amount) {
@@ -71,23 +73,16 @@ function formatLegacyDate(date = /* @__PURE__ */ new Date()) {
     year: "numeric"
   });
 }
-
-// server/db.ts
-var rawPool = void 0;
-var pool = new Proxy({}, {
-  get(target, prop, receiver) {
-    if (!rawPool) {
-      throw new Error(
-        "Database connection pool is not initialized. This means the server failed to connect to your MySQL database on startup. Please ensure your MySQL/MariaDB server is running (e.g. XAMPP locally or your Hostinger database) and check that your .env credentials are correct."
-      );
-    }
-    const value = Reflect.get(rawPool, prop);
-    if (typeof value === "function") {
-      return value.bind(rawPool);
-    }
-    return value;
+var init_helpers = __esm({
+  "server/utils/helpers.ts"() {
   }
 });
+
+// server/db.ts
+import mysql from "mysql2/promise";
+import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
 async function setupDatabase() {
   try {
     let dbHost = process.env.DB_HOST || "localhost";
@@ -632,57 +627,33 @@ async function seedBlogPosts() {
     console.error("Error during blog posts database seeding:", error);
   }
 }
-
-// server/models/compliance.model.ts
-async function listUserComplianceTasks(userId) {
-  const [rows] = await pool.query(
-    'SELECT * FROM compliance_tasks WHERE user_id = ? ORDER BY STR_TO_DATE(dueDate, "%b %d, %Y") ASC, id DESC',
-    [userId]
-  );
-  return rows;
-}
-async function listAllComplianceTasks() {
-  const [rows] = await pool.query(
-    'SELECT c.*, u.name as user_name, u.email as user_email FROM compliance_tasks c JOIN users u ON c.user_id = u.id ORDER BY STR_TO_DATE(c.dueDate, "%b %d, %Y") ASC',
-    []
-  );
-  return rows;
-}
-async function createComplianceTask(task) {
-  const [result] = await pool.execute(
-    "INSERT INTO compliance_tasks (title, dueDate, status, type, penalty, user_id, service_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [
-      task.title,
-      task.dueDate,
-      task.status || "upcoming",
-      task.type || "Taxation",
-      task.penalty || null,
-      task.user_id,
-      task.service_id || null
-    ]
-  );
-  return result.insertId;
-}
-async function findComplianceTaskById(id) {
-  const [rows] = await pool.query("SELECT * FROM compliance_tasks WHERE id = ?", [id]);
-  if (rows.length === 0) return null;
-  return rows[0];
-}
-async function updateComplianceTaskStatus(id, status) {
-  const [result] = await pool.execute("UPDATE compliance_tasks SET status = ? WHERE id = ?", [status, id]);
-  return result.affectedRows > 0;
-}
-async function deleteComplianceTask(id) {
-  const [result] = await pool.execute("DELETE FROM compliance_tasks WHERE id = ?", [id]);
-  return result.affectedRows > 0;
-}
-
-// server/services/notification.service.ts
-import fs2 from "fs";
-import path2 from "path";
-import nodemailer from "nodemailer";
+var rawPool, pool;
+var init_db = __esm({
+  "server/db.ts"() {
+    init_helpers();
+    rawPool = void 0;
+    pool = new Proxy({}, {
+      get(target, prop, receiver) {
+        if (!rawPool) {
+          throw new Error(
+            "Database connection pool is not initialized. This means the server failed to connect to your MySQL database on startup. Please ensure your MySQL/MariaDB server is running (e.g. XAMPP locally or your Hostinger database) and check that your .env credentials are correct."
+          );
+        }
+        const value = Reflect.get(rawPool, prop);
+        if (typeof value === "function") {
+          return value.bind(rawPool);
+        }
+        return value;
+      }
+    });
+  }
+});
 
 // server/services/invoice.service.ts
+var invoice_service_exports = {};
+__export(invoice_service_exports, {
+  generateInvoiceBuffer: () => generateInvoiceBuffer
+});
 import PDFDocument from "pdfkit";
 function generateInvoiceBuffer(orderId, amount, userName, userEmail, serviceName) {
   return new Promise((resolve, reject) => {
@@ -774,8 +745,278 @@ function generateInvoiceBuffer(orderId, amount, userName, userEmail, serviceName
     }
   });
 }
+var init_invoice_service = __esm({
+  "server/services/invoice.service.ts"() {
+  }
+});
+
+// server/models/order.model.ts
+var order_model_exports = {};
+__export(order_model_exports, {
+  createOrderWithItems: () => createOrderWithItems,
+  deleteOrderRecord: () => deleteOrderRecord,
+  findOrderById: () => findOrderById,
+  findOrdersByUserId: () => findOrdersByUserId,
+  getOrderItems: () => getOrderItems,
+  listAllOrders: () => listAllOrders,
+  listUserOrders: () => listUserOrders,
+  markOrderAsPaid: () => markOrderAsPaid,
+  updateOrderAmountAndItems: () => updateOrderAmountAndItems,
+  updateOrderStatus: () => updateOrderStatus
+});
+async function createOrderWithItems(userId, items) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const now = /* @__PURE__ */ new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const datePrefix = `${year}${month}${day}`;
+    const orderIdLike = `DCF-${datePrefix}-%`;
+    const [latestRows] = await connection.query(
+      "SELECT id FROM orders WHERE id LIKE ? ORDER BY id DESC LIMIT 1 FOR UPDATE",
+      [orderIdLike]
+    );
+    let nextIndex = 1;
+    if (latestRows.length > 0) {
+      const latestId = latestRows[0].id;
+      const parts = latestId.split("-");
+      const currentIndexStr = parts[parts.length - 1];
+      const currentIndex = parseInt(currentIndexStr, 10);
+      if (!isNaN(currentIndex)) {
+        nextIndex = currentIndex + 1;
+      }
+    }
+    const suffix = String(nextIndex).padStart(4, "0");
+    const orderId = `DCF-${datePrefix}-${suffix}`;
+    let basePrice = 0;
+    for (const item of items) {
+      basePrice += item.priceAtPurchase * item.quantity;
+    }
+    const cgst = basePrice * 0.09;
+    const sgst = basePrice * 0.09;
+    const totalAmount = basePrice + cgst + sgst;
+    await connection.execute(
+      "INSERT INTO orders (id, user_id, status, total_amount, base_price, cgst, sgst) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [orderId, userId, "placed", totalAmount, basePrice, cgst, sgst]
+    );
+    for (const item of items) {
+      await connection.execute(
+        "INSERT INTO order_items (order_id, service_id, price_at_purchase, quantity) VALUES (?, ?, ?, ?)",
+        [orderId, item.serviceId, item.priceAtPurchase, item.quantity]
+      );
+    }
+    await connection.commit();
+    return orderId;
+  } catch (error) {
+    await connection.rollback();
+    console.error("Failed to execute order placement transaction:", error);
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+async function findOrderById(orderId) {
+  const [rows] = await pool.query(
+    `SELECT o.*, u.name as user_name, u.email as user_email 
+     FROM orders o 
+     JOIN users u ON o.user_id = u.id 
+     WHERE o.id = ?`,
+    [orderId]
+  );
+  if (rows.length === 0) return null;
+  const order = rows[0];
+  order.total_amount = parseFloat(order.total_amount);
+  if (order.base_price !== null && order.base_price !== void 0) {
+    order.base_price = parseFloat(order.base_price);
+  }
+  if (order.cgst !== null && order.cgst !== void 0) {
+    order.cgst = parseFloat(order.cgst);
+  }
+  if (order.sgst !== null && order.sgst !== void 0) {
+    order.sgst = parseFloat(order.sgst);
+  }
+  return order;
+}
+async function getOrderItems(orderId) {
+  const [rows] = await pool.query(
+    `SELECT oi.*, s.name as service_name, s.code as service_code 
+     FROM order_items oi 
+     JOIN services s ON oi.service_id = s.id 
+     WHERE oi.order_id = ?`,
+    [orderId]
+  );
+  return rows.map((r) => ({ ...r, price_at_purchase: parseFloat(r.price_at_purchase) }));
+}
+async function listUserOrders(userId, startDate, endDate) {
+  let sql = `
+    SELECT o.*, 
+      (SELECT GROUP_CONCAT(s.name SEPARATOR ', ') 
+       FROM order_items oi 
+       JOIN services s ON oi.service_id = s.id 
+       WHERE oi.order_id = o.id) as service_names
+    FROM orders o
+    WHERE o.user_id = ?
+  `;
+  const params = [userId];
+  if (startDate && endDate) {
+    sql += " AND o.created_at >= ? AND o.created_at <= ?";
+    params.push(`${startDate} 00:00:00`, `${endDate} 23:59:59`);
+  }
+  sql += " ORDER BY o.created_at DESC";
+  const [rows] = await pool.query(sql, params);
+  return rows.map((r) => ({ ...r, total_amount: parseFloat(r.total_amount) }));
+}
+async function listAllOrders(startDate, endDate) {
+  let sql = `
+    SELECT o.*, u.name as user_name, u.email as user_email,
+      (SELECT GROUP_CONCAT(s.name SEPARATOR ', ') 
+       FROM order_items oi 
+       JOIN services s ON oi.service_id = s.id 
+       WHERE oi.order_id = o.id) as service_names
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+  `;
+  const params = [];
+  if (startDate && endDate) {
+    sql += " WHERE o.created_at >= ? AND o.created_at <= ?";
+    params.push(`${startDate} 00:00:00`, `${endDate} 23:59:59`);
+  }
+  sql += " ORDER BY o.created_at DESC";
+  const [rows] = await pool.query(sql, params);
+  return rows.map((r) => ({ ...r, total_amount: parseFloat(r.total_amount) }));
+}
+async function updateOrderStatus(orderId, status) {
+  const [result] = await pool.execute("UPDATE orders SET status = ? WHERE id = ?", [status, orderId]);
+  return result.affectedRows > 0;
+}
+async function updateOrderAmountAndItems(orderId, amount) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const basePrice = amount;
+    const cgst = basePrice * 0.09;
+    const sgst = basePrice * 0.09;
+    const totalAmount = basePrice + cgst + sgst;
+    const [orderResult] = await connection.execute(
+      "UPDATE orders SET total_amount = ?, base_price = ?, cgst = ?, sgst = ? WHERE id = ?",
+      [totalAmount, basePrice, cgst, sgst, orderId]
+    );
+    await connection.execute(
+      "UPDATE order_items SET price_at_purchase = ? WHERE order_id = ?",
+      [basePrice, orderId]
+    );
+    await connection.commit();
+    return orderResult.affectedRows > 0;
+  } catch (error) {
+    await connection.rollback();
+    console.error("Failed to update order amount and items:", error);
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+async function deleteOrderRecord(orderId) {
+  const [result] = await pool.execute("DELETE FROM orders WHERE id = ?", [orderId]);
+  return result.affectedRows > 0;
+}
+async function markOrderAsPaid(orderId, razorpayOrderId, razorpayPaymentId, signature) {
+  const [result] = await pool.execute(
+    `UPDATE orders 
+     SET status = 'in_progress', 
+         payment_status = 'paid', 
+         razorpay_order_id = ?, 
+         razorpay_payment_id = ?, 
+         razorpay_signature = ? 
+     WHERE id = ?`,
+    [razorpayOrderId, razorpayPaymentId, signature, orderId]
+  );
+  return result.affectedRows > 0;
+}
+async function findOrdersByUserId(userId) {
+  const [rows] = await pool.query(
+    `SELECT o.*, u.name as user_name, u.email as user_email,
+      (SELECT GROUP_CONCAT(s.name SEPARATOR ', ') 
+       FROM order_items oi 
+       JOIN services s ON oi.service_id = s.id 
+       WHERE oi.order_id = o.id) as service_names
+     FROM orders o
+     JOIN users u ON o.user_id = u.id
+     WHERE o.user_id = ?
+     ORDER BY o.created_at DESC`,
+    [userId]
+  );
+  return rows.map((r) => ({ ...r, total_amount: parseFloat(r.total_amount) }));
+}
+var init_order_model = __esm({
+  "server/models/order.model.ts"() {
+    init_db();
+  }
+});
+
+// server.ts
+init_db();
+import dotenv from "dotenv";
+import express2 from "express";
+import { createServer as createViteServer } from "vite";
+import path5 from "path";
+import fs5 from "fs";
+
+// server/services/scheduler.service.ts
+init_db();
+
+// server/models/compliance.model.ts
+init_db();
+async function listUserComplianceTasks(userId) {
+  const [rows] = await pool.query(
+    'SELECT * FROM compliance_tasks WHERE user_id = ? ORDER BY STR_TO_DATE(dueDate, "%b %d, %Y") ASC, id DESC',
+    [userId]
+  );
+  return rows;
+}
+async function listAllComplianceTasks() {
+  const [rows] = await pool.query(
+    'SELECT c.*, u.name as user_name, u.email as user_email FROM compliance_tasks c JOIN users u ON c.user_id = u.id ORDER BY STR_TO_DATE(c.dueDate, "%b %d, %Y") ASC',
+    []
+  );
+  return rows;
+}
+async function createComplianceTask(task) {
+  const [result] = await pool.execute(
+    "INSERT INTO compliance_tasks (title, dueDate, status, type, penalty, user_id, service_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [
+      task.title,
+      task.dueDate,
+      task.status || "upcoming",
+      task.type || "Taxation",
+      task.penalty || null,
+      task.user_id,
+      task.service_id || null
+    ]
+  );
+  return result.insertId;
+}
+async function findComplianceTaskById(id) {
+  const [rows] = await pool.query("SELECT * FROM compliance_tasks WHERE id = ?", [id]);
+  if (rows.length === 0) return null;
+  return rows[0];
+}
+async function updateComplianceTaskStatus(id, status) {
+  const [result] = await pool.execute("UPDATE compliance_tasks SET status = ? WHERE id = ?", [status, id]);
+  return result.affectedRows > 0;
+}
+async function deleteComplianceTask(id) {
+  const [result] = await pool.execute("DELETE FROM compliance_tasks WHERE id = ?", [id]);
+  return result.affectedRows > 0;
+}
 
 // server/services/notification.service.ts
+init_db();
+init_invoice_service();
+import fs2 from "fs";
+import path2 from "path";
+import nodemailer from "nodemailer";
 var transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "",
   port: Number(process.env.SMTP_PORT) || 587,
@@ -1160,6 +1401,7 @@ function initScheduler() {
 import { Router } from "express";
 
 // server/models/user.model.ts
+init_db();
 async function findUserByEmail(email) {
   const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
   if (rows.length === 0) return null;
@@ -1451,6 +1693,7 @@ import jwt2 from "jsonwebtoken";
 import bcrypt3 from "bcryptjs";
 import crypto from "crypto";
 import nodemailer2 from "nodemailer";
+init_db();
 var router = Router();
 var JWT_SECRET2 = process.env.JWT_SECRET || "deccan-filings-secret-key-123";
 async function logActivity(userId, action, details) {
@@ -1716,6 +1959,7 @@ var auth_routes_default = router;
 import { Router as Router2 } from "express";
 
 // server/models/service.model.ts
+init_db();
 async function listAllServices() {
   const [rows] = await pool.query("SELECT * FROM services ORDER BY category ASC, name ASC");
   return rows.map((r) => ({ ...r, price: parseFloat(r.price) }));
@@ -1792,6 +2036,7 @@ async function updateService(id, service) {
 }
 
 // server/services/service.service.ts
+init_helpers();
 async function getServicesCatalog() {
   return listAllServices();
 }
@@ -1870,194 +2115,9 @@ var service_routes_default = router2;
 // server/routes/order.routes.ts
 import { Router as Router3 } from "express";
 
-// server/models/order.model.ts
-async function createOrderWithItems(userId, items) {
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    const now = /* @__PURE__ */ new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const datePrefix = `${year}${month}${day}`;
-    const orderIdLike = `DCF-${datePrefix}-%`;
-    const [latestRows] = await connection.query(
-      "SELECT id FROM orders WHERE id LIKE ? ORDER BY id DESC LIMIT 1 FOR UPDATE",
-      [orderIdLike]
-    );
-    let nextIndex = 1;
-    if (latestRows.length > 0) {
-      const latestId = latestRows[0].id;
-      const parts = latestId.split("-");
-      const currentIndexStr = parts[parts.length - 1];
-      const currentIndex = parseInt(currentIndexStr, 10);
-      if (!isNaN(currentIndex)) {
-        nextIndex = currentIndex + 1;
-      }
-    }
-    const suffix = String(nextIndex).padStart(4, "0");
-    const orderId = `DCF-${datePrefix}-${suffix}`;
-    let basePrice = 0;
-    for (const item of items) {
-      basePrice += item.priceAtPurchase * item.quantity;
-    }
-    const cgst = basePrice * 0.09;
-    const sgst = basePrice * 0.09;
-    const totalAmount = basePrice + cgst + sgst;
-    await connection.execute(
-      "INSERT INTO orders (id, user_id, status, total_amount, base_price, cgst, sgst) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [orderId, userId, "placed", totalAmount, basePrice, cgst, sgst]
-    );
-    for (const item of items) {
-      await connection.execute(
-        "INSERT INTO order_items (order_id, service_id, price_at_purchase, quantity) VALUES (?, ?, ?, ?)",
-        [orderId, item.serviceId, item.priceAtPurchase, item.quantity]
-      );
-    }
-    await connection.commit();
-    return orderId;
-  } catch (error) {
-    await connection.rollback();
-    console.error("Failed to execute order placement transaction:", error);
-    throw error;
-  } finally {
-    connection.release();
-  }
-}
-async function findOrderById(orderId) {
-  const [rows] = await pool.query(
-    `SELECT o.*, u.name as user_name, u.email as user_email 
-     FROM orders o 
-     JOIN users u ON o.user_id = u.id 
-     WHERE o.id = ?`,
-    [orderId]
-  );
-  if (rows.length === 0) return null;
-  const order = rows[0];
-  order.total_amount = parseFloat(order.total_amount);
-  if (order.base_price !== null && order.base_price !== void 0) {
-    order.base_price = parseFloat(order.base_price);
-  }
-  if (order.cgst !== null && order.cgst !== void 0) {
-    order.cgst = parseFloat(order.cgst);
-  }
-  if (order.sgst !== null && order.sgst !== void 0) {
-    order.sgst = parseFloat(order.sgst);
-  }
-  return order;
-}
-async function getOrderItems(orderId) {
-  const [rows] = await pool.query(
-    `SELECT oi.*, s.name as service_name, s.code as service_code 
-     FROM order_items oi 
-     JOIN services s ON oi.service_id = s.id 
-     WHERE oi.order_id = ?`,
-    [orderId]
-  );
-  return rows.map((r) => ({ ...r, price_at_purchase: parseFloat(r.price_at_purchase) }));
-}
-async function listUserOrders(userId, startDate, endDate) {
-  let sql = `
-    SELECT o.*, 
-      (SELECT GROUP_CONCAT(s.name SEPARATOR ', ') 
-       FROM order_items oi 
-       JOIN services s ON oi.service_id = s.id 
-       WHERE oi.order_id = o.id) as service_names
-    FROM orders o
-    WHERE o.user_id = ?
-  `;
-  const params = [userId];
-  if (startDate && endDate) {
-    sql += " AND o.created_at >= ? AND o.created_at <= ?";
-    params.push(`${startDate} 00:00:00`, `${endDate} 23:59:59`);
-  }
-  sql += " ORDER BY o.created_at DESC";
-  const [rows] = await pool.query(sql, params);
-  return rows.map((r) => ({ ...r, total_amount: parseFloat(r.total_amount) }));
-}
-async function listAllOrders(startDate, endDate) {
-  let sql = `
-    SELECT o.*, u.name as user_name, u.email as user_email,
-      (SELECT GROUP_CONCAT(s.name SEPARATOR ', ') 
-       FROM order_items oi 
-       JOIN services s ON oi.service_id = s.id 
-       WHERE oi.order_id = o.id) as service_names
-    FROM orders o
-    JOIN users u ON o.user_id = u.id
-  `;
-  const params = [];
-  if (startDate && endDate) {
-    sql += " WHERE o.created_at >= ? AND o.created_at <= ?";
-    params.push(`${startDate} 00:00:00`, `${endDate} 23:59:59`);
-  }
-  sql += " ORDER BY o.created_at DESC";
-  const [rows] = await pool.query(sql, params);
-  return rows.map((r) => ({ ...r, total_amount: parseFloat(r.total_amount) }));
-}
-async function updateOrderStatus(orderId, status) {
-  const [result] = await pool.execute("UPDATE orders SET status = ? WHERE id = ?", [status, orderId]);
-  return result.affectedRows > 0;
-}
-async function updateOrderAmountAndItems(orderId, amount) {
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    const basePrice = amount;
-    const cgst = basePrice * 0.09;
-    const sgst = basePrice * 0.09;
-    const totalAmount = basePrice + cgst + sgst;
-    const [orderResult] = await connection.execute(
-      "UPDATE orders SET total_amount = ?, base_price = ?, cgst = ?, sgst = ? WHERE id = ?",
-      [totalAmount, basePrice, cgst, sgst, orderId]
-    );
-    await connection.execute(
-      "UPDATE order_items SET price_at_purchase = ? WHERE order_id = ?",
-      [basePrice, orderId]
-    );
-    await connection.commit();
-    return orderResult.affectedRows > 0;
-  } catch (error) {
-    await connection.rollback();
-    console.error("Failed to update order amount and items:", error);
-    throw error;
-  } finally {
-    connection.release();
-  }
-}
-async function deleteOrderRecord(orderId) {
-  const [result] = await pool.execute("DELETE FROM orders WHERE id = ?", [orderId]);
-  return result.affectedRows > 0;
-}
-async function markOrderAsPaid(orderId, razorpayOrderId, razorpayPaymentId, signature) {
-  const [result] = await pool.execute(
-    `UPDATE orders 
-     SET status = 'in_progress', 
-         payment_status = 'paid', 
-         razorpay_order_id = ?, 
-         razorpay_payment_id = ?, 
-         razorpay_signature = ? 
-     WHERE id = ?`,
-    [razorpayOrderId, razorpayPaymentId, signature, orderId]
-  );
-  return result.affectedRows > 0;
-}
-async function findOrdersByUserId(userId) {
-  const [rows] = await pool.query(
-    `SELECT o.*, u.name as user_name, u.email as user_email,
-      (SELECT GROUP_CONCAT(s.name SEPARATOR ', ') 
-       FROM order_items oi 
-       JOIN services s ON oi.service_id = s.id 
-       WHERE oi.order_id = o.id) as service_names
-     FROM orders o
-     JOIN users u ON o.user_id = u.id
-     WHERE o.user_id = ?
-     ORDER BY o.created_at DESC`,
-    [userId]
-  );
-  return rows.map((r) => ({ ...r, total_amount: parseFloat(r.total_amount) }));
-}
-
 // server/services/order.service.ts
+init_order_model();
+init_helpers();
 function getCategoryForService(name) {
   const lower = name.toLowerCase();
   if (lower.includes("proprietorship") || lower.includes("partnership") || lower.includes("company") || lower.includes("llp") || lower.includes("subsidiary") || lower.includes("nidhi") || lower.includes("trust")) {
@@ -2212,7 +2272,11 @@ function mapToLegacyOrder(dbOrder) {
   };
 }
 
+// server/routes/order.routes.ts
+init_order_model();
+
 // server/services/payment.service.ts
+init_order_model();
 import Razorpay from "razorpay";
 import crypto2 from "crypto";
 var razorpayInstance = null;
@@ -2465,7 +2529,9 @@ router3.post("/:id/pay/verify", async (req, res, next) => {
 var order_routes_default = router3;
 
 // server/routes/admin.routes.ts
+init_db();
 import { Router as Router4 } from "express";
+init_order_model();
 var router4 = Router4();
 router4.use(authenticate);
 router4.use(requireAdmin);
@@ -2752,6 +2818,9 @@ var admin_routes_default = router4;
 
 // server/routes/invoice.routes.ts
 import { Router as Router5 } from "express";
+init_order_model();
+init_invoice_service();
+init_db();
 var router5 = Router5();
 router5.use(authenticate);
 router5.use(requireAdmin);
@@ -2866,6 +2935,7 @@ router6.post("/", async (req, res, next) => {
 var compliance_routes_default = router6;
 
 // server/routes/document.routes.ts
+init_db();
 import { Router as Router7 } from "express";
 import multer from "multer";
 import path3 from "path";
@@ -3066,6 +3136,7 @@ router7.get("/admin/user/:userId", requireAdmin, async (req, res, next) => {
 var document_routes_default = router7;
 
 // server/routes/profile.routes.ts
+init_db();
 import { Router as Router8 } from "express";
 import multer2 from "multer";
 import path4 from "path";
@@ -3205,10 +3276,94 @@ router8.get("/invoices", async (req, res, next) => {
     next(error);
   }
 });
+router8.get("/invoices/:orderId/download", async (req, res, next) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+    const { orderId } = req.params;
+    if (orderId.startsWith("INV-")) {
+      const [rows] = await pool.query("SELECT * FROM invoices WHERE id = ?", [orderId]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Invoice not found" });
+      }
+      const invoice = rows[0];
+      if (invoice.user_id !== req.user.id && req.user.role !== "admin" && req.user.role !== "super_admin") {
+        return res.status(403).json({ error: "Forbidden. You do not own this invoice." });
+      }
+      const [userRows] = await pool.query("SELECT name, email FROM users WHERE id = ?", [invoice.user_id]);
+      const user = userRows[0];
+      const cleanAmountStr = invoice.amount.replace(/[₹,]/g, "");
+      const numericAmount = parseFloat(cleanAmountStr) || 0;
+      const { generateInvoiceBuffer: generateInvoiceBuffer3 } = await Promise.resolve().then(() => (init_invoice_service(), invoice_service_exports));
+      const pdfBuffer2 = await generateInvoiceBuffer3(
+        invoice.id,
+        numericAmount,
+        user?.name || "Client",
+        user?.email || "",
+        invoice.service || "General Filing Services"
+      );
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename=Invoice_${orderId}.pdf`);
+      return res.send(pdfBuffer2);
+    }
+    const orderModel = await Promise.resolve().then(() => (init_order_model(), order_model_exports));
+    const order = await orderModel.findOrderById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    if (order.user_id !== req.user.id && req.user.role !== "admin" && req.user.role !== "super_admin") {
+      return res.status(403).json({ error: "Forbidden. You do not own this order." });
+    }
+    const items = await orderModel.getOrderItems(orderId);
+    const serviceName = items.length > 0 && items[0].service_name ? items[0].service_name : "General Filing Services";
+    const { generateInvoiceBuffer: generateInvoiceBuffer2 } = await Promise.resolve().then(() => (init_invoice_service(), invoice_service_exports));
+    const pdfBuffer = await generateInvoiceBuffer2(
+      order.id,
+      order.total_amount,
+      order.user_name || "Client",
+      order.user_email || "",
+      serviceName
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=Invoice_${orderId}.pdf`);
+    return res.send(pdfBuffer);
+  } catch (error) {
+    next(error);
+  }
+});
 router8.get("/stats/activity", async (req, res, next) => {
   try {
-    const [stats] = await pool.query("SELECT name, requests FROM activity_stats ORDER BY id ASC");
-    return res.json(stats);
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+    const [orders] = await pool.query(
+      "SELECT created_at FROM orders WHERE user_id = ?",
+      [req.user.id]
+    );
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const stats = [];
+    const now = /* @__PURE__ */ new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      stats.push({
+        name: monthNames[d.getMonth()],
+        year: d.getFullYear(),
+        monthIndex: d.getMonth(),
+        requests: 0
+      });
+    }
+    orders.forEach((order) => {
+      if (!order.created_at) return;
+      const orderDate = new Date(order.created_at);
+      const orderYear = orderDate.getFullYear();
+      const orderMonth = orderDate.getMonth();
+      const bucket = stats.find((s) => s.year === orderYear && s.monthIndex === orderMonth);
+      if (bucket) {
+        bucket.requests += 1;
+      }
+    });
+    const formattedStats = stats.map((s) => ({
+      name: s.name,
+      requests: s.requests
+    }));
+    return res.json(formattedStats);
   } catch (error) {
     next(error);
   }

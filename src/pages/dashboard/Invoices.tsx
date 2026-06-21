@@ -14,6 +14,32 @@ export default function Invoices() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const handleDownload = async (invoice: Invoice) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/invoices/${invoice.id}/download`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to download invoice (Status: ${response.status})`);
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Invoice_${invoice.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error('Error downloading invoice:', err);
+      alert(err.message || 'Error downloading invoice');
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     fetch('/api/invoices', {
@@ -157,7 +183,10 @@ export default function Invoices() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 text-slate-400 hover:text-dark transition-colors rounded-lg hover:bg-slate-100 inline-flex">
+                      <button 
+                        onClick={() => handleDownload(invoice)}
+                        className="p-2 text-slate-400 hover:text-dark transition-colors rounded-lg hover:bg-slate-100 inline-flex cursor-pointer"
+                      >
                         <Download className="h-5 w-5" />
                       </button>
                     </td>

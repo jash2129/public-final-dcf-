@@ -29,6 +29,12 @@ export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState('All');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [dateRange, setDateRange] = useState<{start: string | null, end: string | null}>({start: null, end: null});
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, dateRange]);
 
   // Row Action State
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -38,7 +44,17 @@ export default function AdminOrders() {
   const [editAmount, setEditAmount] = useState('');
   const [isSavingAmount, setIsSavingAmount] = useState(false);
 
-  const [dateRange, setDateRange] = useState<{start: string | null, end: string | null}>({start: null, end: null});
+  useEffect(() => {
+    if (orders.length > 0 && initialSearch) {
+      const matchedOrder = orders.find(
+        o => o.id.toLowerCase() === initialSearch.toLowerCase()
+      );
+      if (matchedOrder) {
+        setSelectedOrder(matchedOrder);
+        setIsDetailModalOpen(true);
+      }
+    }
+  }, [orders, initialSearch]);
 
   const fetchOrders = async () => {
     setIsLoading(true);
@@ -207,6 +223,14 @@ export default function AdminOrders() {
     });
   }, [orders, searchTerm, statusFilter, dateRange]);
 
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage) || 1;
+
+  const paginatedOrders = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredOrders, currentPage]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -294,7 +318,7 @@ export default function AdminOrders() {
                     </tr>
                   ))
                 ) : filteredOrders.length > 0 ? (
-                  filteredOrders.map((order) => (
+                  paginatedOrders.map((order) => (
                     <motion.tr 
                       layout
                       initial={{ opacity: 0 }}
@@ -430,13 +454,36 @@ export default function AdminOrders() {
         
         <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
           <p className="text-sm text-slate-500 font-medium font-sans">
-            Showing <span className="text-dark font-bold">{filteredOrders.length}</span> of {orders.length} total orders
+            Showing <span className="text-dark font-bold">
+              {filteredOrders.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredOrders.length)}
+            </span> of {filteredOrders.length} filtered orders (total {orders.length})
           </p>
-          <div className="flex gap-2">
-            <button className="px-4 py-2 text-sm font-bold text-slate-400 bg-white border border-slate-200 rounded-xl cursor-not-allowed">
+          <div className="flex gap-2 items-center">
+            <button 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
               Previous
             </button>
-            <button className="px-4 py-2 text-sm font-bold text-dark bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1.5 border rounded-xl text-sm font-bold cursor-pointer ${
+                  currentPage === page 
+                    ? 'bg-dark text-white border-dark' 
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button 
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
               Next
             </button>
           </div>
@@ -517,15 +564,7 @@ export default function AdminOrders() {
                   <div className="grid grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                     <div>
                       <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Amount (₹)</label>
-                      <div className="relative mt-2">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
-                        <input 
-                          type="number"
-                          value={editAmount}
-                          onChange={(e) => setEditAmount(e.target.value)}
-                          className="w-full pl-7 pr-2 py-1.5 text-sm font-bold border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand bg-white text-dark"
-                        />
-                      </div>
+                      <p className="text-lg font-bold text-dark mt-2">{selectedOrder.amount}</p>
                     </div>
                     <div>
                       <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Date</label>
@@ -533,23 +572,12 @@ export default function AdminOrders() {
                     </div>
                   </div>
 
-                  <div className="pt-4 flex gap-3">
+                  <div className="pt-4">
                     <button 
                       onClick={() => setIsDetailModalOpen(false)}
-                      className="flex-1 py-4 border border-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-50 transition-all"
+                      className="w-full py-4 bg-dark text-white rounded-2xl font-bold hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl flex items-center justify-center cursor-pointer"
                     >
                       Close
-                    </button>
-                    <button 
-                      onClick={handleSaveAmount}
-                      disabled={isSavingAmount}
-                      className="flex-1 py-4 bg-dark text-white rounded-2xl font-bold hover:bg-dark-200 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {isSavingAmount ? (
-                        <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        'Save Price'
-                      )}
                     </button>
                   </div>
                 </div>

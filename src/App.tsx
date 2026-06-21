@@ -87,6 +87,7 @@ export default function App() {
           <Route path="compliance" element={<DashboardCompliance />} />
           <Route path="invoices" element={<DashboardInvoices />} />
           <Route path="settings" element={<DashboardSettings />} />
+          <Route path="tools/compliance-calendar" element={<ComplianceCalendar />} />
           <Route path="tools/gst-calculator" element={<GSTCalculator />} />
           <Route path="tools" element={<Navigate to="tools/gst-calculator" replace />} />
         </Route>
@@ -106,6 +107,7 @@ export default function App() {
           <Route path="compliance" element={<AdminCompliance />} />
           <Route path="services" element={<AdminServices />} />
           <Route path="users/:userId" element={<UserDetail />} />
+          <Route path="tools/compliance-calendar" element={<ComplianceCalendar />} />
           <Route path="tools/gst-calculator" element={<GSTCalculator />} />
           <Route path="tools" element={<Navigate to="tools/gst-calculator" replace />} />
         </Route>

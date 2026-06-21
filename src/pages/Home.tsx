@@ -293,14 +293,14 @@ export default function Home() {
       {/* Trusted By Banner */}
       <section className="bg-white border-b border-slate-100 py-8 relative z-20">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-12">
-          <p className="text-center text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Trusted by 10,000+ Fast-Growing Companies</p>
+          <p className="text-center text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Trusted by 1000+ Fast-Growing Companies</p>
           <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
             {/* Placeholder logos using text for now */}
-            <div className="text-2xl font-bold font-display">Acme Corp</div>
-            <div className="text-2xl font-bold font-display">GlobalTech</div>
-            <div className="text-2xl font-bold font-display">Nexus</div>
-            <div className="text-2xl font-bold font-display">Stark Ind.</div>
-            <div className="text-2xl font-bold font-display hidden md:block">Wayne Ent.</div>
+            <div className="text-2xl font-bold font-display">JSW Steel</div>
+            <div className="text-2xl font-bold font-display">Aurobindo</div>
+            <div className="text-2xl font-bold font-display">Dr.Reddys</div>
+            <div className="text-2xl font-bold font-display">Velary Labs</div>
+            <div className="text-2xl font-bold font-display hidden md:block">Wellsfargo</div>
           </div>
         </div>
       </section>

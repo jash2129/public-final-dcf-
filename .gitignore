@@ -84,3 +84,12 @@ dist-ssr/
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# User uploads, backups, and temporary files
+*.zip
+uploads/
+artifacts_link/
+*.csv
+*.sql
+db-services.json
+

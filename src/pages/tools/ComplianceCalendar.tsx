@@ -77,14 +77,26 @@ export default function ComplianceCalendar() {
   const [searchParams] = useSearchParams();
   const [isPersonalized, setIsPersonalized] = useState(searchParams.get('personalized') === 'true');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
     if (!token) {
       setIsPersonalized(false);
       return;
     }
     setIsLoggedIn(true);
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        if (u.role === 'admin' || u.role === 'super_admin') {
+          setIsAdmin(true);
+        }
+      } catch (e) {
+        // ignore parsing errors
+      }
+    }
 
     const fetchData = async () => {
       try {
@@ -207,11 +219,23 @@ export default function ComplianceCalendar() {
             <div className="flex flex-wrap gap-4 w-full xl:w-auto">
               {isPersonalized && (
                 <button 
-                  onClick={() => navigate('/dashboard/compliance')}
-                  className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-dark text-white px-8 py-3.5 rounded-2xl font-bold text-sm hover:bg-dark-200 transition-all shadow-premium active:scale-95"
+                  onClick={() => {
+                    const userStr = localStorage.getItem('user');
+                    let isAdminUser = false;
+                    if (userStr) {
+                      try {
+                        const u = JSON.parse(userStr);
+                        if (u.role === 'admin' || u.role === 'super_admin') {
+                          isAdminUser = true;
+                        }
+                      } catch (e) {}
+                    }
+                    navigate(isAdminUser ? '/admin/compliance' : '/dashboard/compliance');
+                  }}
+                  className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-dark text-white px-8 py-3.5 rounded-2xl font-bold text-sm hover:bg-dark-200 transition-all shadow-premium active:scale-95 cursor-pointer"
                 >
                   <ArrowRight className="h-4 w-4 rotate-180" />
-                  Back to Dashboard
+                  Back to Compliance Tracker
                 </button>
               )}
               <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-soft w-full sm:w-auto">
@@ -228,10 +252,12 @@ export default function ComplianceCalendar() {
                   Grid
                 </button>
               </div>
-              <button className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 text-dark px-8 py-3.5 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all shadow-soft active:scale-95">
-                <Download className="h-4 w-4" />
-                Export
-              </button>
+              {!isAdmin && (
+                <button className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-white border border-slate-200 text-dark px-8 py-3.5 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all shadow-soft active:scale-95">
+                  <Download className="h-4 w-4" />
+                  Export
+                </button>
+              )}
             </div>
           </div>
 
@@ -254,16 +280,18 @@ export default function ComplianceCalendar() {
               </div>
             </div>
 
-            <div className="bg-dark text-white p-8 rounded-[32px] shadow-premium relative overflow-hidden group">
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-brand rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
-              <h3 className="font-bold text-xl mb-3 relative z-10">Expert Help</h3>
-              <p className="text-slate-400 text-sm mb-6 leading-relaxed relative z-10">
-                Let our compliance experts handle your filings while you grow.
-              </p>
-              <button className="w-full bg-brand text-dark py-3.5 rounded-xl font-black text-sm hover:bg-brand-hover transition-all active:scale-95 relative z-10">
-                Talk to Expert
-              </button>
-            </div>
+            {!isAdmin && (
+              <div className="bg-dark text-white p-8 rounded-[32px] shadow-premium relative overflow-hidden group">
+                <div className="absolute -top-12 -right-12 w-32 h-32 bg-brand rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <h3 className="font-bold text-xl mb-3 relative z-10">Expert Help</h3>
+                <p className="text-slate-400 text-sm mb-6 leading-relaxed relative z-10">
+                  Let our compliance experts handle your filings while you grow.
+                </p>
+                <button className="w-full bg-brand text-dark py-3.5 rounded-xl font-black text-sm hover:bg-brand-hover transition-all active:scale-95 relative z-10">
+                  Talk to Expert
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Calendar Main View */}
@@ -454,6 +482,14 @@ export default function ComplianceCalendar() {
                               </div>
 
                               <div className="flex items-center gap-2">
+                                {task.type !== 'holiday' && status !== 'completed' && (
+                                  <a 
+                                    href="tel:+919000243270"
+                                    className="bg-dark text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-dark-200 transition-colors inline-block text-center cursor-pointer mr-2"
+                                  >
+                                    Take Action
+                                  </a>
+                                )}
                                 {status === 'completed' ? (
                                   <div className="flex items-center gap-1 text-emerald-600">
                                     <CheckCircle2 className="h-4 w-4" />

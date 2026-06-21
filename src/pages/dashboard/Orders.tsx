@@ -1,6 +1,6 @@
 import { Search, Filter, Download, Eye, X, Plus } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { serviceCategories } from '../../data/services';
 import DateRangeFilter from '../../components/orders/DateRangeFilter';
@@ -16,6 +16,8 @@ interface Order {
 
 export default function Orders() {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('id') || searchParams.get('search') || '';
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,16 +40,31 @@ export default function Orders() {
   }, [isModalOpen]);
 
   // Filter & Search State
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState('All');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [dateRange, setDateRange] = useState<{start: string | null, end: string | null}>({start: null, end: null});
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, dateRange]);
 
   // Row Action State
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  
-  // Date Filter State
-  const [dateRange, setDateRange] = useState<{start: string | null, end: string | null}>({start: null, end: null});
+
+  useEffect(() => {
+    if (orders.length > 0 && initialSearch) {
+      const matchedOrder = orders.find(
+        o => o.id.toLowerCase() === initialSearch.toLowerCase()
+      );
+      if (matchedOrder) {
+        setSelectedOrder(matchedOrder);
+        setIsDetailModalOpen(true);
+      }
+    }
+  }, [orders, initialSearch]);
 
   const uniqueCategories = React.useMemo(() => {
     return Array.from(new Set(servicesCatalog.map(s => s.category))).filter(Boolean).sort();
@@ -275,6 +292,14 @@ export default function Orders() {
     });
   }, [orders, searchTerm, statusFilter]);
 
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage) || 1;
+
+  const paginatedOrders = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredOrders, currentPage]);
+
   const handleExport = () => {
     if (filteredOrders.length === 0) return;
 
@@ -365,7 +390,7 @@ export default function Orders() {
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     className="absolute top-full right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-2 overflow-hidden"
                   >
-                    {['All', 'Processing', 'Action Required', 'Completed'].map((status) => (
+                    {['All', 'Placed', 'Processing', 'Action Required', 'Completed'].map((status) => (
                       <button
                         key={status}
                         onClick={() => {
@@ -429,7 +454,7 @@ export default function Orders() {
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => (
+                paginatedOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-brand/5 transition-colors group">
                     <td className="px-6 py-4 text-sm font-bold text-dark">{order.id}</td>
                     <td className="px-6 py-4 text-sm font-medium text-slate-700">{order.service}</td>
@@ -439,6 +464,7 @@ export default function Orders() {
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
                         order.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
                         order.status === 'Action Required' ? 'bg-amber-100 text-amber-700' :
+                        order.status === 'Placed' ? 'bg-slate-100 text-slate-700' :
                         'bg-blue-100 text-blue-700'
                       }`}>
                         {order.status}
@@ -490,7 +516,7 @@ export default function Orders() {
           ) : filteredOrders.length === 0 ? (
             <div className="p-6 text-center text-slate-500">No orders found.</div>
           ) : (
-            filteredOrders.map((order) => (
+            paginatedOrders.map((order) => (
               <div 
                 key={order.id} 
                 onClick={() => {
@@ -504,9 +530,10 @@ export default function Orders() {
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{order.id}</span>
                     <h3 className="font-bold text-dark">{order.service}</h3>
                   </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${
                     order.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
                     order.status === 'Action Required' ? 'bg-amber-100 text-amber-700' :
+                    order.status === 'Placed' ? 'bg-slate-100 text-slate-700' :
                     'bg-blue-100 text-blue-700'
                   }`}>
                     {order.status}
@@ -535,11 +562,38 @@ export default function Orders() {
         </div>
         
         <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
-          <span>Showing {filteredOrders.length > 0 ? 1 : 0} to {filteredOrders.length} of {filteredOrders.length} entries</span>
-          <div className="flex gap-1">
-            <button className="px-3 py-1 border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-50" disabled>Prev</button>
-            <button className="px-3 py-1 border border-slate-200 rounded-md bg-dark text-white">1</button>
-            <button className="px-3 py-1 border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-50" disabled>Next</button>
+          <span>
+            Showing {filteredOrders.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{' '}
+            {Math.min(currentPage * itemsPerPage, filteredOrders.length)} of {filteredOrders.length} entries
+          </span>
+          <div className="flex gap-1 items-center">
+            <button 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-bold text-xs"
+            >
+              Prev
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1 border rounded-md cursor-pointer font-bold text-xs ${
+                  currentPage === page 
+                    ? 'bg-dark text-white border-dark' 
+                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button 
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-bold text-xs"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -748,6 +802,7 @@ export default function Orders() {
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
                           selectedOrder.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
                           selectedOrder.status === 'Action Required' ? 'bg-amber-100 text-amber-700' :
+                          selectedOrder.status === 'Placed' ? 'bg-slate-100 text-slate-700' :
                           'bg-blue-100 text-blue-700'
                         }`}>
                           {selectedOrder.status}

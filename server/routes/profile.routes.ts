@@ -193,6 +193,84 @@ router.get('/invoices', async (req: AuthenticatedRequest, res, next) => {
 });
 
 /**
+ * GET /api/invoices/:orderId/download
+ * Generate a PDF for an order or a seeded invoice and serve it as a download for the authenticated client.
+ */
+router.get('/invoices/:orderId/download', async (req: AuthenticatedRequest, res, next) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    const { orderId } = req.params;
+
+    // Check if it is a seeded invoice ID (starts with "INV-")
+    if (orderId.startsWith('INV-')) {
+      const [rows] = await pool.query<any[]>('SELECT * FROM invoices WHERE id = ?', [orderId]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Invoice not found' });
+      }
+      const invoice = rows[0];
+      
+      // Verify ownership (only allow if they own it or are admin/super_admin)
+      if (invoice.user_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Forbidden. You do not own this invoice.' });
+      }
+      
+      const [userRows] = await pool.query<any[]>('SELECT name, email FROM users WHERE id = ?', [invoice.user_id]);
+      const user = userRows[0];
+
+      // Parse amount string like "₹15,000" to number
+      const cleanAmountStr = invoice.amount.replace(/[₹,]/g, '');
+      const numericAmount = parseFloat(cleanAmountStr) || 0;
+
+      const { generateInvoiceBuffer } = await import('../services/invoice.service');
+      const pdfBuffer = await generateInvoiceBuffer(
+        invoice.id,
+        numericAmount,
+        user?.name || 'Client',
+        user?.email || '',
+        invoice.service || 'General Filing Services'
+      );
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=Invoice_${orderId}.pdf`);
+      return res.send(pdfBuffer);
+    }
+
+    // Otherwise, assume it is a real order ID (starts with "DCF-")
+    const orderModel = await import('../models/order.model');
+    const order = await orderModel.findOrderById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Verify ownership
+    if (order.user_id !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+      return res.status(403).json({ error: 'Forbidden. You do not own this order.' });
+    }
+
+    const items = await orderModel.getOrderItems(orderId);
+    const serviceName = items.length > 0 && items[0].service_name 
+      ? items[0].service_name 
+      : 'General Filing Services';
+
+    const { generateInvoiceBuffer } = await import('../services/invoice.service');
+    const pdfBuffer = await generateInvoiceBuffer(
+      order.id,
+      order.total_amount,
+      order.user_name || 'Client',
+      order.user_email || '',
+      serviceName
+    );
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Invoice_${orderId}.pdf`);
+    return res.send(pdfBuffer);
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+/**
  * GET /api/stats/activity
  * Get activity requests statistics (ROC / compliance / logins charts)
  */
