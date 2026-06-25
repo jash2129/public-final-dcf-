@@ -219,7 +219,7 @@ export default function ServicePage() {
             "provider": {
               "@type": "Organization",
               "name": "Deccan Filings",
-              "url": "https://www.deccan-filings.com"
+              "url": "https://deccanfilings.com"
             },
             "areaServed": "IN",
             "hasOfferCatalog": {
