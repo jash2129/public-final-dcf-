@@ -64,12 +64,13 @@
   --color-secondary: var(--color-brand);
   --color-secondary-hover: var(--color-brand-hover);
   
-  --color-dark: var(--color-text-primary);
+  --color-dark: #1A1715;
   --color-dark-100: #191919;
   --color-dark-200: var(--ds-text-muted);
   --color-dark-300: #B5AFA8;
   --color-dark-400: #8C8480;
   
+  --color-background: var(--ds-bg);
   --color-accent: var(--color-accent);
   --color-surface: var(--ds-surface);
   --color-surface-hover: var(--ds-surface-hover);

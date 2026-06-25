@@ -318,7 +318,7 @@ export default function DashboardLayout() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen transition-all duration-300">
-        <header className="bg-white/60 backdrop-blur-2xl border-b border-slate-200/50 h-20 flex items-center justify-between px-8 sticky top-0 z-10 transition-all duration-300 shadow-sm">
+        <header className="bg-surface/60 backdrop-blur-2xl border-b border-slate-200/50 h-20 flex items-center justify-between px-8 sticky top-0 z-10 transition-all duration-300 shadow-sm">
           {isMobileSearchOpen ? (
             <div className="flex-1 flex items-center gap-4">
               <div className="flex-1">
@@ -404,7 +404,7 @@ export default function DashboardLayout() {
       </div>
 
       {/* Dynamic Bottom Navigation (Mobile Only) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/80 backdrop-blur-xl border-t border-slate-200 px-4 pb-safe shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-surface/80 backdrop-blur-xl border-t border-slate-200 px-4 pb-safe shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
         <div className="flex justify-around items-center h-16">
           {(user.role === 'admin' || user.role === 'super_admin' ? adminNavItems : navItems).slice(0, 4).map((item) => {
             const isActive = location.pathname === item.path || (item.path !== '/dashboard' && item.path !== '/admin' && location.pathname.startsWith(item.path));

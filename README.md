@@ -34,7 +34,7 @@ To start the full-stack development server (which runs both the Express backend 
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`.
+The application will be available at `http://localhost:3005`.
 
 *Note: The SQLite database (`database.sqlite`) will be automatically created and seeded with initial data the first time you run the server.*
 
@@ -56,7 +56,7 @@ After building the frontend, you can start the production server:
 npm run start
 ```
 
-The production server will serve the static files from the `dist` directory and handle API requests on `http://localhost:3000`.
+The production server will serve the static files from the `dist` directory and handle API requests on `http://localhost:3005`.
 
 ## Project Structure
 

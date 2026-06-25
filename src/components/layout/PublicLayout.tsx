@@ -268,7 +268,7 @@ export default function PublicLayout() {
       </div>
 
       {/* Navigation */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-slate-200/40 sticky top-0 z-50 shadow-sm transition-all duration-300">
+      <header className="bg-surface/90 backdrop-blur-xl border-b border-slate-200/40 sticky top-0 z-50 shadow-sm transition-all duration-300">
         {/* Top glowing edge line */}
         <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-hover/70 to-secondary/70"></div>
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -287,7 +287,7 @@ export default function PublicLayout() {
             <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-2 h-full mx-2 2xl:mx-4">
               {navCategories.slice(0, 7).map((category, index) => (
                 <div key={category.title} className="relative group h-full flex items-center">
-                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-slate-100/80 transition-all whitespace-nowrap">
+                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-surface-hover/80 transition-all whitespace-nowrap">
                     {category.title} 
                     {category.title === 'Finance' && (
                       <span className="relative flex h-2 w-2 ml-1">
@@ -299,9 +299,9 @@ export default function PublicLayout() {
                   </button>
                   
                   {/* Mega Menu with Premium Glassmorphism and 3-Column Layout */}
-                  <div className={`absolute top-full ${index <= 1 ? 'left-0' : index >= 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'} w-[820px] bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-2xl rounded-3xl py-7 px-7 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 z-50 grid grid-cols-12 gap-6`}>
+                  <div className={`absolute top-full ${index <= 1 ? 'left-0' : index >= 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'} w-[820px] bg-surface/95 backdrop-blur-xl border border-slate-200/50 shadow-2xl rounded-3xl py-7 px-7 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 z-50 grid grid-cols-12 gap-6`}>
                     {/* Left Column Promo Card */}
-                    <div className="col-span-4 bg-slate-50/80 rounded-2xl p-5 border border-slate-100/80 flex flex-col justify-between relative overflow-hidden group/promo">
+                    <div className="col-span-4 bg-surface-hover/80 rounded-2xl p-5 border border-slate-200/40 flex flex-col justify-between relative overflow-hidden group/promo">
                       <div className="absolute top-0 right-0 w-24 h-24 bg-brand/10 rounded-full blur-2xl"></div>
                       <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-secondary/5 rounded-full blur-2xl"></div>
                       <div className="relative z-10">
@@ -344,10 +344,10 @@ export default function PublicLayout() {
               {/* More Dropdown */}
               {navCategories.length > 7 && (
                 <div className="relative group h-full flex items-center">
-                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-slate-100/80 transition-all">
+                  <button className="flex items-center gap-1 text-dark-400 hover:text-dark font-medium px-2 2xl:px-3 py-2 text-sm rounded-full hover:bg-surface-hover/80 transition-all">
                     More <ChevronDown className="h-3.5 w-3.5 opacity-50 group-hover:rotate-180 transition-transform duration-300" />
                   </button>
-                  <div className="absolute top-full right-0 w-64 bg-white/95 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 z-50">
+                  <div className="absolute top-full right-0 w-64 bg-surface/95 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 z-50">
                     {navCategories.slice(7).map((category) => (
                       <div key={category.title} className="relative group/sub px-2">
                         <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-dark-400 hover:text-dark hover:bg-slate-50 rounded-xl transition-all">

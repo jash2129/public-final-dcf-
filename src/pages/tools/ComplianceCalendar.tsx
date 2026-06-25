@@ -173,7 +173,7 @@ export default function ComplianceCalendar() {
   const daysWithTasks = filteredMonthDays.sort((a, b) => a.day - b.day);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 py-8 md:py-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-8 md:py-16 px-4 sm:px-6 lg:px-8">
       <Helmet>
         <title>Compliance Calendar 2026 | Deccan Filings</title>
         <meta name="description" content="Stay ahead of your statutory deadlines with our interactive Compliance Calendar 2026. Track GST, TDS, Payroll, and other statutory filings for your business." />
@@ -264,7 +264,7 @@ export default function ComplianceCalendar() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Summary Sidebar */}
           <div className={`lg:col-span-3 space-y-6 order-2 lg:order-1 ${viewMode === 'schedule' ? 'hidden lg:block' : ''}`}>
-            <div className="glass p-8 rounded-[32px] shadow-soft">
+            <div className="glass dark:glass-dark p-8 rounded-[32px] shadow-soft">
               <h3 className="font-bold text-dark mb-6 flex items-center gap-2 text-lg">
                 <Info className="h-5 w-5 text-secondary" />
                 Month Summary
@@ -298,7 +298,7 @@ export default function ComplianceCalendar() {
           <div className="lg:col-span-9 space-y-8 order-1 lg:order-2">
             <div className="bg-white rounded-[32px] md:rounded-[40px] border border-slate-200 shadow-premium overflow-hidden">
               {/* Calendar Controls */}
-              <div className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-8 gap-4 border-b border-slate-100 bg-slate-50/20">
+              <div className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-8 gap-4 border-b border-slate-100 bg-surface-hover/20">
                 <div className="flex items-center gap-2 md:gap-4">
                   <button 
                     onClick={prevMonth}
@@ -347,7 +347,7 @@ export default function ComplianceCalendar() {
                     {/* Grid Days */}
                     <div className="grid grid-cols-7">
                       {paddingArray.map((i) => (
-                        <div key={`padding-${i}`} className="aspect-square border-r border-b border-slate-50 bg-slate-50/10" />
+                        <div key={`padding-${i}`} className="aspect-square border-r border-b border-[var(--ds-border)] bg-surface-hover/10" />
                       ))}
                       {daysArray.map((day) => {
                         const task = getDayTask(day);
@@ -360,7 +360,7 @@ export default function ComplianceCalendar() {
                           <div 
                             key={day} 
                             onClick={() => setSelectedDay(day)}
-                            className={`calendar-day group aspect-square min-h-0 md:min-h-[120px] p-1 md:p-3 transition-all duration-300 cursor-pointer border-r border-b border-slate-50 ${
+                            className={`calendar-day group aspect-square min-h-0 md:min-h-[120px] p-1 md:p-3 transition-all duration-300 cursor-pointer border-r border-b border-[var(--ds-border)] ${
                               task?.type === 'holiday' && isRelevant ? 'bg-holiday-bg/10' : ''
                             } ${isToday ? 'bg-brand/5' : ''} ${isSelected ? 'ring-2 ring-brand ring-inset bg-brand/5' : ''}`}
                           >
@@ -556,8 +556,8 @@ function StatItem({ label, count, color }: { label: string; count: number; color
   };
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-2xl bg-white/50 border border-slate-100 hover:border-slate-200 transition-all shadow-sm">
-      <span className="text-sm font-bold text-slate-500">{label}</span>
+    <div className="flex items-center justify-between p-4 rounded-2xl bg-surface/50 border border-slate-100 hover:border-slate-200 transition-all shadow-sm">
+      <span className="text-sm font-bold text-dark">{label}</span>
       <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${colorMap[color]}`}>
         {count}
       </span>

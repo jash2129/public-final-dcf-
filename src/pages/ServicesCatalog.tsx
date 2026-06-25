@@ -128,7 +128,7 @@ export default function ServicesCatalog() {
   }, [loading, location.hash]);
 
   return (
-    <div className="bg-[#fafafa] min-h-screen py-20 relative overflow-hidden">
+    <div className="bg-background min-h-screen py-20 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
       
@@ -158,7 +158,7 @@ export default function ServicesCatalog() {
         </motion.div>
 
         {/* Sticky category filter tabs bar */}
-        <div className="sticky top-24 z-40 bg-white/90 backdrop-blur-md border border-slate-200/50 rounded-2xl p-2 mb-16 shadow-soft max-w-5xl mx-auto flex items-center gap-1 overflow-x-auto scrollbar-none scroll-smooth">
+        <div className="sticky top-24 z-40 bg-surface/90 backdrop-blur-md border border-slate-200/50 rounded-2xl p-2 mb-16 shadow-soft max-w-5xl mx-auto flex items-center gap-1 overflow-x-auto scrollbar-none scroll-smooth">
           {serviceCategories.map((category) => (
             <button
               key={category.slug}
@@ -166,7 +166,7 @@ export default function ServicesCatalog() {
               className={`px-4.5 py-2.5 rounded-xl text-xs font-black transition-all shrink-0 capitalize whitespace-nowrap cursor-pointer ${
                 activeCategory === category.slug 
                   ? 'bg-dark text-white shadow-md' 
-                  : 'text-slate-500 hover:text-dark hover:bg-slate-100/80'
+                  : 'text-slate-500 hover:text-dark hover:bg-surface-hover/80'
               }`}
             >
               {category.title}
