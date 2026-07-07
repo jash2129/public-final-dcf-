@@ -394,7 +394,12 @@ async function setupDatabase() {
       );
       console.log("Super Admin user seeded (superadmin@deccanfilings.com / admin123).");
     }
-    await seedServices();
+    const [serviceCountRows] = await pool.query("SELECT COUNT(*) as count FROM services");
+    if (serviceCountRows[0].count === 0) {
+      await seedServices();
+    } else {
+      await pool.execute("DELETE FROM services WHERE code = 'code'");
+    }
     await seedTestData();
     await seedBlogPosts();
     return pool;
@@ -3332,38 +3337,8 @@ router8.get("/invoices/:orderId/download", async (req, res, next) => {
 });
 router8.get("/stats/activity", async (req, res, next) => {
   try {
-    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-    const [orders] = await pool.query(
-      "SELECT created_at FROM orders WHERE user_id = ?",
-      [req.user.id]
-    );
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const stats = [];
-    const now = /* @__PURE__ */ new Date();
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      stats.push({
-        name: monthNames[d.getMonth()],
-        year: d.getFullYear(),
-        monthIndex: d.getMonth(),
-        requests: 0
-      });
-    }
-    orders.forEach((order) => {
-      if (!order.created_at) return;
-      const orderDate = new Date(order.created_at);
-      const orderYear = orderDate.getFullYear();
-      const orderMonth = orderDate.getMonth();
-      const bucket = stats.find((s) => s.year === orderYear && s.monthIndex === orderMonth);
-      if (bucket) {
-        bucket.requests += 1;
-      }
-    });
-    const formattedStats = stats.map((s) => ({
-      name: s.name,
-      requests: s.requests
-    }));
-    return res.json(formattedStats);
+    const [stats] = await pool.query("SELECT name, requests FROM activity_stats ORDER BY id ASC");
+    return res.json(stats);
   } catch (error) {
     next(error);
   }

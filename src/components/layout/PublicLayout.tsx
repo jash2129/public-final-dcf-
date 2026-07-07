@@ -619,7 +619,26 @@ export default function PublicLayout() {
             ))}
           </div>
           
-          <div className="border-t border-slate-800/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+          {/* ── Regulatory & Policy Disclaimer ── */}
+          <div className="border-t border-slate-800/40 pt-6 pb-6">
+            <p className="text-[11px] leading-relaxed text-slate-500 text-center md:text-left">
+              <span className="font-semibold text-slate-400">Disclaimer: </span>
+              Deccan Filings is an independent, private CA-assisted professional services platform operated by{' '}
+              <strong className="text-slate-300">TOR BUSINESS SOLUTIONS PRIVATE LIMITED</strong>. We are{' '}
+              <strong className="text-slate-300">not affiliated with, endorsed by, or an official portal of</strong> the Income Tax
+              Department of India, the Ministry of Corporate Affairs (MCA), the Registrar of Companies (RoC), or any other
+              government authority. All third-party brand names, trademarks, logos, and government portal names referenced on
+              this website are the property of their respective owners and are used solely for identification and descriptive
+              purposes. Our professional service and consultation fees are{' '}
+              <strong className="text-slate-300">entirely separate</strong> from any mandatory government filing fees,
+              statutory dues, or taxes payable to government departments, which remain the sole responsibility of the
+              applicant. Deccan Filings does not guarantee specific government processing timelines, approval outcomes, tax
+              refund amounts, or results, as these are determined solely by the relevant government authority.
+            </p>
+          </div>
+
+          {/* ── Copyright & Links ── */}
+          <div className="border-t border-slate-800/40 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
             <div className="text-center md:text-left space-y-1">
               <p>© 2026 Deccan Filings. All rights reserved.</p>
               <p>Deccan Filings is a brand owned and operated by <strong className="text-white">TOR BUSINESS SOLUTIONS PRIVATE LIMITED.</strong></p>
@@ -632,9 +651,9 @@ export default function PublicLayout() {
                 { name: 'Terms of Service', path: '/terms' },
                 { name: 'Refund Policy', path: '/refund' }
               ].map(link => (
-                <Link 
+                <Link
                   key={link.name}
-                  to={link.path} 
+                  to={link.path}
                   className="hover:text-white transition-colors relative py-0.5 inline-block after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100"
                 >
                   {link.name}

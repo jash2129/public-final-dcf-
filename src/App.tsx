@@ -40,6 +40,8 @@ import UserDetail from './pages/admin/UserDetail';
 import About from './pages/About';
 import GSTCalculator from './pages/tools/GSTCalculator';
 import ComplianceCalendar from './pages/tools/ComplianceCalendar';
+import ItrLandingPage from './pages/ItrLandingPage';
+import ItrLandingPageB from './pages/ItrLandingPageB';
 
 
 export default function App() {
@@ -65,6 +67,10 @@ export default function App() {
           <Route path="/refund" element={<RefundPolicy />} />
           <Route path="/refund" element={<RefundPolicy />} />
         </Route>
+
+        {/* Campaign Landing Pages */}
+        <Route path="/itr-filing" element={<ItrLandingPage />} />
+        <Route path="/itr-filing-b" element={<ItrLandingPageB />} />
 
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />

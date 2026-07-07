@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Building2, ArrowRight, CheckCircle2, Star } from 'lucide-react';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -6,7 +6,12 @@ import { useGoogleLogin } from '@react-oauth/google';
 
 export default function Register() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+
+  const initialName = searchParams.get('name') || '';
+  const initialEmail = searchParams.get('email') || '';
+  const initialPhone = searchParams.get('phone') || '';
 
   const [showCRMModal, setShowCRMModal] = useState(false);
   const [tempToken, setTempToken] = useState('');
@@ -196,6 +201,7 @@ export default function Register() {
                   required
                   className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   placeholder="John Doe"
+                  defaultValue={initialName}
                 />
               </div>
 
@@ -211,6 +217,7 @@ export default function Register() {
                   required
                   className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   placeholder="john@example.com"
+                  defaultValue={initialEmail}
                 />
               </div>
 
@@ -228,6 +235,7 @@ export default function Register() {
                   title="Please enter a valid WhatsApp number (10-15 digits)"
                   className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   placeholder="e.g. 9876543210"
+                  defaultValue={initialPhone}
                 />
               </div>
 
