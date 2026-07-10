@@ -212,13 +212,19 @@ export default function ItrLandingPageB() {
     setIsSubmitting(true);
     setErrors({});
 
+    const formattedPhone = phone.trim().startsWith('+91')
+      ? phone.trim()
+      : phone.trim().startsWith('91') && phone.trim().length === 12
+        ? `+${phone.trim()}`
+        : `+91${phone.trim()}`;
+
     try {
       await fetch('https://hook.eu1.make.com/kn9e94j7t8gs8lghxaa311k7v8su7ayo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
-          phone: phone.trim(),
+          phone: formattedPhone,
           email: email.trim(),
           variant: 'B',
           source: 'itr-filing-b',
@@ -234,7 +240,7 @@ export default function ItrLandingPageB() {
     setTimeout(() => {
       const params = new URLSearchParams({
         name: name.trim(),
-        phone: phone.trim(),
+        phone: formattedPhone,
         email: email.trim(),
         plan: 'assisted',
       });
@@ -269,11 +275,10 @@ export default function ItrLandingPageB() {
           HEADER — Leak-Free, No Nav
       ══════════════════════════════════════════════════ */}
       <header
-        className={`sticky top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
+        className={`sticky top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled
             ? 'bg-white/95 dark:bg-[#171514]/95 backdrop-blur-xl border-b border-slate-200 dark:border-[#242220] shadow-sm py-2.5'
             : 'bg-white dark:bg-[#171514] border-b border-slate-100 dark:border-[#242220] py-3'
-        }`}
+          }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex justify-between items-center">
           {/* Brand */}
@@ -430,11 +435,10 @@ export default function ItrLandingPageB() {
                             setName(e.target.value);
                             if (errors.name) setErrors((p) => ({ ...p, name: undefined }));
                           }}
-                          className={`w-full bg-[#F8FAFC] dark:bg-[#0F172A] border rounded-xl pl-10 pr-4 py-3 text-sm text-[#0F172A] dark:text-[#F8F6F0] placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                            errors.name
+                          className={`w-full bg-[#F8FAFC] dark:bg-[#0F172A] border rounded-xl pl-10 pr-4 py-3 text-sm text-[#0F172A] dark:text-[#F8F6F0] placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${errors.name
                               ? 'border-red-400 focus:ring-red-400'
                               : 'border-slate-200 dark:border-[#242220] focus:ring-[#EA580C]'
-                          }`}
+                            }`}
                         />
                       </div>
                       {errors.name && (
@@ -468,11 +472,10 @@ export default function ItrLandingPageB() {
                             setPhone(e.target.value.replace(/\D/g, ''));
                             if (errors.phone) setErrors((p) => ({ ...p, phone: undefined }));
                           }}
-                          className={`w-full bg-[#F8FAFC] border rounded-xl pl-20 pr-4 py-3 text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                            errors.phone
+                          className={`w-full bg-[#F8FAFC] border rounded-xl pl-20 pr-4 py-3 text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${errors.phone
                               ? 'border-red-400 focus:ring-red-400'
                               : 'border-slate-200 focus:ring-[#EA580C]'
-                          }`}
+                            }`}
                         />
                       </div>
                       {errors.phone && (
@@ -505,11 +508,10 @@ export default function ItrLandingPageB() {
                             setEmail(e.target.value);
                             if (errors.email) setErrors((p) => ({ ...p, email: undefined }));
                           }}
-                          className={`w-full bg-[#F8FAFC] border rounded-xl pl-10 pr-4 py-3 text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                            errors.email
+                          className={`w-full bg-[#F8FAFC] border rounded-xl pl-10 pr-4 py-3 text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${errors.email
                               ? 'border-red-400 focus:ring-red-400'
                               : 'border-slate-200 focus:ring-[#EA580C]'
-                          }`}
+                            }`}
                         />
                       </div>
                       {errors.email && (
@@ -666,11 +668,10 @@ export default function ItrLandingPageB() {
             {PRICING_PLANS.map((plan) => (
               <div
                 key={plan.id}
-                className={`relative flex flex-col rounded-3xl overflow-visible transition-all duration-300 ${
-                  plan.highlighted
+                className={`relative flex flex-col rounded-3xl overflow-visible transition-all duration-300 ${plan.highlighted
                     ? 'bg-white border-2 border-[#EA580C] shadow-[0_0_0_4px_rgba(234,88,12,0.15),0_24px_60px_rgba(234,88,12,0.25)] hover:shadow-[0_0_0_4px_rgba(234,88,12,0.2),0_32px_80px_rgba(234,88,12,0.35)] hover:-translate-y-1'
                     : 'bg-[#1E293B] border border-slate-700 shadow-[0_8px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_16px_60px_rgba(0,0,0,0.4)] hover:-translate-y-1'
-                }`}
+                  }`}
               >
                 {/* Most Popular Badge */}
                 {plan.badge && (
@@ -684,49 +685,42 @@ export default function ItrLandingPageB() {
                 <div className="p-7 sm:p-8 flex flex-col gap-6 h-full">
                   {/* Plan header */}
                   <div className="space-y-1 pt-2">
-                    <span className={`text-xs font-bold uppercase tracking-widest ${
-                      plan.highlighted ? 'text-[#EA580C]' : 'text-slate-400'
-                    }`}>
+                    <span className={`text-xs font-bold uppercase tracking-widest ${plan.highlighted ? 'text-[#EA580C]' : 'text-slate-400'
+                      }`}>
                       {plan.tag}
                     </span>
-                    <h3 className={`text-xl font-black leading-tight ${
-                      plan.highlighted ? 'text-[#0F172A]' : 'text-white'
-                    }`}>
+                    <h3 className={`text-xl font-black leading-tight ${plan.highlighted ? 'text-[#0F172A]' : 'text-white'
+                      }`}>
                       {plan.title}
                     </h3>
                   </div>
 
                   {/* Pricing block */}
-                  <div className={`rounded-2xl p-5 ${
-                    plan.highlighted
+                  <div className={`rounded-2xl p-5 ${plan.highlighted
                       ? 'bg-[#FFF7F4] border border-[#EA580C]/20'
                       : 'bg-[#0F172A] border border-slate-700'
-                  }`}>
+                    }`}>
                     <div className="flex items-start justify-between mb-1">
                       <div>
-                        <div className={`text-4xl font-black leading-none ${
-                          plan.highlighted ? 'text-[#0F172A]' : 'text-white'
-                        }`}>
+                        <div className={`text-4xl font-black leading-none ${plan.highlighted ? 'text-[#0F172A]' : 'text-white'
+                          }`}>
                           {plan.price}
                         </div>
-                        <div className={`text-sm mt-1 ${
-                          plan.highlighted ? 'text-slate-500' : 'text-slate-500'
-                        }`}>
+                        <div className={`text-sm mt-1 ${plan.highlighted ? 'text-slate-500' : 'text-slate-500'
+                          }`}>
                           <span className="line-through">{plan.originalPrice}</span>
                           <span className="ml-2 text-xs">per filing</span>
                         </div>
                       </div>
-                      <span className={`text-xs font-black px-3 py-1.5 rounded-full ${
-                        plan.highlighted
+                      <span className={`text-xs font-black px-3 py-1.5 rounded-full ${plan.highlighted
                           ? 'bg-[#EA580C] text-white'
                           : 'bg-[#16A34A]/20 text-[#4ADE80] border border-[#16A34A]/30'
-                      }`}>
+                        }`}>
                         {plan.discount}
                       </span>
                     </div>
-                    <p className={`text-xs leading-relaxed mt-3 ${
-                      plan.highlighted ? 'text-slate-500' : 'text-slate-400'
-                    }`}>
+                    <p className={`text-xs leading-relaxed mt-3 ${plan.highlighted ? 'text-slate-500' : 'text-slate-400'
+                      }`}>
                       {plan.description}
                     </p>
                   </div>
@@ -735,18 +729,16 @@ export default function ItrLandingPageB() {
                   <ul className="space-y-3.5 flex-1">
                     {plan.features.map((feature, fi) => (
                       <li key={fi} className="flex items-start gap-3">
-                        <span className={`flex h-5 w-5 shrink-0 rounded-full items-center justify-center mt-0.5 ${
-                          plan.highlighted
+                        <span className={`flex h-5 w-5 shrink-0 rounded-full items-center justify-center mt-0.5 ${plan.highlighted
                             ? 'bg-[#EA580C]/10 text-[#EA580C]'
                             : 'bg-[#16A34A]/15 text-[#4ADE80]'
-                        }`}>
+                          }`}>
                           <CheckCircle2 className="h-3.5 w-3.5" />
                         </span>
-                        <span className={`text-sm leading-snug ${
-                          fi === 0 && plan.id === 'premium'
+                        <span className={`text-sm leading-snug ${fi === 0 && plan.id === 'premium'
                             ? plan.highlighted ? 'font-bold text-[#0F172A]' : 'font-bold text-white'
                             : plan.highlighted ? 'text-slate-700' : 'text-slate-300'
-                        }`}>
+                          }`}>
                           {feature}
                         </span>
                       </li>
@@ -757,19 +749,17 @@ export default function ItrLandingPageB() {
                   <button
                     id={`pricing-cta-${plan.id}`}
                     onClick={scrollToForm}
-                    className={`w-full py-4 rounded-xl font-black text-sm transition-all active:scale-95 ${
-                      plan.highlighted
+                    className={`w-full py-4 rounded-xl font-black text-sm transition-all active:scale-95 ${plan.highlighted
                         ? 'bg-[#EA580C] hover:bg-[#C2410C] text-white shadow-[0_8px_30px_rgba(234,88,12,0.45)] hover:shadow-[0_12px_40px_rgba(234,88,12,0.55)]'
                         : 'bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40'
-                    }`}
+                      }`}
                   >
                     {plan.cta} →
                   </button>
 
                   {/* Trust footer */}
-                  <p className={`text-center text-[11px] ${
-                    plan.highlighted ? 'text-slate-400' : 'text-slate-500'
-                  }`}>
+                  <p className={`text-center text-[11px] ${plan.highlighted ? 'text-slate-400' : 'text-slate-500'
+                    }`}>
                     <Lock className="h-3 w-3 inline mr-1 mb-0.5" />
                     No payment needed to get started
                   </p>
@@ -832,9 +822,8 @@ export default function ItrLandingPageB() {
             {COMPARISON.map((row, idx) => (
               <div
                 key={idx}
-                className={`grid grid-cols-2 divide-x divide-slate-100 dark:divide-[#2D3748] border-t border-slate-100 dark:border-[#2D3748] ${
-                  idx % 2 === 0 ? 'bg-white dark:bg-[#1E293B]' : 'bg-slate-50/30 dark:bg-[#1E293B]/60'
-                } hover:bg-slate-50 dark:hover:bg-[#1E293B]/80 transition-colors`}
+                className={`grid grid-cols-2 divide-x divide-slate-100 dark:divide-[#2D3748] border-t border-slate-100 dark:border-[#2D3748] ${idx % 2 === 0 ? 'bg-white dark:bg-[#1E293B]' : 'bg-slate-50/30 dark:bg-[#1E293B]/60'
+                  } hover:bg-slate-50 dark:hover:bg-[#1E293B]/80 transition-colors`}
               >
                 {/* Old Way */}
                 <div className="px-5 py-4 sm:py-5 flex items-start gap-3 opacity-90">
@@ -1062,11 +1051,10 @@ export default function ItrLandingPageB() {
             {FAQ_ITEMS.map((item, idx) => (
               <div
                 key={idx}
-                className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-                  openFaq === idx
+                className={`border rounded-2xl overflow-hidden transition-all duration-300 ${openFaq === idx
                     ? 'border-[#EA580C]/40 shadow-[0_4px_20px_rgba(234,88,12,0.08)]'
                     : 'border-slate-200'
-                }`}
+                  }`}
               >
                 <button
                   id={`faq-${idx}`}
@@ -1077,15 +1065,13 @@ export default function ItrLandingPageB() {
                     {item.q}
                   </span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 shrink-0 transition-transform duration-300 ${
-                      openFaq === idx ? 'rotate-180 text-[#EA580C]' : ''
-                    }`}
+                    className={`h-5 w-5 text-slate-400 shrink-0 transition-transform duration-300 ${openFaq === idx ? 'rotate-180 text-[#EA580C]' : ''
+                      }`}
                   />
                 </button>
                 <div
-                  className={`overflow-hidden transition-all duration-300 ${
-                    openFaq === idx ? 'max-h-60' : 'max-h-0'
-                  }`}
+                  className={`overflow-hidden transition-all duration-300 ${openFaq === idx ? 'max-h-60' : 'max-h-0'
+                    }`}
                 >
                   <div className="px-5 pb-5 pt-1 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-[#242220]">
                     {item.a}
@@ -1202,9 +1188,8 @@ export default function ItrLandingPageB() {
           MOBILE STICKY BOTTOM CTA BAR
       ══════════════════════════════════════════════════ */}
       <div
-        className={`fixed bottom-0 left-0 w-full md:hidden z-40 transition-all duration-500 ${
-          showStickyBar ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
-        }`}
+        className={`fixed bottom-0 left-0 w-full md:hidden z-40 transition-all duration-500 ${showStickyBar ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
+          }`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="bg-white/95 dark:bg-[#171514]/95 backdrop-blur-md border-t border-slate-200 dark:border-[#242220] shadow-[0_-8px_30px_rgba(0,0,0,0.10)] p-3 flex items-center justify-between gap-3">

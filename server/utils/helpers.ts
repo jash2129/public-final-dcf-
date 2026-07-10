@@ -94,3 +94,26 @@ export function formatLegacyDate(date: Date = new Date()): string {
     year: 'numeric'
   });
 }
+
+/**
+ * Standardize phone and whatsapp number fields to always include the +91 country code for Indian numbers.
+ */
+export function formatPhoneWithCountryCode(phone: any): string | null {
+  if (phone === undefined || phone === null) return null;
+  const cleaned = String(phone).trim().replace(/\s+/g, '').replace(/[-()]/g, '');
+  if (!cleaned) return null;
+  
+  if (cleaned.startsWith('+')) {
+    return cleaned;
+  }
+  
+  if (cleaned.length === 12 && cleaned.startsWith('91')) {
+    return `+${cleaned}`;
+  }
+  
+  if (cleaned.length === 10) {
+    return `+91${cleaned}`;
+  }
+  
+  return cleaned;
+}

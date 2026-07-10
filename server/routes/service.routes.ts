@@ -9,6 +9,9 @@ const router = Router();
  */
 router.get('/', async (req, res, next) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     const services = await serviceService.getServicesCatalog();
     return res.json(services);
   } catch (error) {

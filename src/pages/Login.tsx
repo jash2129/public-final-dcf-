@@ -7,6 +7,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 export default function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   const [showCRMModal, setShowCRMModal] = useState(false);
   const [tempToken, setTempToken] = useState('');
@@ -21,6 +22,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setAuthError('');
 
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
@@ -46,11 +48,11 @@ export default function Login() {
         }
       } else {
         const result = await response.json();
-        alert(result.error || 'Login failed');
+        setAuthError(result.error || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
-      alert('An error occurred during login');
+      setAuthError('An error occurred during login');
     } finally {
       setIsLoading(false);
     }
@@ -59,6 +61,7 @@ export default function Login() {
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setIsLoading(true);
+      setAuthError('');
       try {
         const response = await fetch('/api/auth/google', {
           method: 'POST',
@@ -91,18 +94,18 @@ export default function Login() {
           }
         } else {
           const result = await response.json();
-          alert(result.error || 'Google login failed');
+          setAuthError(result.error || 'Google login failed');
         }
       } catch (error) {
         console.error('Google login error:', error);
-        alert('An error occurred during Google login');
+        setAuthError('An error occurred during Google login');
       } finally {
         setIsLoading(false);
       }
     },
     onError: (error) => {
       console.error('Google Sign-In failed:', error);
-      alert('Google Sign-In failed');
+      setAuthError('Google Sign-In failed');
     }
   });
 
@@ -191,6 +194,17 @@ export default function Login() {
           </div>
 
           <div className="mt-10">
+            {authError && (
+              <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                <div className="p-1 bg-red-100 rounded-full shrink-0">
+                  <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-red-700 mt-0.5">{authError}</p>
+              </div>
+            )}
+
             <form className="space-y-6" onSubmit={handleLogin}>
               <div>
                 <label htmlFor="email" className="block text-sm font-bold text-dark mb-2">
@@ -202,7 +216,7 @@ export default function Login() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
+                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   defaultValue="demo@deccanfilings.com"
                 />
               </div>
@@ -217,7 +231,7 @@ export default function Login() {
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
+                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   defaultValue="password123"
                 />
               </div>
@@ -236,7 +250,7 @@ export default function Login() {
                 </div>
 
                 <div className="text-sm">
-                  <Link to="/forgot-password" className="font-bold text-dark hover:text-secondary transition-colors">
+                  <Link to="/forgot-password" className="font-bold text-dark hover:text-secondary py-2 inline-block transition-colors">
                     Forgot password?
                   </Link>
                 </div>

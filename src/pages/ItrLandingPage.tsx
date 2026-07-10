@@ -88,6 +88,12 @@ export default function ItrLandingPage() {
     setIsSubmitting(true);
     setErrors({});
 
+    const formattedPhone = phone.trim().startsWith('+91')
+      ? phone.trim()
+      : phone.trim().startsWith('91') && phone.trim().length === 12
+        ? `+${phone.trim()}`
+        : `+91${phone.trim()}`;
+
     try {
       await fetch('https://hook.eu1.make.com/kn9e94j7t8gs8lghxaa311k7v8su7ayo', {
         method: 'POST',
@@ -96,7 +102,7 @@ export default function ItrLandingPage() {
         },
         body: JSON.stringify({
           name: name.trim(),
-          phone: phone.trim(),
+          phone: formattedPhone,
           email: email.trim(),
           plan: selectedPlan,
         }),
@@ -108,7 +114,7 @@ export default function ItrLandingPage() {
     const searchParams = new URLSearchParams({
       plan: selectedPlan,
       name: name.trim(),
-      phone: phone.trim(),
+      phone: formattedPhone,
       email: email.trim(),
     });
     

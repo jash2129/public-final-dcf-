@@ -165,7 +165,7 @@ export default function DashboardLayout() {
             )}
             <button 
               onClick={closeMobileMenu} 
-              className="p-1.5 text-[var(--ds-text-muted)] hover:text-[var(--ds-text)] hover:bg-[var(--ds-bg)] rounded-lg transition-colors md:hidden"
+              className="p-2 text-[var(--ds-text-muted)] hover:text-[var(--ds-text)] hover:bg-[var(--ds-bg)] rounded-lg transition-colors md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <X className="h-5 w-5" />
             </button>
@@ -287,9 +287,10 @@ export default function DashboardLayout() {
             {/* Profile & Sign Out Section */}
             <div className="p-2 flex flex-col gap-1 bg-white">
               {/* User Profile display card */}
-              <div 
+              <Link 
+                to="/dashboard/settings"
                 title={isSidebarCollapsed ? `${user.name} (${user.email})` : ""}
-                className={`flex items-center rounded-xl transition-colors ${isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-2 gap-3 hover:bg-[var(--ds-bg)]'}`}
+                className={`flex items-center rounded-xl transition-colors ${isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-2 gap-3 hover:bg-[var(--ds-bg)] cursor-pointer'}`}
               >
                 <div className="h-10 w-10 bg-[var(--ds-bg)] text-[var(--ds-text)] border border-[var(--ds-border)] rounded-full flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
                   {getUserInitials(user.name)}
@@ -300,7 +301,7 @@ export default function DashboardLayout() {
                     <p className="text-xs text-[var(--ds-text-muted)] truncate">{user.email}</p>
                   </div>
                 )}
-              </div>
+              </Link>
 
               {/* Sign Out Button */}
               <button
@@ -326,7 +327,7 @@ export default function DashboardLayout() {
               </div>
               <button 
                 onClick={() => setIsMobileSearchOpen(false)}
-                className="p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl cursor-pointer"
+                className="p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
                 title="Close Search"
               >
                 <X className="h-5 w-5" />
@@ -337,7 +338,7 @@ export default function DashboardLayout() {
               <div className="flex items-center gap-3 text-sm">
                 <button 
                   onClick={() => setIsMobileMenuOpen(true)}
-                  className="p-1.5 mr-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-lg transition-colors md:hidden"
+                  className="p-2 mr-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-lg transition-colors md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <Menu className="h-5 w-5" />
                 </button>
@@ -364,7 +365,7 @@ export default function DashboardLayout() {
                     </div>
                     <button
                       onClick={() => setIsMobileSearchOpen(true)}
-                      className="lg:hidden p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl transition-all duration-300 flex items-center justify-center cursor-pointer"
+                      className="lg:hidden p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl transition-all duration-300 flex items-center justify-center cursor-pointer min-h-[44px] min-w-[44px]"
                       title="Search"
                     >
                       <Search className="h-5 w-5" />
@@ -374,7 +375,7 @@ export default function DashboardLayout() {
                 
                 <button
                   onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
-                  className="p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl transition-all duration-300 relative group flex items-center justify-center cursor-pointer"
+                  className="p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl transition-all duration-300 relative group flex items-center justify-center cursor-pointer min-h-[44px] min-w-[44px]"
                   title={`Switch to ${resolvedTheme === 'light' ? 'Dark' : 'Light'} Mode`}
                 >
                   {resolvedTheme === 'light' ? (

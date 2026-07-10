@@ -45,6 +45,13 @@ export default function AdminOverview() {
           fetch('/api/admin/compliance', { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
 
+        if (ordersRes.status === 401 || ordersRes.status === 403 || compRes.status === 401 || compRes.status === 403) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          return;
+        }
+
         if (ordersRes.ok && compRes.ok) {
           const orders = await ordersRes.json();
           const compliance = await compRes.json();

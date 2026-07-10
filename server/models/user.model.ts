@@ -1,5 +1,6 @@
 import { pool } from '../db';
 import mysql from 'mysql2/promise';
+import { formatPhoneWithCountryCode } from '../utils/helpers';
 
 export interface User {
   id: number;
@@ -47,17 +48,17 @@ export async function createUser(user: Partial<User>): Promise<number> {
   const [result] = await pool.execute(
     'INSERT INTO users (name, email, password, role, avatar, phone, whatsapp_number, company_name, address, gstin, notification_prefs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [
-      user.name,
-      user.email,
-      user.password,
+      user.name ?? null,
+      user.email ?? null,
+      user.password ?? null,
       user.role || 'user',
-      user.avatar || null,
-      user.phone || null,
-      user.whatsapp_number || null,
-      user.company_name || null,
-      user.address || null,
-      user.gstin || null,
-      user.notification_prefs || JSON.stringify({ email: true, sms: false })
+      user.avatar ?? null,
+      formatPhoneWithCountryCode(user.phone) ?? null,
+      formatPhoneWithCountryCode(user.whatsapp_number) ?? null,
+      user.company_name ?? null,
+      user.address ?? null,
+      user.gstin ?? null,
+      user.notification_prefs ?? JSON.stringify({ email: true, sms: false })
     ]
   );
   return (result as any).insertId;
@@ -79,12 +80,12 @@ export async function updateUserProfile(id: number, profile: Partial<User>): Pro
   const [result] = await pool.execute(
     'UPDATE users SET name = ?, email = ?, phone = ?, company_name = ?, address = ?, gstin = ? WHERE id = ?',
     [
-      profile.name,
-      profile.email,
-      profile.phone,
-      profile.company_name,
-      profile.address,
-      profile.gstin,
+      profile.name ?? null,
+      profile.email ?? null,
+      formatPhoneWithCountryCode(profile.phone) ?? null,
+      profile.company_name ?? null,
+      profile.address ?? null,
+      profile.gstin ?? null,
       id
     ]
   );

@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import { pool } from '../db';
 import { authenticate, requireSuperAdmin, AuthenticatedRequest } from '../middlewares/auth';
 import mysql from 'mysql2/promise';
+import { formatPhoneWithCountryCode } from '../utils/helpers';
 
 const router = Router();
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -87,14 +88,16 @@ router.patch('/user/profile', async (req: AuthenticatedRequest, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
     const { name, email, phone, whatsapp_number, company_name, address, gstin } = req.body;
+    const formattedPhone = formatPhoneWithCountryCode(phone);
+    const formattedWhatsapp = formatPhoneWithCountryCode(whatsapp_number);
 
-    if (whatsapp_number) {
-      if (!/^\+?[0-9]{10,15}$/.test(whatsapp_number.trim())) {
+    if (formattedWhatsapp) {
+      if (!/^\+?[0-9]{10,15}$/.test(formattedWhatsapp)) {
         return res.status(400).json({ error: 'A valid WhatsApp number is required (10-15 digits)' });
       }
       const [existing] = await pool.query<mysql.RowDataPacket[]>(
         'SELECT id FROM users WHERE whatsapp_number = ? AND id != ?',
-        [whatsapp_number, req.user.id]
+        [formattedWhatsapp, req.user.id]
       );
       if (existing.length > 0) {
         return res.status(400).json({ error: 'WhatsApp number is already in use' });
@@ -103,7 +106,16 @@ router.patch('/user/profile', async (req: AuthenticatedRequest, res, next) => {
 
     await pool.execute(
       'UPDATE users SET name = ?, email = ?, phone = ?, whatsapp_number = ?, company_name = ?, address = ?, gstin = ? WHERE id = ?',
-      [name, email, phone, whatsapp_number, company_name, address, gstin, req.user.id]
+      [
+        name ?? null,
+        email ?? null,
+        formattedPhone ?? null,
+        formattedWhatsapp ?? null,
+        company_name ?? null,
+        address ?? null,
+        gstin ?? null,
+        req.user.id
+      ]
     );
 
     await logActivity(req.user.id, 'PROFILE_UPDATE', 'Updated profile information');

@@ -43,6 +43,18 @@ export default function PublicLayout() {
     }
   }, []);
 
+  // Scroll locking for mobile menus
+  useEffect(() => {
+    if (isMenuOpen || isSearchOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen, isSearchOpen]);
+
   const handleMobileNavClick = (categoryTitle: string) => {
     setActiveMobileCategory(activeMobileCategory === categoryTitle ? null : categoryTitle);
   };
@@ -410,10 +422,10 @@ export default function PublicLayout() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="flex items-center xl:hidden gap-4">
+            <div className="flex items-center xl:hidden gap-3">
               <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="text-dark-400 hover:text-secondary p-2 md:hidden"
+                className="text-dark-400 hover:text-secondary p-3 md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <Search className="h-5 w-5" />
               </button>
@@ -422,7 +434,7 @@ export default function PublicLayout() {
                   setIsMenuOpen(!isMenuOpen);
                   if (isMenuOpen) setTimeout(() => setActiveMobileCategory(null), 300);
                 }} 
-                className="text-dark-400 p-2 bg-slate-100 rounded-md"
+                className="text-dark-400 p-3 bg-slate-100 rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>

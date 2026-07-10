@@ -124,6 +124,12 @@ export default function ServicePage() {
     setIsLoading(true);
     setErrorMessage(null);
 
+    const formattedMobile = formData.mobileNumber.trim().startsWith('+91')
+      ? formData.mobileNumber.trim()
+      : formData.mobileNumber.trim().startsWith('91') && formData.mobileNumber.trim().length === 12
+        ? `+${formData.mobileNumber.trim()}`
+        : `+91${formData.mobileNumber.trim()}`;
+
     try {
       const response = await fetch('/api/leads/callback', {
         method: 'POST',
@@ -132,6 +138,7 @@ export default function ServicePage() {
         },
         body: JSON.stringify({
           ...formData,
+          mobileNumber: formattedMobile,
           serviceName,
         }),
       });
@@ -337,7 +344,7 @@ export default function ServicePage() {
                   </div>
                 )}
 
-                <form className="space-y-5" onSubmit={handleSubmit}>
+                <form id="request-form" className="space-y-5" onSubmit={handleSubmit}>
                   <div>
                     <label className="block text-sm font-bold text-dark mb-2">Full Name</label>
                     <input 
@@ -604,6 +611,19 @@ export default function ServicePage() {
           </div>
         </div>
       </section>
+
+      {/* Mobile Sticky CTA */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50">
+        <button 
+          onClick={() => {
+            const form = document.getElementById('request-form');
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="w-full bg-brand text-dark px-4 py-3.5 rounded-xl font-bold text-base shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2"
+        >
+          Request {serviceName}
+        </button>
+      </div>
     </div>
   );
 }

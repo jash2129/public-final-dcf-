@@ -17,6 +17,9 @@ router.use(authenticate);
 router.post('/', async (req: AuthenticatedRequest, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    if (!req.user.phone || req.user.phone.trim() === '') {
+      return res.status(403).json({ error: 'Phone number is required to place an order.' });
+    }
 
     const validation = validateOrder(req.body);
     if (!validation.isValid) {

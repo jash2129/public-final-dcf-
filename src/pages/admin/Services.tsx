@@ -59,7 +59,7 @@ export default function AdminServices() {
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/services');
+      const response = await fetch(`/api/services?_t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
         setServices(data);
@@ -188,20 +188,23 @@ export default function AdminServices() {
         </div>
         
         {/* Horizontal scrollable category filters */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all whitespace-nowrap ${
-                selectedCategory === category 
-                  ? 'bg-dark text-white border-dark shadow-sm' 
-                  : 'bg-white text-slate-500 border-slate-200 hover:border-dark hover:text-dark'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+        <div className="relative">
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden z-10 rounded-r-2xl"></div>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin relative z-0">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-3 text-xs font-bold rounded-xl border transition-all whitespace-nowrap min-h-[44px] ${
+                  selectedCategory === category 
+                    ? 'bg-dark text-white border-dark shadow-sm' 
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-dark hover:text-dark'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

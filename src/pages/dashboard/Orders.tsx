@@ -14,6 +14,18 @@ interface Order {
   amount: string;
 }
 
+const ALL_CATEGORIES = [
+  'Compliance',
+  'Finance',
+  'Global',
+  'GST',
+  'Income Tax',
+  'License',
+  'MCA',
+  'Startup Registrations',
+  'Trademark',
+];
+
 export default function Orders() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -67,7 +79,11 @@ export default function Orders() {
   }, [orders, initialSearch]);
 
   const uniqueCategories = React.useMemo(() => {
-    return Array.from(new Set(servicesCatalog.map(s => s.category))).filter(Boolean).sort();
+    if (servicesCatalog.length === 0) return ALL_CATEGORIES;
+    const fromApi = Array.from(new Set(servicesCatalog.map(s => s.category))).filter(Boolean);
+    // Merge API categories with hardcoded ones to ensure none are missing
+    const merged = Array.from(new Set([...fromApi, ...ALL_CATEGORIES]));
+    return merged.sort();
   }, [servicesCatalog]);
 
   const availableServices = React.useMemo(() => {
@@ -107,9 +123,11 @@ export default function Orders() {
   const fetchServicesCatalog = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/services', {
+      const response = await fetch(`/api/services?_t=${Date.now()}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
       });
       if (response.ok) {
@@ -123,8 +141,18 @@ export default function Orders() {
 
   useEffect(() => {
     fetchOrders();
-    fetchServicesCatalog();
   }, [dateRange]);
+
+  useEffect(() => {
+    fetchServicesCatalog();
+  }, []);
+
+  // Re-fetch catalog when modal opens to get fresh categories
+  useEffect(() => {
+    if (isModalOpen) {
+      fetchServicesCatalog();
+    }
+  }, [isModalOpen]);
 
   useEffect(() => {
     if (location.state && (location.state as any).openNewOrderModal) {
@@ -140,6 +168,15 @@ export default function Orders() {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      
+      if (!user || !user.phone || user.phone.trim() === '') {
+        alert('Please complete your profile and add a mobile number before placing an order.');
+        window.location.href = '/complete-profile';
+        return;
+      }
+
       const newId = `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
       const currentDate = new Date().toLocaleDateString('en-US', {
         month: 'short',

@@ -1,11 +1,13 @@
 import { Router, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
+import { formatPhoneWithCountryCode } from '../utils/helpers';
 
 const router = Router();
 
 // POST /api/leads/callback
 router.post('/callback', async (req: Request, res: Response) => {
   const { fullName, mobileNumber, emailAddress, city, serviceName } = req.body;
+  const formattedMobile = formatPhoneWithCountryCode(mobileNumber) || mobileNumber;
 
   if (!fullName || !mobileNumber || !emailAddress || !city || !serviceName) {
     return res.status(400).json({ error: 'Please fill in all required fields.' });
@@ -26,7 +28,7 @@ router.post('/callback', async (req: Request, res: Response) => {
       });
     } else {
       console.log('=== CALLBACK REQUEST SUBMISSION (no SMTP configured) ===');
-      console.log({ fullName, mobileNumber, emailAddress, city, serviceName });
+      console.log({ fullName, mobileNumber: formattedMobile, emailAddress, city, serviceName });
       console.log('Would send to: deccanfilings@gmail.com');
       console.log('========================================================');
       return res.json({ success: true, message: 'Callback request received! (SMTP not configured — logged to console)' });
@@ -47,7 +49,7 @@ router.post('/callback', async (req: Request, res: Response) => {
           </tr>
           <tr style="background: #f8fafc; border-bottom: 1px solid #f1f5f9;">
             <td style="padding: 12px 16px; font-weight: bold; color: #64748b; font-size: 14px;">Mobile Number</td>
-            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px;">${mobileNumber}</td>
+            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px;">${formattedMobile}</td>
           </tr>
           <tr style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
             <td style="padding: 12px 16px; font-weight: bold; color: #64748b; font-size: 14px;">Email Address</td>

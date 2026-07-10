@@ -239,7 +239,8 @@ export default function AdminDocuments() {
           <span className="text-sm text-slate-400 whitespace-nowrap">{filtered.length} file{filtered.length !== 1 ? 's' : ''}</span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
@@ -338,6 +339,90 @@ export default function AdminDocuments() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {loading ? (
+            <div className="p-16 text-center">
+              <div className="flex flex-col items-center gap-3 text-slate-400">
+                <RefreshCw className="h-8 w-8 animate-spin" />
+                <span className="text-sm">Loading documents...</span>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="p-12 text-center text-red-500 text-sm">{error}</div>
+          ) : filtered.length === 0 ? (
+            <div className="p-12 text-center text-slate-400 text-sm">No documents found.</div>
+          ) : (
+            filtered.map(doc => {
+              const initials = doc.user_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+              return (
+                <div key={doc.id} className="p-4 flex flex-col gap-3 hover:bg-slate-50/60 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1">{getFileIcon(doc.type)}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-dark truncate" title={doc.name}>{doc.name}</p>
+                      <div className="flex items-center justify-between mt-1 text-xs text-slate-500">
+                        <span>{doc.folder}</span>
+                        <span>{doc.size}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                    <div className="h-6 w-6 bg-dark text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">
+                      {initials}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-dark truncate">{doc.user_name}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{doc.user_email}</p>
+                    </div>
+                    {doc.order_id && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 text-blue-700 whitespace-nowrap">
+                        Order #{doc.order_id}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs mt-1">
+                    <span className="text-slate-400">{doc.date}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleRename(doc)}
+                        className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
+                        title="Rename document"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(doc.id)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                        title="Delete document"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDownload(doc)}
+                        disabled={!doc.file_path || downloading === doc.id}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          doc.file_path
+                            ? 'bg-dark text-white hover:bg-dark/90 shadow-sm'
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                        } disabled:opacity-60`}
+                      >
+                        {downloading === doc.id
+                          ? <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                          : <Download className="h-3.5 w-3.5" />
+                        }
+                        {downloading === doc.id ? 'Loading...' : doc.file_path ? 'Download' : 'No File'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         {!loading && (

@@ -1,5 +1,6 @@
 import * as userModel from '../models/user.model';
 import { hashPassword, comparePassword, generateToken } from '../utils/security';
+import { formatPhoneWithCountryCode } from '../utils/helpers';
 
 export interface AuthResult {
   user: {
@@ -23,8 +24,9 @@ export async function register(userData: any): Promise<AuthResult> {
     throw { status: 400, message: 'Email address is already in use' };
   }
 
-  if (userData.whatsapp_number) {
-    const existingWhatsapp = await userModel.findUserByWhatsappNumber(userData.whatsapp_number);
+  const formattedWhatsapp = formatPhoneWithCountryCode(userData.whatsapp_number);
+  if (formattedWhatsapp) {
+    const existingWhatsapp = await userModel.findUserByWhatsappNumber(formattedWhatsapp);
     if (existingWhatsapp) {
       throw { status: 400, message: 'WhatsApp number is already in use' };
     }

@@ -72,6 +72,12 @@ export default function AdminCompliance() {
       const response = await fetch('/api/admin/compliance', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
       if (response.ok) {
         const data = await response.json();
         setTasks(data);
@@ -89,6 +95,12 @@ export default function AdminCompliance() {
       const response = await fetch('/api/admin/users', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
       if (response.ok) {
         const data = await response.json();
         // Only list standard clients/users in user dropdown (exclude admins if needed, or include all)

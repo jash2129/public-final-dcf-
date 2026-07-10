@@ -4,9 +4,10 @@ import { Navigate } from 'react-router-dom';
 interface ProtectedRouteProps {
   children: ReactNode;
   role?: 'admin' | 'user' | 'super_admin';
+  requirePhone?: boolean;
 }
 
-const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, role, requirePhone = false }: ProtectedRouteProps) => {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
@@ -14,6 +15,11 @@ const ProtectedRoute = ({ children, role }: ProtectedRouteProps) => {
   if (!token) {
     // Redirect to login if not authenticated
     return <Navigate to="/login" replace />;
+  }
+
+  if (requirePhone && user && (!user.phone || user.phone.trim() === '')) {
+    // Redirect to complete profile if phone is missing
+    return <Navigate to="/complete-profile" replace />;
   }
 
   if (role && user) {

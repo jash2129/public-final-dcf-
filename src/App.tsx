@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import CompleteProfile from './pages/CompleteProfile';
 import DashboardOverview from './pages/dashboard/Overview';
 import DashboardOrders from './pages/dashboard/Orders';
 import DashboardDocuments from './pages/dashboard/Documents';
@@ -77,6 +78,11 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/complete-profile" element={
+          <ProtectedRoute requirePhone={false}>
+            <CompleteProfile />
+          </ProtectedRoute>
+        } />
 
         {/* Dashboard Routes (Protected) */}
         <Route 

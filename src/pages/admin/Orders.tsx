@@ -26,6 +26,7 @@ export default function AdminOrders() {
   const initialSearch = searchParams.get('id') || searchParams.get('search') || '';
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState('All');
   const [showSuccess, setShowSuccess] = useState(false);
@@ -58,8 +59,13 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     setIsLoading(true);
+    setFetchError(null);
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
       let url = '/api/admin/orders';
       if (dateRange.start && dateRange.end) {
         const params = new URLSearchParams({
@@ -70,14 +76,27 @@ export default function AdminOrders() {
       }
 
       const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
       if (response.ok) {
         const data = await response.json();
-        setOrders(data);
+        setOrders(Array.isArray(data) ? data : []);
+      } else {
+        setFetchError(`Server returned ${response.status}. Please try refreshing.`);
       }
     } catch (err) {
       console.error('Failed to fetch orders', err);
+      setFetchError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +109,7 @@ export default function AdminOrders() {
   const updateOrderStatus = async (id: string, newStatus: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/orders/${id}/status`, {
+      const response = await fetch(`/api/admin/orders/${id}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -98,10 +117,17 @@ export default function AdminOrders() {
         },
         body: JSON.stringify({ status: newStatus })
       });
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
       if (response.ok) {
         fetchOrders();
       }
     } catch (err) {
+      console.error('Failed to update order status', err);
     }
   };
 
@@ -280,9 +306,27 @@ export default function AdminOrders() {
         </div>
       </div>
 
+      {/* Error Banner */}
+      {fetchError && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />
+            <p className="text-sm font-medium text-red-700">{fetchError}</p>
+          </div>
+          <button
+            onClick={fetchOrders}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-colors shrink-0"
+          >
+            <RefreshCcw className="h-4 w-4" />
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Orders Table */}
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
@@ -291,6 +335,7 @@ export default function AdminOrders() {
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Service</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Payment</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
               </tr>
@@ -313,6 +358,7 @@ export default function AdminOrders() {
                       <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
                       <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
                       <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-6 w-16" /></td>
                       <td className="px-6 py-4"><Skeleton className="h-6 w-20" /></td>
                       <td className="px-6 py-4"><Skeleton className="h-8 w-8" variant="circle" /></td>
                     </tr>
@@ -351,6 +397,15 @@ export default function AdminOrders() {
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-500">{order.date}</td>
                       <td className="px-6 py-4 text-sm font-bold text-dark">{order.amount}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize ${
+                          order.payment_status === 'paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                          order.payment_status === 'failed' ? 'bg-red-50 text-red-600 border border-red-200' :
+                          'bg-amber-50 text-amber-600 border border-amber-200'
+                        }`}>
+                          {order.payment_status || 'pending'}
+                        </span>
+                      </td>
                       <td className="px-6 py-4">
                         <select 
                           value={order.status}
@@ -431,18 +486,33 @@ export default function AdminOrders() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="px-6 py-20 text-center">
+                    <td colSpan={8} className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <div className="p-4 bg-slate-50 rounded-full">
                           <AlertCircle className="h-8 w-8 text-slate-300" />
                         </div>
-                        <p className="text-slate-500 font-medium">No orders found matching your criteria.</p>
-                        <button 
-                          onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}
-                          className="text-brand font-bold text-sm hover:underline"
-                        >
-                          Clear all filters
-                        </button>
+                        {fetchError ? (
+                          <>
+                            <p className="text-slate-500 font-medium">Failed to load orders. Please try again.</p>
+                            <button
+                              onClick={fetchOrders}
+                              className="flex items-center gap-2 text-brand font-bold text-sm hover:underline"
+                            >
+                              <RefreshCcw className="h-4 w-4" />
+                              Reload orders
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-slate-500 font-medium">No orders found matching your criteria.</p>
+                            <button
+                              onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}
+                              className="text-brand font-bold text-sm hover:underline"
+                            >
+                              Clear all filters
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -451,8 +521,102 @@ export default function AdminOrders() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden divide-y divide-slate-100">
+          <AnimatePresence mode="popLayout">
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="p-4 space-y-4">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ))
+            ) : filteredOrders.length > 0 ? (
+              paginatedOrders.map((order) => (
+                <motion.div 
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  key={order.id} 
+                  className="p-4 flex flex-col gap-3 hover:bg-slate-50/50 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{order.id}</span>
+                      <h3 className="text-sm font-bold text-dark">{order.service}</h3>
+                      <span className={`mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${
+                        order.payment_status === 'paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                        order.payment_status === 'failed' ? 'bg-red-50 text-red-600 border border-red-200' :
+                        'bg-amber-50 text-amber-600 border border-amber-200'
+                      }`}>
+                        {order.payment_status || 'pending'}
+                      </span>
+                    </div>
+                    <select 
+                      value={order.status}
+                      onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                      className={`text-[10px] font-bold px-2 py-1 rounded-full border outline-none cursor-pointer ${getStatusStyle(order.status)}`}
+                    >
+                      <option value="Placed">Placed</option>
+                      <option value="Processing">Processing</option>
+                      <option value="Action Required">Action Required</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                    <div className="h-6 w-6 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
+                      <User className="h-3 w-3 text-slate-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-dark truncate">{order.user_name}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{order.user_email}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-500 font-medium">{order.date}</span>
+                    <span className="font-black text-dark">{order.amount}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    <button 
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setEditAmount(order.amount.replace(/[^0-9.]/g, ''));
+                        setIsDetailModalOpen(true);
+                      }}
+                      className="w-full py-2 bg-slate-100 text-dark text-xs font-bold rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => handleCopyId(order.id)}
+                      className="w-full py-2 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                      Copy ID
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="p-8 text-center">
+                <AlertCircle className="h-8 w-8 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-500 text-sm font-medium">No orders found.</p>
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
         
-        <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+        <div className="px-4 md:px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-500 font-medium font-sans">
             Showing <span className="text-dark font-bold">
               {filteredOrders.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredOrders.length)}
@@ -547,10 +711,25 @@ export default function AdminOrders() {
                       <p className="text-lg font-bold text-dark mt-1">{selectedOrder.id}</p>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Status</label>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Order Status</label>
                       <div className="mt-1 text-left">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${getStatusStyle(selectedOrder.status)}`}>
                           {selectedOrder.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Payment Status</label>
+                      <div className="mt-1 text-left">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize ${
+                          selectedOrder.payment_status === 'paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                          selectedOrder.payment_status === 'failed' ? 'bg-red-50 text-red-600 border border-red-200' :
+                          'bg-amber-50 text-amber-600 border border-amber-200'
+                        }`}>
+                          {selectedOrder.payment_status || 'pending'}
                         </span>
                       </div>
                     </div>

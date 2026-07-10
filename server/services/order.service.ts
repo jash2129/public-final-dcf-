@@ -205,6 +205,7 @@ export function mapToLegacyOrder(dbOrder: any) {
     amount: formatCurrency(dbOrder.total_amount),
     status: dbOrder.status === 'placed' ? 'Placed' :
             dbOrder.status === 'in_progress' ? 'Processing' :
-            dbOrder.status === 'completed' ? 'Completed' : 'Action Required'
+            dbOrder.status === 'completed' ? 'Completed' : 'Action Required',
+    payment_status: dbOrder.payment_status || 'pending'
   };
 }

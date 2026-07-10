@@ -8,6 +8,7 @@ export default function Register() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   const initialName = searchParams.get('name') || '';
   const initialEmail = searchParams.get('email') || '';
@@ -26,6 +27,7 @@ export default function Register() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setAuthError('');
     
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
@@ -43,11 +45,11 @@ export default function Register() {
         navigate('/login');
       } else {
         const result = await response.json();
-        alert(result.error || 'Registration failed');
+        setAuthError(result.error || 'Registration failed');
       }
     } catch (error) {
       console.error('Registration error:', error);
-      alert('An error occurred during registration');
+      setAuthError('An error occurred during registration');
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +58,7 @@ export default function Register() {
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setIsLoading(true);
+      setAuthError('');
       try {
         const response = await fetch('/api/auth/google', {
           method: 'POST',
@@ -88,18 +91,18 @@ export default function Register() {
           }
         } else {
           const result = await response.json();
-          alert(result.error || 'Google login failed');
+          setAuthError(result.error || 'Google login failed');
         }
       } catch (error) {
         console.error('Google login error:', error);
-        alert('An error occurred during Google login');
+        setAuthError('An error occurred during Google login');
       } finally {
         setIsLoading(false);
       }
     },
     onError: (error) => {
       console.error('Google Sign-In failed:', error);
-      alert('Google Sign-In failed');
+      setAuthError('Google Sign-In failed');
     }
   });
 
@@ -181,13 +184,24 @@ export default function Register() {
             </h2>
             <p className="text-dark-400">
               Already have an account?{' '}
-              <Link to="/login" className="font-bold text-dark underline decoration-brand decoration-2 hover:text-secondary transition-colors">
+              <Link to="/login" className="font-bold text-dark underline decoration-brand decoration-2 hover:text-secondary py-2 inline-block transition-colors">
                 Sign in
               </Link>
             </p>
           </div>
 
           <div className="mt-10">
+            {authError && (
+              <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                <div className="p-1 bg-red-100 rounded-full shrink-0">
+                  <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-red-700 mt-0.5">{authError}</p>
+              </div>
+            )}
+
             <form className="space-y-6" onSubmit={handleRegister}>
               <div>
                 <label htmlFor="name" className="block text-sm font-bold text-dark mb-2">
@@ -199,7 +213,7 @@ export default function Register() {
                   type="text"
                   autoComplete="name"
                   required
-                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
+                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   placeholder="John Doe"
                   defaultValue={initialName}
                 />
@@ -215,7 +229,7 @@ export default function Register() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
+                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   placeholder="john@example.com"
                   defaultValue={initialEmail}
                 />
@@ -233,7 +247,7 @@ export default function Register() {
                   required
                   pattern="^\+?[0-9]{10,15}$"
                   title="Please enter a valid WhatsApp number (10-15 digits)"
-                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
+                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   placeholder="e.g. 9876543210"
                   defaultValue={initialPhone}
                 />
@@ -250,7 +264,7 @@ export default function Register() {
                   autoComplete="new-password"
                   required
                   minLength={8}
-                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
+                  className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   placeholder="At least 8 characters"
                 />
               </div>
@@ -282,7 +296,7 @@ export default function Register() {
                 <button
                   type="button"
                   onClick={() => loginWithGoogle()}
-                  className="inline-flex w-full justify-center items-center gap-2 rounded-xl border border-slate-200 bg-white py-3 px-4 text-sm font-bold text-dark shadow-sm hover:bg-slate-50 cursor-pointer transition-colors"
+                  className="inline-flex w-full justify-center items-center gap-2 rounded-xl border border-slate-200 bg-white py-3.5 px-4 text-sm font-bold text-dark shadow-sm hover:bg-slate-50 cursor-pointer transition-colors"
                 >
                   <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
                     <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335" />

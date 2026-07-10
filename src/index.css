@@ -281,6 +281,31 @@
     background-color: var(--ds-bg);
     color: var(--ds-text);
   }
+
+  /* Global Stylesheet Catch-All for standard text elements */
+  .dark p:not([class*="text-"]), 
+  .dark span:not([class*="text-"]), 
+  .dark h1:not([class*="text-"]), 
+  .dark h2:not([class*="text-"]), 
+  .dark h3:not([class*="text-"]), 
+  .dark h4:not([class*="text-"]), 
+  .dark h5:not([class*="text-"]), 
+  .dark h6:not([class*="text-"]), 
+  .dark td:not([class*="text-"]), 
+  .dark th:not([class*="text-"]) {
+    color: var(--ds-text);
+  }
+
+  /* Row Hover Interaction Adjustments for Dark Mode */
+  .dark tr:hover td,
+  .dark tr:hover th,
+  .dark tr:hover span,
+  .dark tr:hover p,
+  .dark tr:hover div,
+  .dark tr:hover time {
+    color: #ffffff !important;
+  }
+  
   .dark .bg-white {
     background-color: var(--ds-surface) !important;
   }
@@ -324,10 +349,35 @@
   .dark .hover\:bg-slate-100:hover {
     background-color: var(--ds-surface-hover) !important;
   }
-  .dark input, .dark select, .dark textarea {
-    background-color: var(--ds-surface-hover) !important;
+  /* Form Controls, Modals, and Interactive Components */
+  .dark input, 
+  .dark select, 
+  .dark textarea,
+  .dark [role="dialog"],
+  .dark [role="menu"] {
+    background-color: var(--ds-surface) !important;
     border-color: var(--ds-border) !important;
     color: var(--ds-text) !important;
+  }
+  
+  .dark input:focus, 
+  .dark select:focus, 
+  .dark textarea:focus {
+    background-color: var(--ds-surface-hover) !important;
+  }
+
+  /* Universal Button and Action Hover Adjustments */
+  .dark button:not([class*="bg-brand"]):not([class*="bg-primary"]):not([class*="bg-blue"]):not([class*="bg-red"]):not([class*="bg-green"]):not([class*="bg-transparent"]) {
+    border-color: var(--ds-border);
+  }
+
+  /* Ensure unstyled or secondary buttons flip to white text on hover */
+  .dark button:hover:not([class*="text-white"]):not([class*="bg-brand"]):not([class*="bg-primary"]) {
+    color: #ffffff !important;
+  }
+  
+  .dark button:hover:not([class*="text-white"]):not([class*="bg-brand"]):not([class*="bg-primary"]) * {
+    color: #ffffff !important;
   }
   .dark ::-webkit-scrollbar-thumb {
     background-color: #3e3835 !important;
