@@ -32,7 +32,7 @@ router.post('/callback', async (req: Request, res: Response) => {
 
     // 2. Trigger Day 0 Marketing Email to the Lead
     try {
-      await sendMarketingEmail(fullName, emailAddress, serviceName, 0);
+      await sendMarketingEmail(fullName, emailAddress, formattedMobile, serviceName, 0);
       console.log(`Day 0 marketing email triggered for: ${emailAddress}`);
     } catch (emailErr: any) {
       console.error('Failed to send Day 0 marketing email:', emailErr);

@@ -115,6 +115,71 @@ export async function sendSMS(toPhone: string, message: string, userId?: number)
 }
 
 /**
+ * Meta Cloud API WhatsApp Dispatcher
+ */
+export async function sendWhatsAppTemplate(
+  toPhone: string,
+  templateName: string,
+  params: string[],
+  userId?: number
+): Promise<boolean> {
+  const phoneId = process.env.WHATSAPP_PHONE_ID;
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+
+  if (!phoneId || !token) {
+    console.log(`[WHATSAPP MOCK] Missing credentials. Would send template '${templateName}' to ${toPhone} with params:`, params);
+    logNotificationToFile('WHATSAPP_TEMPLATE', toPhone, templateName, JSON.stringify(params));
+    return true;
+  }
+
+  // Format parameters for Meta API
+  const components = params.length > 0 ? [
+    {
+      type: 'body',
+      parameters: params.map(p => ({ type: 'text', text: p }))
+    }
+  ] : [];
+
+  try {
+    // Remove '+' and spaces from phone number as Meta expects format without leading +
+    const cleanPhone = toPhone.replace(/\D/g, '');
+    
+    const response = await fetch(`https://graph.facebook.com/v17.0/${phoneId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: cleanPhone,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: { code: 'en' }, // Adjust if you use a different default language
+          components
+        }
+      })
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      console.error(`[WHATSAPP ERROR] Failed to send template ${templateName} to ${toPhone}:`, result);
+      return false;
+    }
+    
+    console.log(`[WHATSAPP] Sent template ${templateName} to ${toPhone}`);
+    if (userId) {
+      await logToActivityDB(userId, 'WhatsApp Template Dispatched', `Template: ${templateName}`);
+    }
+    return true;
+  } catch (error) {
+    console.error(`[WHATSAPP ERROR] Exception while sending template ${templateName} to ${toPhone}:`, error);
+    return false;
+  }
+}
+
+/**
  * Notify user of new order placement
  */
 export async function notifyOrderPlacement(
@@ -150,10 +215,11 @@ export async function notifyOrderPlacement(
                     `Best regards,\nTeam Deccan Filings`;
   await sendEmail(userEmail, emailSubject, emailBody, userId);
 
-  // SMS
+  // SMS & WhatsApp
   const smsMessage = `Hi ${userName}, order ${orderId} for ${serviceNames} (Amt: ${formattedTotal}) has been placed successfully. Team Deccan Filings`;
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
+    await sendWhatsAppTemplate(userPhone, 'utility_order_placed', [userName, orderId, serviceNames, formattedTotal], userId);
   }
 }
 
@@ -178,10 +244,11 @@ export async function notifyOrderStatusChange(
                     `Best regards,\nTeam Deccan Filings`;
   await sendEmail(userEmail, emailSubject, emailBody, userId);
 
-  // SMS
+  // SMS & WhatsApp
   const smsMessage = `Hi ${userName}, status of your order ${orderId} has been updated to ${statusDisplay}. Log in to dashboard to check. Team Deccan Filings`;
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
+    await sendWhatsAppTemplate(userPhone, 'utility_order_status', [userName, orderId, statusDisplay], userId);
   }
 }
 
@@ -210,13 +277,18 @@ export async function notifyComplianceDeadline(
                     `\n\nBest regards,\nTeam Deccan Filings`;
   await sendEmail(userEmail, subject, emailBody, userId);
 
-  // SMS
+  // SMS & WhatsApp
   const smsMessage = status === 'overdue'
     ? `Hi ${userName}, compliance for ${taskTitle} was due on ${dueDate} and is OVERDUE. Please share documents immediately to avoid penalties. Team Deccan Filings`
     : `Hi ${userName}, compliance for ${taskTitle} is due on ${dueDate}. Please share required documents at the earliest. Team Deccan Filings`;
 
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
+    if (status === 'overdue') {
+      await sendWhatsAppTemplate(userPhone, 'utility_compliance_overdue', [userName, taskTitle, dueDate], userId);
+    } else {
+      await sendWhatsAppTemplate(userPhone, 'utility_compliance_upcoming', [userName, taskTitle, dueDate, daysRemaining.toString()], userId);
+    }
   }
 }
 
@@ -273,6 +345,19 @@ export async function notifyPaymentSuccess(
   }
 
   await sendEmail(userEmail, emailSubject, emailBody, userId, attachments);
+
+  // Send SMS & WhatsApp if we can retrieve phone number
+  try {
+    const [userRows] = await pool.query<mysql.RowDataPacket[]>('SELECT phone FROM users WHERE id = ?', [userId]);
+    if (userRows.length > 0 && userRows[0].phone) {
+      const phone = userRows[0].phone;
+      const smsMessage = `Hi ${userName}, we have received your payment of ${formattedTotal} for Order ${orderId}. Team Deccan Filings`;
+      await sendSMS(phone, smsMessage, userId);
+      await sendWhatsAppTemplate(phone, 'utility_payment_success', [userName, formattedTotal, orderId], userId);
+    }
+  } catch (err) {
+    console.error(`Failed to dispatch payment success SMS/WhatsApp for order ${orderId}:`, err);
+  }
 }
 
 /**
@@ -354,37 +439,52 @@ export async function notifyWelcome(
   if (phone) {
     const smsMessage = `Hi ${name}, welcome to Deccan Filings! We're excited to partner with you. Track your business filings & consult experts at deccanfilings.com.`;
     await sendSMS(phone, smsMessage, userId);
+    await sendWhatsAppTemplate(phone, 'utility_welcome', [name], userId);
   }
 }
 
 /**
- * Send Marketing Drip Emails
+ * Send Marketing Drip Emails and WhatsApp
  */
 export async function sendMarketingEmail(
   name: string,
   email: string,
+  phone: string,
   serviceName: string,
   step: number
 ): Promise<void> {
   let subject = '';
   let textBody = '';
+  let templateName = '';
+  let templateParams: string[] = [];
 
   if (step === 0) {
     subject = `We received your request, ${name}!`;
     textBody = `Hi ${name},\n\nThank you for requesting a callback regarding ${serviceName}. Our team of CA/CS experts has received your request and will be reaching out to you shortly.\n\nIn the meantime, feel free to reply to this email if you have any immediate questions!\n\nBest regards,\nTeam Deccan Filings`;
+    templateName = 'marketing_drip_day_0';
+    templateParams = [name, serviceName];
   } else if (step === 1) {
     subject = `Everything you need to know about ${serviceName}`;
     textBody = `Hi ${name},\n\nYesterday you asked about ${serviceName}. We know that compliance can be confusing, so we wanted to share a quick tip: The most important thing when starting with ${serviceName} is having your basic documents (PAN, Aadhaar, and Address Proof) ready. This can speed up your processing time by up to 40%!\n\nOur team is here to help you get everything sorted without the headache. Let us know when you're ready to proceed.\n\nBest regards,\nTeam Deccan Filings`;
+    templateName = 'marketing_drip_day_1';
+    templateParams = [name, serviceName];
   } else if (step === 3) {
     subject = `Why 10,000+ Founders Trust Deccan Filings 🚀`;
     textBody = `Hi ${name},\n\nStill thinking about ${serviceName}? We get it, choosing the right compliance partner is a big decision. Here is why founders across India trust us:\n1. 100% Online Process: No office visits required.\n2. Expert CA/CS Support: We don't just file forms; we offer strategic advice.\n3. Transparent Pricing: No hidden fees, ever.\n\nReady to take the next step? Reply to this email or call us directly!\n\nBest regards,\nTeam Deccan Filings`;
+    templateName = 'marketing_drip_day_3';
+    templateParams = [serviceName, name]; // As per your template design
   } else if (step === 7) {
     subject = `Final Follow-up: Let's get your ${serviceName} sorted`;
     textBody = `Hi ${name},\n\nWe haven't heard from you in a few days regarding your interest in ${serviceName}. If you've already found a solution, that's great! If you're still on the fence or have questions holding you back, we'd love to chat. You can schedule a free 15-minute consultation with one of our senior experts by replying to this email. We're here when you need us.\n\nBest regards,\nTeam Deccan Filings`;
+    templateName = 'marketing_drip_day_7';
+    templateParams = [name, serviceName];
   } else {
     return; // No email for this step
   }
 
   await sendEmail(email, subject, textBody);
+  if (phone) {
+    await sendWhatsAppTemplate(phone, templateName, templateParams);
+  }
 }
 

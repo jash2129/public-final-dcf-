@@ -170,7 +170,7 @@ export async function runMarketingDripScan(): Promise<void> {
 
       if (nextStep !== -1) {
         try {
-          await sendMarketingEmail(lead.full_name, lead.email_address, lead.service_name, nextStep);
+          await sendMarketingEmail(lead.full_name, lead.email_address, lead.mobile_number, lead.service_name, nextStep);
           await updateLeadSequence(lead.id, nextStep);
           sentCount++;
           console.log(`Sent marketing drip step ${nextStep} to ${lead.email_address}`);
