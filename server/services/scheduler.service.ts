@@ -2,7 +2,8 @@ import { pool } from '../db';
 import * as complianceModel from '../models/compliance.model';
 import * as userModel from '../models/user.model';
 import * as serviceModel from '../models/service.model';
-import { notifyComplianceDeadline } from './notification.service';
+import { notifyComplianceDeadline, sendMarketingEmail } from './notification.service';
+import { getActiveLeadsForFollowUp, updateLeadSequence } from '../models/lead.model';
 import mysql from 'mysql2/promise';
 
 /**
@@ -143,6 +144,48 @@ export async function runComplianceScan(): Promise<ScanResult> {
 }
 
 /**
+ * Scans active leads and sends the next email in their marketing drip sequence based on days elapsed.
+ */
+export async function runMarketingDripScan(): Promise<void> {
+  try {
+    const leads = await getActiveLeadsForFollowUp();
+    const today = new Date();
+    let sentCount = 0;
+
+    for (const lead of leads) {
+      if (!lead.id || !lead.last_email_sent_at) continue;
+
+      const diffTime = today.getTime() - new Date(lead.last_email_sent_at).getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      let nextStep = -1;
+
+      if (lead.sequence_step === 0 && diffDays >= 1) {
+        nextStep = 1;
+      } else if (lead.sequence_step === 1 && diffDays >= 2) { 
+        nextStep = 3;
+      } else if (lead.sequence_step === 3 && diffDays >= 4) {
+        nextStep = 7;
+      }
+
+      if (nextStep !== -1) {
+        try {
+          await sendMarketingEmail(lead.full_name, lead.email_address, lead.service_name, nextStep);
+          await updateLeadSequence(lead.id, nextStep);
+          sentCount++;
+          console.log(`Sent marketing drip step ${nextStep} to ${lead.email_address}`);
+        } catch (err) {
+          console.error(`Failed to send marketing drip step ${nextStep} to ${lead.email_address}:`, err);
+        }
+      }
+    }
+    console.log(`Marketing drip scan completed. Sent ${sentCount} emails.`);
+  } catch (error) {
+    console.error("Marketing drip scan encountered error:", error);
+  }
+}
+
+/**
  * Initializes the background scheduler to run the scan once every 24 hours
  */
 export function initScheduler() {
@@ -152,11 +195,13 @@ export function initScheduler() {
   setTimeout(() => {
     console.log("Running initial compliance scheduler scan...");
     runComplianceScan();
+    runMarketingDripScan();
   }, 30000);
 
   // Set recurring interval
   setInterval(() => {
     console.log("Running daily compliance scheduler scan...");
     runComplianceScan();
+    runMarketingDripScan();
   }, TWENTY_FOUR_HOURS);
 }

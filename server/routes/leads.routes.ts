@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import { formatPhoneWithCountryCode } from '../utils/helpers';
-
+import { createLead } from '../models/lead.model';
+import { sendMarketingEmail } from '../services/notification.service';
 const router = Router();
 
 // POST /api/leads/callback
@@ -14,6 +15,29 @@ router.post('/callback', async (req: Request, res: Response) => {
   }
 
   try {
+    // 1. Save lead to database for drip sequence tracking
+    try {
+      await createLead({
+        full_name: fullName,
+        mobile_number: formattedMobile,
+        email_address: emailAddress,
+        city,
+        service_name: serviceName
+      });
+      console.log(`Lead saved to database: ${emailAddress}`);
+    } catch (dbErr: any) {
+      console.error('Failed to save lead to database:', dbErr);
+      // Continue execution so the admin notification still sends if possible
+    }
+
+    // 2. Trigger Day 0 Marketing Email to the Lead
+    try {
+      await sendMarketingEmail(fullName, emailAddress, serviceName, 0);
+      console.log(`Day 0 marketing email triggered for: ${emailAddress}`);
+    } catch (emailErr: any) {
+      console.error('Failed to send Day 0 marketing email:', emailErr);
+    }
+
     let transporter: nodemailer.Transporter;
 
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {

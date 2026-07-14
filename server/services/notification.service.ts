@@ -357,3 +357,34 @@ export async function notifyWelcome(
   }
 }
 
+/**
+ * Send Marketing Drip Emails
+ */
+export async function sendMarketingEmail(
+  name: string,
+  email: string,
+  serviceName: string,
+  step: number
+): Promise<void> {
+  let subject = '';
+  let textBody = '';
+
+  if (step === 0) {
+    subject = `We received your request, ${name}!`;
+    textBody = `Hi ${name},\n\nThank you for requesting a callback regarding ${serviceName}. Our team of CA/CS experts has received your request and will be reaching out to you shortly.\n\nIn the meantime, feel free to reply to this email if you have any immediate questions!\n\nBest regards,\nTeam Deccan Filings`;
+  } else if (step === 1) {
+    subject = `Everything you need to know about ${serviceName}`;
+    textBody = `Hi ${name},\n\nYesterday you asked about ${serviceName}. We know that compliance can be confusing, so we wanted to share a quick tip: The most important thing when starting with ${serviceName} is having your basic documents (PAN, Aadhaar, and Address Proof) ready. This can speed up your processing time by up to 40%!\n\nOur team is here to help you get everything sorted without the headache. Let us know when you're ready to proceed.\n\nBest regards,\nTeam Deccan Filings`;
+  } else if (step === 3) {
+    subject = `Why 10,000+ Founders Trust Deccan Filings 🚀`;
+    textBody = `Hi ${name},\n\nStill thinking about ${serviceName}? We get it, choosing the right compliance partner is a big decision. Here is why founders across India trust us:\n1. 100% Online Process: No office visits required.\n2. Expert CA/CS Support: We don't just file forms; we offer strategic advice.\n3. Transparent Pricing: No hidden fees, ever.\n\nReady to take the next step? Reply to this email or call us directly!\n\nBest regards,\nTeam Deccan Filings`;
+  } else if (step === 7) {
+    subject = `Final Follow-up: Let's get your ${serviceName} sorted`;
+    textBody = `Hi ${name},\n\nWe haven't heard from you in a few days regarding your interest in ${serviceName}. If you've already found a solution, that's great! If you're still on the fence or have questions holding you back, we'd love to chat. You can schedule a free 15-minute consultation with one of our senior experts by replying to this email. We're here when you need us.\n\nBest regards,\nTeam Deccan Filings`;
+  } else {
+    return; // No email for this step
+  }
+
+  await sendEmail(email, subject, textBody);
+}
+
