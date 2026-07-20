@@ -179,9 +179,9 @@ export default function Register() {
           </Link>
 
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-dark mb-2">
+            <h1 className="text-3xl font-bold tracking-tight text-dark mb-2">
               Create an account
-            </h2>
+            </h1>
             <p className="text-dark-400">
               Already have an account?{' '}
               <Link to="/login" className="font-bold text-dark underline decoration-brand decoration-2 hover:text-secondary py-2 inline-block transition-colors">
@@ -327,10 +327,10 @@ export default function Register() {
               <Star className="h-4 w-4 text-brand fill-current" />
               Trusted by 100,000+ Businesses
             </div>
-            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-              Manage your compliance <br />
-              <span className="text-brand">all in one place.</span>
-            </h3>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+              Start your business journey <br />
+              <span className="text-brand">today.</span>
+            </h2>
             
             <div className="space-y-4 mt-8">
               {[
@@ -354,7 +354,7 @@ export default function Register() {
           <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 rounded-bl-full opacity-50 blur-xl pointer-events-none" />
             
-            <h3 className="text-2xl font-black text-dark mb-2 tracking-tight">Complete Your Profile</h3>
+            <h2 className="text-2xl font-black text-dark mb-2 tracking-tight">Complete Your Profile</h2>
             <p className="text-sm text-slate-500 mb-6 font-bold leading-relaxed">
               We need a few details to register your account and configure CRM integration.
             </p>

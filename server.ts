@@ -5,6 +5,7 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import fs from "fs";
+import helmet from "helmet";
 import { setupDatabase } from "./server/db";
 import { initScheduler } from "./server/services/scheduler.service";
 
@@ -19,11 +20,15 @@ import documentRouter from "./server/routes/document.routes";
 import profileRouter from "./server/routes/profile.routes";
 import contactRouter from "./server/routes/contact.routes";
 import leadsRouter from "./server/routes/leads.routes";
+import blogRouter from "./server/routes/blog.routes";
 import webhookRoutes from "./server/routes/webhook.routes";
 import { errorHandler } from "./server/middlewares/error.middleware";
+import { serviceCategories, generateSlug } from "./src/data/services";
+import { getAllBlogPosts } from "./server/services/blog.service";
 
 async function startServer() {
   const app = express();
+  app.set('trust proxy', true);
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   // Ensure uploads directory exists
@@ -31,6 +36,55 @@ async function startServer() {
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
   }
+
+  // --- SEO & Security Headers ---
+  app.use(helmet({
+    contentSecurityPolicy: false, // Disabled to prevent blocking existing inline scripts/GTM
+    crossOriginEmbedderPolicy: false,
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true
+    },
+    frameguard: {
+      action: "sameorigin" // Sets X-Frame-Options: SAMEORIGIN
+    }
+  }));
+
+  // Enforce non-WWW canonical domain
+  app.use((req, res, next) => {
+    const host = req.headers.host || "";
+    if (host.startsWith("www.")) {
+      const nonWwwHost = host.replace(/^www\./, "");
+      return res.redirect(301, `https://${nonWwwHost}${req.originalUrl}`);
+    }
+    next();
+  });
+
+  // 301 Permanent Redirects for Missing Pages
+  const redirects: Record<string, string> = {
+    "/startup-registrations": "/services/startup",
+    "/license": "/services/licenses",
+    "/gst": "/services/gst",
+    "/startup-registrations/one-person-company-opc-registration": "/services/startup/opc-registration",
+    "/license/trade-license": "/services/licenses/trade-license",
+    "/gst/gst-registration-for-foreigners": "/services/gst/foreign-company-registration"
+  };
+
+  app.use((req, res, next) => {
+    const target = redirects[req.path];
+    if (target) {
+      return res.redirect(301, target);
+    }
+    
+    // Strip trailing slashes for SEO consistency (except root)
+    if (req.path.length > 1 && req.path.endsWith('/')) {
+      const query = req.url.slice(req.path.length);
+      return res.redirect(301, req.path.slice(0, -1) + query);
+    }
+    
+    next();
+  });
 
   // Request logger middleware
   app.use((req, res, next) => {
@@ -129,7 +183,73 @@ async function startServer() {
   app.use("/api/documents", documentRouter);
   app.use("/api/contact", contactRouter);
   app.use("/api/leads", leadsRouter);
+  app.use("/api/blogs", blogRouter);
   app.use("/api", profileRouter); // Matches: /api/user/*, /api/invoices, /api/stats/*
+
+  // --- Dynamic Sitemap Endpoint ---
+  app.get('/sitemap.xml', async (_req, res) => {
+    try {
+      const baseUrl = 'https://deccanfilings.com';
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+      // 1. Static Pages
+      const staticPages = [
+        '', '/about', '/contact', '/blog', '/services',
+        '/careers', '/privacy', '/terms', '/refund',
+        '/tools/gst-calculator', '/tools/compliance-calendar',
+        '/itr-filing', '/itr-filing-b'
+      ];
+
+      for (const page of staticPages) {
+        xml += `
+  <url>
+    <loc>${baseUrl}${page}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>${page === '' ? '1.0' : '0.8'}</priority>
+  </url>`;
+      }
+
+      // 2. Dynamic Service Pages
+      for (const category of serviceCategories) {
+        for (const service of category.services) {
+          const serviceSlug = generateSlug(service);
+          xml += `
+  <url>
+    <loc>${baseUrl}/services/${category.slug}/${serviceSlug}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+        }
+      }
+
+      // 3. Blog Posts
+      try {
+        const blogs = await getAllBlogPosts();
+        for (const blog of blogs) {
+          xml += `
+  <url>
+    <loc>${baseUrl}/blog/${blog.id}</loc>
+    <lastmod>${new Date(blog.created_at || blog.date || Date.now()).toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+        }
+      } catch (dbErr) {
+        console.error('Error fetching blogs for sitemap:', dbErr);
+        // Continue without blogs if DB fails, rather than crashing sitemap
+      }
+
+      xml += `
+</urlset>`;
+
+      res.header('Content-Type', 'application/xml');
+      res.send(xml);
+    } catch (err) {
+      console.error('Error generating sitemap:', err);
+      res.status(500).end();
+    }
+  });
 
   // Serve static files from uploads
   app.use('/uploads', express.static(uploadsDir));

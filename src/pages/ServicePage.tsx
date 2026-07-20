@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import React, { useState, useMemo, useEffect } from 'react';
 import { CheckCircle, ChevronRight, Star, Shield, Clock, Users, AlertCircle } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import SEO from '../components/SEO';
 import { serviceCategories, generateSlug } from '../data/services';
 
 export default function ServicePage() {
@@ -47,28 +48,29 @@ export default function ServicePage() {
       ]
     },
     'insurance': {
-      whatIs: `Insurance is a critical risk management tool that provides financial protection against unforeseen events. From health and life to general business assets, our insurance services ensure that you and your business are shielded from significant financial losses due to accidents, illnesses, or other liabilities.`,
+      whatIs: `Insurance is a critical risk management tool that provides financial protection against unforeseen events. In the context of Indian businesses and individuals, having proper insurance coverage shields you from significant financial losses due to accidents, health emergencies, cyber threats, or other liabilities.`,
       whoNeeds: [
-        { title: 'Families', desc: 'Seeking financial security for their loved ones.' },
-        { title: 'Business Owners', desc: 'Protecting assets, employees, and operations.' },
-        { title: 'Individuals', desc: 'Planning for health emergencies and long-term savings.' }
+        { title: 'Families', desc: 'Seeking long-term financial security and health coverage for their loved ones.' },
+        { title: 'Business Owners', desc: 'Protecting commercial assets, safeguarding employees, and mitigating operational risks.' },
+        { title: 'Individuals', desc: 'Planning for health emergencies and ensuring long-term savings through life policies.' }
       ],
       documents: [
         'ID Proof (PAN / Aadhaar)',
         'Age Proof (Birth Certificate / 10th Marksheet)',
         'Address Proof (Utilities / Passport)',
         'Recent Passport Size Photographs',
-        'Medical Reports (if applicable)'
+        'Medical Reports (if applicable for health/term)'
       ],
       process: [
-        { title: 'Need Assessment', desc: 'Identifying the right type and amount of coverage.' },
-        { title: 'Policy Comparison', desc: 'Comparing premiums and benefits across top providers.' },
-        { title: 'Application Filing', desc: 'Submitting the proposal and required documents.' },
-        { title: 'Policy Issuance', desc: 'Coordinating with insurers for quick policy delivery.' }
+        { title: 'Risk & Need Assessment', desc: 'Our experts identify the right type and optimal amount of coverage for your specific risk profile.' },
+        { title: 'Policy Comparison', desc: 'We compare premiums, riders, and claim settlement ratios across top IRDAI-approved providers.' },
+        { title: 'Application & Documentation', desc: 'Submitting the proposal form along with required KYC and medical documents.' },
+        { title: 'Underwriting & Issuance', desc: 'Coordinating with insurers for swift underwriting and instant policy delivery.' }
       ],
       faqs: [
-        { q: 'What is the importance of Health Insurance?', a: 'Health insurance covers medical expenses, protecting your savings from high hospital costs during emergencies.' },
-        { q: 'What is Term Life Insurance?', a: 'Term insurance provides a large life cover at a low premium for a specific period, ensuring your family\'s financial future.' }
+        { q: 'What is the importance of Health Insurance in India?', a: 'Health insurance covers exorbitant medical expenses, protecting your savings from high hospital costs during emergencies, and offers tax benefits under Section 80D.' },
+        { q: 'What is Term Life Insurance?', a: 'Term insurance provides a massive life cover at a highly affordable premium for a specific period, ensuring your family\'s financial future in case of unfortunate events.' },
+        { q: 'Can businesses claim tax deductions on employee insurance?', a: 'Yes, premiums paid by an employer for Group Health Insurance or Group Term Life Insurance for employees are generally deductible as a business expense under the Income Tax Act.' }
       ]
     },
     'mutual-fund': {
@@ -98,7 +100,41 @@ export default function ServicePage() {
     }
   };
 
-  const specificContent = category === 'finance' ? financeContent[slug || ''] : null;
+  const incomeTaxContent: Record<string, any> = {
+    'company-e-taxing': {
+      whatIs: `Company e-Taxing refers to the completely digitized, end-to-end electronic process of filing corporate income tax returns and managing corporate tax compliance. As per the Indian Income Tax Act, 1961, every registered private limited, public limited, and Section 8 company must file an annual income tax return (ITR-6) electronically, regardless of profit, loss, or no business activity.`,
+      whoNeeds: [
+        { title: 'Private Limited Companies', desc: 'Mandatory annual tax filing (ITR-6) for all active and dormant Pvt Ltd entities.' },
+        { title: 'LLPs & Partnerships', desc: 'Required to file their annual returns and maintain digital tax compliance.' },
+        { title: 'Section 8 Companies', desc: 'NGOs and non-profits needing to file their tax exemptions correctly.' }
+      ],
+      documents: [
+        'Audited Financial Statements (Balance Sheet & P&L)',
+        'Digital Signature Certificate (DSC) of Director',
+        'Company PAN Card & Director DIN',
+        'Bank Account Statements & Audit Report (Form 3CA/3CB)',
+        'TDS Certificates (Form 16A/26AS/AIS)'
+      ],
+      process: [
+        { title: 'Document Gathering & Audit', desc: 'We compile your financial statements and ensure statutory audits are complete.' },
+        { title: 'Tax Computation', desc: 'Our Chartered Accountants calculate accurate tax liabilities, MAT (Minimum Alternate Tax), and deductions.' },
+        { title: 'e-Filing on Tax Portal', desc: 'We electronically file your ITR-6 securely on the official Income Tax e-Filing portal.' },
+        { title: 'e-Verification', desc: 'The return is e-verified seamlessly using the authorized Director’s Digital Signature Certificate (DSC).' }
+      ],
+      faqs: [
+        { q: 'Is it mandatory to file an income tax return if my company made no profit?', a: 'Yes, it is strictly mandatory for every registered company in India to file a NIL income tax return even if there was no revenue, profit, or transaction during the financial year.' },
+        { q: 'What is the deadline for Company e-Taxing?', a: 'For companies requiring a tax audit, the due date to file the income tax return is usually October 31st of the assessment year.' },
+        { q: 'What is the penalty for late filing?', a: 'Late filing of a company tax return can attract a penalty under Section 234F of up to ₹10,000, along with interest on the pending tax amount under Sections 234A, 234B, and 234C.' }
+      ]
+    }
+  };
+
+  let specificContent = null;
+  if (category === 'finance') {
+    specificContent = financeContent[slug || ''];
+  } else if (category === 'income-tax') {
+    specificContent = incomeTaxContent[slug || ''];
+  }
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -212,11 +248,11 @@ export default function ServicePage() {
 
   return (
     <div className="bg-white">
+      <SEO 
+        title={`${serviceName}`} 
+        description={`Register for ${serviceName} online in India. 100% online process with expert CA/CS assistance. Fast, reliable, and affordable compliance services.`} 
+      />
       <Helmet>
-        <title>{serviceName} | Deccan Filings India</title>
-        <meta name="description" content={`Register for ${serviceName} online in India. 100% online process with expert CA/CS assistance. Fast, reliable, and affordable compliance services.`} />
-        <meta property="og:title" content={`${serviceName} Registration - Deccan Filings`} />
-        <meta property="og:description" content={`Get your ${serviceName} handled by experts. 10,000+ businesses served across India.`} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -446,14 +482,17 @@ export default function ServicePage() {
             {/* What is it */}
             <div>
               <h2 className="text-3xl font-bold text-dark mb-6">What is {serviceName}?</h2>
-              <p className="text-lg text-dark-400 leading-relaxed">
+              <p className="text-lg text-dark-400 leading-relaxed mb-4">
                 {specificContent?.whatIs || `${serviceName} is a crucial compliance requirement for businesses operating in India. It ensures that your business is legally recognized and adheres to the statutory guidelines set by the government.`}
+              </p>
+              <p className="text-sm text-dark-400 bg-brand-lightest/50 p-4 rounded-xl border border-brand/20">
+                <strong>Official Resources:</strong> For the most up-to-date regulatory guidelines regarding {serviceName}, we recommend verifying details on the <a href="https://www.mca.gov.in/" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline font-bold">Ministry of Corporate Affairs (MCA) Portal</a> or the <a href="https://www.incometax.gov.in/" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline font-bold">Income Tax e-Filing Portal</a> depending on the nature of your compliance.
               </p>
             </div>
 
             {/* Who Needs This - Bento Grid */}
             <div>
-              <h2 className="text-3xl font-bold text-dark mb-6">Who Needs This?</h2>
+              <h2 className="text-3xl font-bold text-dark mb-6">Who Needs {serviceName}?</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(specificContent?.whoNeeds || [
                   { title: 'Startups', desc: 'Looking for formal recognition and funding.' },
@@ -473,7 +512,7 @@ export default function ServicePage() {
 
             {/* Documents Required */}
             <div>
-              <h2 className="text-3xl font-bold text-dark mb-6">Documents Required</h2>
+              <h2 className="text-3xl font-bold text-dark mb-6">Documents Required for {serviceName}</h2>
               
               <div className="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl mb-6 shadow-sm">
                 <div className="flex justify-between items-center mb-2">
@@ -521,7 +560,7 @@ export default function ServicePage() {
 
             {/* Process Steps */}
             <div>
-              <h2 className="text-3xl font-bold text-dark mb-8">Process Steps</h2>
+              <h2 className="text-3xl font-bold text-dark mb-8">{serviceName} Process Steps</h2>
               <div className="relative border-l-2 border-brand ml-4 space-y-10">
                 {(specificContent?.process || [
                   { title: 'Submit Documents', desc: 'Upload required documents securely on our portal.' },
@@ -542,7 +581,7 @@ export default function ServicePage() {
 
             {/* FAQs */}
             <div className="pt-8">
-              <h2 className="text-3xl font-bold text-dark mb-8">Frequently Asked Questions</h2>
+              <h2 className="text-3xl font-bold text-dark mb-8">Frequently Asked Questions about {serviceName}</h2>
               <div className="space-y-4">
                 {(specificContent?.faqs || [
                   {

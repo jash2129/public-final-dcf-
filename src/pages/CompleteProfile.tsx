@@ -91,7 +91,7 @@ export default function CompleteProfile() {
           </div>
         </div>
 
-        <h3 className="text-2xl font-black text-dark mb-2 tracking-tight text-center">Complete Your Profile</h3>
+        <h1 className="text-2xl font-black text-dark mb-2 tracking-tight text-center">Complete Your Profile</h1>
         <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed text-center">
           For security and communication purposes, a valid mobile number is required to access your dashboard.
         </p>

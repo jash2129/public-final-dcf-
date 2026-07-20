@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Ghost, Home, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SEO from '../components/SEO';
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <SEO title="Page Not Found - 404" description="The page you are looking for does not exist." />
       <div className="max-w-md w-full text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
@@ -14,7 +16,7 @@ export default function NotFound() {
         >
           <div className="relative inline-block">
             <Ghost className="h-32 w-32 text-slate-300 animate-bounce" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl font-black text-dark/10">404</div>
+            <h2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl font-black text-dark/10">404</h2>
           </div>
         </motion.div>
         

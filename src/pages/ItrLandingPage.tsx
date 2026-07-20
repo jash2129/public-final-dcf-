@@ -239,6 +239,11 @@ export default function ItrLandingPage() {
                 </div>
               </li>
             </ul>
+            <div className="mt-4 p-3 sm:p-4 bg-orange-50/50 dark:bg-[#1A1715]/50 border border-orange-100 dark:border-[#242220] rounded-xl">
+              <p className="text-xs text-[#8C8480] dark:text-[#9E9692]">
+                <strong>Official Resources:</strong> To learn more about ITR deadlines and statutory requirements, you can also check the official <a href="https://www.incometax.gov.in/" target="_blank" rel="noopener noreferrer" className="text-[#FF6F43] hover:underline font-bold">Income Tax e-Filing Portal</a>.
+              </p>
+            </div>
           </div>
 
           <div className="pt-3 sm:pt-4">

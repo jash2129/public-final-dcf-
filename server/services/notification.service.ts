@@ -4,6 +4,7 @@ import { pool } from '../db';
 import { formatCurrency } from '../utils/helpers';
 import nodemailer from 'nodemailer';
 import * as invoiceService from './invoice.service';
+import mysql from 'mysql2/promise';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || '',
@@ -33,7 +34,7 @@ function ensureLogFile() {
 /**
  * Log notification dispatch to a local log file for testing and auditing
  */
-function logNotificationToFile(type: 'EMAIL' | 'SMS', recipient: string, subjectOrMessage: string, body?: string) {
+function logNotificationToFile(type: 'EMAIL' | 'SMS' | 'WHATSAPP_TEMPLATE' | 'WHATSAPP', recipient: string, subjectOrMessage: string, body?: string) {
   ensureLogFile();
   const timestamp = new Date().toISOString();
   const logEntry = `[${timestamp}] [${type}] To: ${recipient}\n` + 

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Building, FileText, Briefcase, CheckCircle, Star, ArrowRight, Shield, Clock, Users, Quote, ChevronRight, Play, Calculator, Building2, ShieldCheck, Utensils } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import SEO from '../components/SEO';
 import { serviceCategories, generateSlug } from '../data/services';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
@@ -92,12 +92,10 @@ export default function Home() {
 
   return (
     <div className="overflow-hidden">
-      <Helmet>
-        <title>Deccan Filings | India's Trusted Compliance Platform</title>
-        <meta name="description" content="Start and grow your business in India with Deccan Filings. Expert assistance for Company Registration, GST, Trademark, and more. 100% online process." />
-        <meta property="og:title" content="Deccan Filings | Start & Grow Your Business" />
-        <meta property="og:description" content="India's leading cloud-based business services platform. Expert CA/CS assistance for all your compliance needs." />
-      </Helmet>
+      <SEO 
+        title="India's Trusted Compliance Platform" 
+        description="Start and grow your business in India with Deccan Filings. Expert assistance for Company Registration, GST, Trademark, and more. 100% online process."
+      />
       {/* Hero Section */}
       <section className="bg-dark text-white pt-28 pb-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Abstract background pattern with pulse-glow animations */}

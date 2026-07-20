@@ -7,6 +7,7 @@ const JWT_EXPIRES_IN = '1h';
 export interface UserTokenPayload {
   id: number;
   email: string;
+  phone?: string;
   role: 'user' | 'admin' | 'super_admin';
 }
 

@@ -1,5 +1,8 @@
 import { Router, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
+import { createLead } from '../models/lead.model';
+import { sendMarketingEmail } from '../services/notification.service';
+import { formatPhoneWithCountryCode } from '../utils/helpers';
 
 const router = Router();
 
@@ -12,7 +15,32 @@ router.post('/', async (req: Request, res: Response) => {
   }
 
   try {
-    // Configure transporter — uses SMTP env vars, falls back to Ethereal for local dev
+    const formattedMobile = formatPhoneWithCountryCode(mobile) || mobile;
+    const serviceName = service || category || 'General Inquiry';
+
+    // 1. Save lead to database for drip sequence tracking
+    try {
+      await createLead({
+        full_name: name,
+        mobile_number: formattedMobile,
+        email_address: email,
+        city: address,
+        service_name: serviceName
+      });
+      console.log(`Lead saved to database from Contact Form: ${email}`);
+    } catch (dbErr: any) {
+      console.error('Failed to save lead to database:', dbErr);
+    }
+
+    // 2. Trigger Day 0 Marketing Sequence to the Lead
+    try {
+      await sendMarketingEmail(name, email, formattedMobile, serviceName, 0);
+      console.log(`Day 0 marketing sequence triggered for: ${email}`);
+    } catch (emailErr: any) {
+      console.error('Failed to send Day 0 marketing sequence:', emailErr);
+    }
+
+    // 3. Configure transporter for internal HR notification
     let transporter: nodemailer.Transporter;
 
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {

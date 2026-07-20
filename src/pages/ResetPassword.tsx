@@ -91,9 +91,9 @@ export default function ResetPassword() {
           </Link>
 
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-dark mb-2">
+            <h1 className="text-3xl font-bold tracking-tight text-dark mb-2">
               Reset Password
-            </h2>
+            </h1>
             <p className="text-dark-400">
               Set a strong, new password for your Deccan Filings account.
             </p>
@@ -108,7 +108,7 @@ export default function ResetPassword() {
               >
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
-                  <h3 className="font-bold text-lg text-emerald-950">Success!</h3>
+                  <h2 className="font-bold text-lg text-emerald-950">Success!</h2>
                 </div>
                 <p className="text-sm text-emerald-800/95 leading-relaxed">
                   Your password has been successfully reset. You will be redirected to the sign in page in <span className="font-extrabold">{countdown}</span> seconds.
@@ -207,10 +207,10 @@ export default function ResetPassword() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
               A secure portal for your <br />
               <span className="text-brand">peace of mind.</span>
-            </h3>
+            </h2>
             <p className="text-slate-300 text-lg leading-relaxed max-w-md">
               We leverage bank-grade encryption to ensure your data and credentials remain secure and strictly private.
             </p>

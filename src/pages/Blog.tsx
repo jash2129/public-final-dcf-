@@ -1,16 +1,48 @@
-import React, { useState } from 'react';
-import { Calendar, User, ArrowRight, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, User, ArrowRight, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { blogPosts } from '../data/blogPosts';
+import SEO from '../components/SEO';
+
+interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  category: string;
+  author: string;
+  date: string;
+  readTime: string;
+  image: string;
+  content: string;
+}
 
 export default function Blog() {
   const categories = ['All', 'Startup', 'GST', 'Income Tax', 'Trademark', 'MCA', 'Global'];
+  
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   
   // State variables
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const POSTS_PER_PAGE = 6;
+
+  useEffect(() => {
+    fetch('/api/blogs')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch blogs');
+        return res.json();
+      })
+      .then(data => {
+        setBlogPosts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
   // Filter logic
   const filteredPosts = blogPosts.filter(post => {
@@ -30,6 +62,10 @@ export default function Blog() {
 
   return (
     <div className="bg-slate-50 min-h-screen pb-20">
+      <SEO 
+        title="Blog | Deccan Filings" 
+        description="Read our latest insights, guides, and updates on business registration, compliance, and taxation in India."
+      />
       {/* Hero Section */}
       <section className="bg-dark text-white py-16">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -77,8 +113,17 @@ export default function Blog() {
             ))}
           </div>
 
-          {/* Blog Grid */}
-          {currentPosts.length > 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 text-brand">
+              <Loader2 className="h-10 w-10 animate-spin mb-4" />
+              <p className="text-slate-600 font-medium">Loading articles...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16 bg-red-50 text-red-600 rounded-3xl max-w-xl mx-auto">
+              <p className="font-bold">Error loading articles.</p>
+              <p className="text-sm mt-2">{error}</p>
+            </div>
+          ) : currentPosts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {currentPosts.map((post) => (
                 <article key={post.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex flex-col">

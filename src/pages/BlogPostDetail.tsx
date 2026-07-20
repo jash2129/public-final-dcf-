@@ -1,11 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, User, ArrowLeft, Clock, Share2 } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Clock, Share2, Loader2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { blogPosts } from '../data/blogPosts';
+
+interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  category: string;
+  author: string;
+  date: string;
+  readTime: string;
+  image: string;
+  content: string;
+}
 
 export default function BlogPostDetail() {
   const { id } = useParams<{ id: string }>();
+  
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch('/api/blogs')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch blogs');
+        return res.json();
+      })
+      .then(data => {
+        setBlogPosts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <Loader2 className="h-10 w-10 animate-spin mb-4 text-brand" />
+        <p className="text-slate-600 font-medium">Loading article...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <h2 className="text-2xl font-bold text-red-600 mb-2">Error loading article</h2>
+        <p className="text-slate-500 mb-4">{error}</p>
+        <Link to="/blog" className="text-brand font-bold flex items-center gap-2 hover:underline">
+          <ArrowLeft className="h-5 w-5" /> Back to Blog
+        </Link>
+      </div>
+    );
+  }
+
   const post = blogPosts.find(p => p.id === Number(id));
 
   if (!post) {

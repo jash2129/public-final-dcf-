@@ -289,7 +289,9 @@ export default function PublicLayout() {
               <Link to="/" className="flex items-center group flex-shrink-0">
                 <img 
                   src="/logo.png" 
-                  alt="Deccan Filings" 
+                  alt="Deccan Filings"
+                  width="180"
+                  height="45"
                   className="h-14 lg:h-16 2xl:h-20 w-auto group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
@@ -581,7 +583,10 @@ export default function PublicLayout() {
               <div className="inline-flex items-center mb-6 bg-white p-3.5 rounded-2xl shadow-sm">
                 <img 
                   src="/logo.png" 
-                  alt="Deccan Filings" 
+                  alt="Deccan Filings Footer Logo" 
+                  width="160"
+                  height="40"
+                  loading="lazy"
                   className="h-12 w-auto object-contain" 
                 />
               </div>
@@ -696,7 +701,7 @@ export default function PublicLayout() {
         className="md:hidden fixed bottom-24 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:bg-[#20ba5a] transition-all transform hover:scale-110 flex items-center justify-center btn-tap"
         aria-label="Chat on WhatsApp"
       >
-        <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24" xmlns="https://www.w3.org/2000/svg">
           <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.42 1.451 5.302 1.453 5.485.002 9.948-4.461 9.952-9.953.002-2.661-1.034-5.163-2.915-7.046C17.106 1.77 14.604.735 11.944.735c-5.49 0-9.957 4.463-9.961 9.955-.001 1.93.499 3.81 1.453 5.419L2.465 20.8l4.182-1.646zm13.438-6.303c-.267-.134-1.58-.78-1.82-.866-.239-.087-.412-.13-.587.135-.176.265-.678.866-.83 1.039-.153.174-.306.195-.573.061-.267-.134-1.127-.415-2.147-1.325-.793-.707-1.329-1.582-1.485-1.85-.156-.268-.017-.413.117-.547.12-.12.267-.312.4-.467.135-.156.18-.268.27-.447.09-.179.046-.336-.023-.47-.069-.134-.588-1.42-.806-1.947-.212-.512-.446-.442-.609-.45-.16-.009-.344-.01-.528-.01-.184 0-.485.07-.74.349-.253.28-1.042 1.02-1.042 2.485 0 1.464 1.065 2.88 1.212 3.081.148.201 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.58-.646 1.8-1.238.22-.593.22-1.102.154-1.207-.066-.105-.24-.167-.507-.3z"/>
         </svg>
       </a>
