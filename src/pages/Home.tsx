@@ -104,7 +104,7 @@ export default function Home() {
           <div className="absolute top-[45%] -left-[10%] w-[50%] h-[50%] rounded-full bg-secondary/20 blur-3xl animate-pulse-glow animate-float-delayed"></div>
           
           {/* Grid Pattern */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDUpIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDQwaDQwVjBIMHoiLz48L2c+PC9zdmc+')] opacity-20"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwczovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIHN0cm9rZT0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjA1KSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMCA0MGg0MFYwSDB6Ii8+PC9nPjwvc3ZnPg==')] opacity-20"></div>
         </div>
         
         <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
@@ -321,7 +321,7 @@ export default function Home() {
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-8">
                     <Building className="h-7 w-7" />
                   </div>
-                  <h3 className="font-bold text-2xl text-dark mb-3 group-hover:text-secondary transition-colors">Business Registration</h3>
+                  <h2 className="font-bold text-2xl text-dark mb-3 group-hover:text-secondary transition-colors">Business Registration</h2>
                   <p className="text-dark-400 text-sm max-w-md mb-6">Incorporate your venture quickly with end-to-end guidance. We handle Pvt Ltd, LLP, OPC, and Partner Firms.</p>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-4">
@@ -339,7 +339,7 @@ export default function Home() {
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-6">
                     <FileText className="h-7 w-7" />
                   </div>
-                  <h3 className="font-bold text-xl text-dark mb-2 group-hover:text-secondary transition-colors">GST Compliance</h3>
+                  <h2 className="font-bold text-xl text-dark mb-2 group-hover:text-secondary transition-colors">GST Compliance</h2>
                   <p className="text-dark-400 text-sm">Hassle-free GST registration & monthly return filings.</p>
                 </div>
                 <span className="text-xs font-black text-secondary hover:underline mt-6 inline-flex items-center gap-1">File Return &rarr;</span>
@@ -353,7 +353,7 @@ export default function Home() {
                   <div className="bg-brand-lightest w-14 h-14 rounded-xl flex items-center justify-center text-dark group-hover:bg-brand group-hover:scale-110 transition-all duration-300 mb-6">
                     <Briefcase className="h-7 w-7" />
                   </div>
-                  <h3 className="font-bold text-xl text-dark mb-2 group-hover:text-secondary transition-colors">MCA Compliance</h3>
+                  <h2 className="font-bold text-xl text-dark mb-2 group-hover:text-secondary transition-colors">MCA Compliance</h2>
                   <p className="text-dark-400 text-sm">Maintain Roc compliance, annual returns & corporate changes.</p>
                 </div>
                 <span className="text-xs font-black text-secondary hover:underline mt-6 inline-flex items-center gap-1">ROC Filings &rarr;</span>
@@ -369,7 +369,7 @@ export default function Home() {
                     <CheckCircle className="h-7 w-7" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-xl text-dark mb-1 group-hover:text-secondary transition-colors">Income Tax Return Filing</h3>
+                    <h2 className="font-bold text-xl text-dark mb-1 group-hover:text-secondary transition-colors">Income Tax Return Filing</h2>
                     <p className="text-dark-400 text-sm max-w-xl">Accurate and compliant ITR filing for individuals, salaried employees, freelancers, and businesses. Maximize your tax savings with CA review.</p>
                   </div>
                 </div>
@@ -570,21 +570,21 @@ export default function Home() {
               <div className="bg-brand-lightest p-4 rounded-2xl mb-6">
                 <Shield className="h-10 w-10 text-dark" />
               </div>
-              <h4 className="font-bold text-2xl mb-4 text-dark">Bank-Grade Security</h4>
+              <h2 className="font-bold text-2xl mb-4 text-dark">Bank-Grade Security</h2>
               <p className="text-dark-400 text-lg">Your data and documents are encrypted and stored securely.</p>
             </motion.div>
             <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center p-10 bg-white rounded-3xl shadow-sm border border-brand-light">
               <div className="bg-brand-lightest p-4 rounded-2xl mb-6">
                 <Clock className="h-10 w-10 text-dark" />
               </div>
-              <h4 className="font-bold text-2xl mb-4 text-dark">Fastest Turnaround</h4>
+              <h2 className="font-bold text-2xl mb-4 text-dark">Fastest Turnaround</h2>
               <p className="text-dark-400 text-lg">Streamlined processes ensure quick filing and approvals.</p>
             </motion.div>
             <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center p-10 bg-white rounded-3xl shadow-sm border border-brand-light">
               <div className="bg-brand-lightest p-4 rounded-2xl mb-6">
                 <Users className="h-10 w-10 text-dark" />
               </div>
-              <h4 className="font-bold text-2xl mb-4 text-dark">Dedicated Support</h4>
+              <h2 className="font-bold text-2xl mb-4 text-dark">Dedicated Support</h2>
               <p className="text-dark-400 text-lg">Get a dedicated relationship manager for your business.</p>
             </motion.div>
           </div>

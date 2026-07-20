@@ -27,6 +27,12 @@ export default function SEO({ title, description, canonicalUrl }: SEOProps) {
       <meta property="og:url" content={finalCanonical} />
       <meta property="og:title" content={finalTitle} />
       <meta property="og:description" content={finalDescription} />
+      <meta property="og:type" content="website" />
+      <meta property="og:image" content="https://deccanfilings.com/og-image.jpg" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={finalTitle} />
+      <meta name="twitter:description" content={finalDescription} />
+      <meta name="twitter:image" content="https://deccanfilings.com/og-image.jpg" />
     </Helmet>
   );
 }

@@ -256,6 +256,31 @@ async function startServer() {
   // Serve static files from uploads
   app.use('/uploads', express.static(uploadsDir));
 
+  // --- Valid Frontend Routes for 404 Handling ---
+  const validRoutePrefixes = [
+    '/services', '/tools', '/blog', '/about', '/careers', '/contact', 
+    '/privacy', '/terms', '/refund', '/itr-filing', '/itr-filing-b', 
+    '/login', '/register', '/forgot-password', '/reset-password', 
+    '/complete-profile', '/dashboard', '/admin'
+  ];
+
+  const check404 = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // If it's the root path or an API/asset path, continue normally
+    if (req.path === '/' || req.path.startsWith('/api/') || req.path.startsWith('/uploads/') || req.path.includes('.')) {
+      return next();
+    }
+    
+    // Check if the path starts with any valid prefix
+    const isValid = validRoutePrefixes.some(prefix => req.path === prefix || req.path.startsWith(prefix + '/'));
+    
+    if (!isValid) {
+      res.status(404);
+    }
+    next();
+  };
+
+  app.use(check404);
+
   // --- Vite Dev Server / Static Production SPA Servicing ---
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

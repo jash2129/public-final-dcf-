@@ -129,11 +129,78 @@ export default function ServicePage() {
     }
   };
 
+  const mcaContent: Record<string, any> = {
+    'annual-return-filing': {
+      metaTitle: 'Annual Return Filing (AOC-4, MGT-7) Guide',
+      metaDescription: 'File your company or LLP Annual Return (AOC-4, MGT-7) with expert CA/CS help. 100% online MCA compliance, fast processing, and accurate filing.',
+      whatIs: `Annual Return Filing is a mandatory compliance requirement for all registered companies and LLPs in India. It involves submitting your company's financial and operational data to the Registrar of Companies (ROC) via the MCA portal.`,
+      whoNeeds: [
+        { title: 'Private Limited Companies', desc: 'Must file AOC-4 and MGT-7 annually.' },
+        { title: 'Public Limited Companies', desc: 'Strict compliance required to maintain active status.' },
+        { title: 'LLPs', desc: 'Required to file Form 8 and Form 11.' }
+      ],
+      documents: [
+        'Audited Balance Sheet & P&L Statement',
+        'Notice of AGM & Directors Report',
+        'List of Shareholders',
+        'DSC of Directors'
+      ],
+      process: [
+        { title: 'Document Collection', desc: 'We collect your finalized audit reports and AGM details.' },
+        { title: 'Form Preparation', desc: 'Our experts prepare AOC-4 and MGT-7 forms.' },
+        { title: 'DSC Signing', desc: 'Forms are digitally signed by authorized directors.' },
+        { title: 'ROC Submission', desc: 'Forms are filed and challans are shared with you.' }
+      ],
+      faqs: [
+        { q: 'What is the due date for Annual Return filing?', a: 'Typically within 30 days of the AGM for AOC-4 and 60 days for MGT-7.' },
+        { q: 'Is audit mandatory?', a: 'Yes, audit by a practicing Chartered Accountant is mandatory before filing.' },
+        { q: 'What is the difference between AOC-4 and MGT-7?', a: 'AOC-4 is used to file your company’s financial statements with the ROC, while MGT-7 is the annual return that reports shareholding, directorship, and governance details.' },
+        { q: 'What happens if I miss the Annual Return filing deadline?', a: 'Late filing attracts an additional government fee of ₹100 per day per form with no upper cap, and can eventually lead to the company being marked as non-compliant or struck off.' }
+      ],
+      relatedLink: { label: 'Annual ROC Filing', to: '/services/mca/annual-roc-filing' }
+    }
+  };
+
+  const licenseContent: Record<string, any> = {
+    'startup-india': {
+      metaTitle: 'Startup India Registration (DPIIT) Guide',
+      metaDescription: 'Get DPIIT-recognized Startup India registration online. Unlock tax exemptions, funding access, and fast-tracked patents with expert guidance.',
+      whatIs: `Startup India Registration (DPIIT Recognition) provides eligible startups with numerous benefits including tax exemptions, easier compliance, fast-tracked patent applications, and access to government funding.`,
+      whoNeeds: [
+        { title: 'Tech Startups', desc: 'Building innovative, scalable products.' },
+        { title: 'SMEs', desc: 'Working on product/process improvements with high employment potential.' }
+      ],
+      documents: [
+        'Certificate of Incorporation',
+        'Brief Pitch Deck or Business Plan',
+        'Details of Directors/Partners',
+        'Patent/Trademark details (if any)'
+      ],
+      process: [
+        { title: 'Eligibility Check', desc: 'We verify if your entity qualifies as a startup.' },
+        { title: 'Profile Creation', desc: 'Registering your entity on the Startup India portal.' },
+        { title: 'Application Submission', desc: 'Submitting the detailed application with supporting documents.' },
+        { title: 'DPIIT Certificate', desc: 'Receiving the official recognition certificate.' }
+      ],
+      faqs: [
+        { q: 'What age must a company be to apply?', a: 'The entity must not be older than 10 years from the date of incorporation.' },
+        { q: 'Do I get tax exemption automatically?', a: 'No, tax exemption (under Section 80IAC) requires a separate application to the Inter-Ministerial Board.' },
+        { q: 'Which entities are eligible for Startup India recognition?', a: 'Private Limited Companies, LLPs, and Registered Partnership Firms with an annual turnover under ₹100 crore in any financial year since incorporation are eligible to apply.' },
+        { q: 'What benefits does DPIIT recognition unlock?', a: 'Recognized startups get access to tax exemptions, self-certification under labour and environment laws, easier public procurement norms, fast-tracked patent examination, and startup funding schemes.' }
+      ],
+      relatedLink: { label: 'MSME/Udyam Registration', to: '/services/license/msme-udyam-registration' }
+    }
+  };
+
   let specificContent = null;
   if (category === 'finance') {
     specificContent = financeContent[slug || ''];
   } else if (category === 'income-tax') {
     specificContent = incomeTaxContent[slug || ''];
+  } else if (category === 'mca') {
+    specificContent = mcaContent[slug || ''];
+  } else if (category === 'license') {
+    specificContent = licenseContent[slug || ''];
   }
 
   const [formData, setFormData] = useState({
@@ -248,9 +315,9 @@ export default function ServicePage() {
 
   return (
     <div className="bg-white">
-      <SEO 
-        title={`${serviceName}`} 
-        description={`Register for ${serviceName} online in India. 100% online process with expert CA/CS assistance. Fast, reliable, and affordable compliance services.`} 
+      <SEO
+        title={specificContent?.metaTitle || `${serviceName}`}
+        description={specificContent?.metaDescription || `Register for ${serviceName} online in India. 100% online process with expert CA/CS assistance. Fast, reliable, and affordable compliance services.`}
       />
       <Helmet>
         <script type="application/ld+json">
@@ -488,6 +555,15 @@ export default function ServicePage() {
               <p className="text-sm text-dark-400 bg-brand-lightest/50 p-4 rounded-xl border border-brand/20">
                 <strong>Official Resources:</strong> For the most up-to-date regulatory guidelines regarding {serviceName}, we recommend verifying details on the <a href="https://www.mca.gov.in/" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline font-bold">Ministry of Corporate Affairs (MCA) Portal</a> or the <a href="https://www.incometax.gov.in/" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline font-bold">Income Tax e-Filing Portal</a> depending on the nature of your compliance.
               </p>
+              {specificContent?.relatedLink && (
+                <p className="text-lg text-dark-400 leading-relaxed mt-4">
+                  Looking for a related compliance? Check out our{' '}
+                  <Link to={specificContent.relatedLink.to} className="text-brand hover:underline font-bold">
+                    {specificContent.relatedLink.label}
+                  </Link>{' '}
+                  service as well.
+                </p>
+              )}
             </div>
 
             {/* Who Needs This - Bento Grid */}

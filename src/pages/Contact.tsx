@@ -341,8 +341,7 @@ export default function Contact() {
             <iframe
               title="Deccan Filings Office Location"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.3802166980095!2d78.44703249999999!3d17.441506699999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb911c9bbaf111%3A0x1c88fe8f0dd41d08!2sTor%20Business%20Solutions%20Private%20Limited!5e0!3m2!1sen!2sin!4v1775744514950!5m2!1sen!2sin"
-              className="w-full h-full rounded-2xl"
-              style={{ border: 0 }}
+              className="w-full h-full rounded-2xl border-0"
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

@@ -137,8 +137,7 @@
   </url>
   <url>
     <loc>https://deccanfilings.com/services/license/factory-pollution</loc>
-
-<changefreq>monthly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
@@ -277,8 +276,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-
-<loc>https://deccanfilings.com/services/gst/gst-registration</loc>
+    <loc>https://deccanfilings.com/services/gst/gst-registration</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -418,8 +416,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-
-<loc>https://deccanfilings.com/services/mca/llp-annual-filing</loc>
+    <loc>https://deccanfilings.com/services/mca/llp-annual-filing</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -551,8 +548,7 @@
   <url>
     <loc>https://deccanfilings.com/services/trademark/expedited-trademark-registration</loc>
     <changefreq>monthly</changefreq>
-
-<priority>0.7</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://deccanfilings.com/services/trademark/trademark-search</loc>
@@ -623,5 +619,101 @@
     <loc>https://deccanfilings.com/services/global/us-taxation</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/16</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/15</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/14</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/13</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/12</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/11</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/10</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/9</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/8</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/7</loc>
+    <lastmod>2026-07-15T18:30:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/6</loc>
+    <lastmod>2026-06-17T14:23:51.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/5</loc>
+    <lastmod>2026-06-17T14:23:51.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/4</loc>
+    <lastmod>2026-06-17T14:23:51.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/3</loc>
+    <lastmod>2026-06-17T14:23:51.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/2</loc>
+    <lastmod>2026-06-17T14:23:51.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://deccanfilings.com/blog/1</loc>
+    <lastmod>2026-06-17T14:23:51.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

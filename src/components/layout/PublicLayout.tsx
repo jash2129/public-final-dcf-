@@ -290,6 +290,7 @@ export default function PublicLayout() {
                 <img 
                   src="/logo.png" 
                   alt="Deccan Filings"
+                  loading="lazy"
                   width="180"
                   height="45"
                   className="h-14 lg:h-16 2xl:h-20 w-auto group-hover:scale-105 transition-transform duration-300"
@@ -331,7 +332,7 @@ export default function PublicLayout() {
                     {/* Middle and Right Column Service Items */}
                     <div className="col-span-8 flex flex-col justify-between">
                       <div className="grid grid-cols-2 gap-x-6 gap-y-3.5">
-                        {category.services.slice(0, 8).map((service) => (
+                        {category.services.slice(0, 5).map((service) => (
                           <Link 
                             key={service} 
                             to={`/services/${category.slug}/${generateSlug(service)}`} 
@@ -371,7 +372,7 @@ export default function PublicLayout() {
                         
                         {/* Sub dropdown with slide-in transition */}
                         <div className="absolute right-full top-0 mr-1 w-64 bg-white border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover/sub:opacity-100 group-hover/sub:pointer-events-auto transform -translate-x-4 group-hover/sub:translate-x-0 transition-all duration-300 z-50">
-                          {category.services.slice(0, 8).map((service) => (
+                          {category.services.slice(0, 5).map((service) => (
                             <Link 
                               key={service} 
                               to={`/services/${category.slug}/${generateSlug(service)}`} 
@@ -451,12 +452,10 @@ export default function PublicLayout() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="xl:hidden bg-white border-b border-slate-200 absolute top-full left-0 w-full overflow-hidden shadow-xl"
-              style={{ height: 'calc(100vh - 80px)' }}
+              className="xl:hidden bg-white border-b border-slate-200 absolute top-full left-0 w-full overflow-hidden shadow-xl h-[calc(100vh-80px)]"
             >
               <div 
-                className="w-full h-full flex transition-transform duration-300 ease-in-out" 
-                style={{ transform: activeMobileCategory ? 'translateX(-100%)' : 'translateX(0)' }}
+                className={`w-full h-full flex transition-transform duration-300 ease-in-out ${activeMobileCategory ? '-translate-x-full' : 'translate-x-0'}`}
               >
                 
                 {/* Level 1: Categories */}
@@ -614,7 +613,7 @@ export default function PublicLayout() {
               <div key={category.title}>
                 <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-wider">{category.title}</h3>
                 <ul className="space-y-2.5 text-sm">
-                  {category.services.slice(0, 6).map(service => (
+                  {category.services.slice(0, 4).map(service => (
                     <li key={service}>
                       <Link 
                         to={`/services/${category.slug}/${generateSlug(service)}`} 
@@ -624,7 +623,7 @@ export default function PublicLayout() {
                       </Link>
                     </li>
                   ))}
-                  {category.services.length > 6 && (
+                  {category.services.length > 4 && (
                     <li>
                       <Link to={`/services#${category.slug}`} className="text-secondary hover:text-secondary-hover font-bold inline-block">
                         View all &rarr;
@@ -676,6 +675,17 @@ export default function PublicLayout() {
                   {link.name}
                 </Link>
               ))}
+            </div>
+            <div className="flex gap-4 items-center">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="LinkedIn">
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="Twitter">
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="Facebook">
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              </a>
             </div>
           </div>
         </div>

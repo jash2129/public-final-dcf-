@@ -177,7 +177,7 @@ export default function Careers() {
 
       {/* ── Hero ── */}
       <section className="relative bg-dark text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #c8f135 0%, transparent 60%), radial-gradient(circle at 80% 20%, #c8f135 0%, transparent 50%)' }} />
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_50%,#c8f135_0%,transparent_60%),radial-gradient(circle_at_80%_20%,#c8f135_0%,transparent_50%)]" />
         <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-bold mb-8 backdrop-blur">
             <Star className="h-4 w-4 text-brand fill-brand" />

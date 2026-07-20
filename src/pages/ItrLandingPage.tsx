@@ -213,28 +213,28 @@ export default function ItrLandingPage() {
 
           {/* Benefits bullets */}
           <div className="bg-white dark:bg-[#171514] border border-[#EAE6DF] dark:border-[#242220] rounded-[20px] p-5 sm:p-8 max-w-3xl mx-auto text-left shadow-[0_8px_30px_rgba(0,0,0,0.04)] space-y-4 sm:space-y-5 mt-6 sm:mt-8">
-            <h3 className="text-sm sm:text-lg font-bold text-[#1A1715] dark:text-[#F8F6F0]">
+            <h2 className="text-sm sm:text-lg font-bold text-[#1A1715] dark:text-[#F8F6F0]">
               Why 10,000+ Corporate Employees Trust Us:
-            </h3>
+            </h2>
             <ul className="space-y-3 sm:space-y-4">
               <li className="flex items-start gap-3">
                 <span className="text-[#FF6F43] font-bold text-base sm:text-lg mt-0.5 leading-none shrink-0">✓</span>
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-[#1A1715] dark:text-[#F8F6F0]">Maximum Refunds Guaranteed:</h4>
+                  <h3 className="font-bold text-xs sm:text-sm text-[#1A1715] dark:text-[#F8F6F0]">Maximum Refunds Guaranteed:</h3>
                   <p className="text-xs text-[#8C8480] dark:text-[#9E9692] leading-relaxed">We forensically align your Form 16, AIS, and TIS to ensure you don't leave a single rupee on the table.</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[#FF6F43] font-bold text-base sm:text-lg mt-0.5 leading-none shrink-0">✓</span>
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-[#1A1715] dark:text-[#F8F6F0]">Complex Stock Expertise:</h4>
+                  <h3 className="font-bold text-xs sm:text-sm text-[#1A1715] dark:text-[#F8F6F0]">Complex Stock Expertise:</h3>
                   <p className="text-xs text-[#8C8480] dark:text-[#9E9692] leading-relaxed">Multi-employer? Foreign Assets? RSUs? Your assigned Senior CA (10+ years exp) handles the heavy lifting.</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[#FF6F43] font-bold text-base sm:text-lg mt-0.5 leading-none shrink-0">✓</span>
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-[#1A1715] dark:text-[#F8F6F0]">100% Audit-Proof &amp; Secure:</h4>
+                  <h3 className="font-bold text-xs sm:text-sm text-[#1A1715] dark:text-[#F8F6F0]">100% Audit-Proof &amp; Secure:</h3>
                   <p className="text-xs text-[#8C8480] dark:text-[#9E9692] leading-relaxed">Zero physical office visits. Just upload your docs securely, and we handle the rest before the deadline.</p>
                 </div>
               </li>
@@ -409,7 +409,7 @@ export default function ItrLandingPage() {
         <div className="max-w-lg mx-auto">
           <div className="bg-white dark:bg-[#171514] border border-[#EAE6DF] dark:border-[#242220] rounded-[20px] sm:rounded-[24px] p-5 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.05)] space-y-5 sm:space-y-6">
             <div>
-              <h3 className="text-lg sm:text-xl font-bold font-display text-[#1A1715] dark:text-[#F8F6F0] leading-tight text-center lg:text-left mb-4">
+              <h2 className="text-lg sm:text-xl font-bold font-display text-[#1A1715] dark:text-[#F8F6F0] leading-tight text-center lg:text-left mb-4">
                 Secure Your Filing Slot & Lock In 50% Off
               </h3>
 

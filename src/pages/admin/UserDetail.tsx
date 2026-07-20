@@ -354,11 +354,11 @@ export default function UserDetail() {
           </div>
 
           {/* Tab Panels with display and size constraints */}
-          <div className="pt-2 w-full min-h-[300px] flex flex-col" style={{ display: 'flex' }}>
+          <div className="pt-2 w-full min-h-[300px] flex flex-col">
             
             {/* Orders Panel */}
             {activeTab === 'orders' && (
-              <div className="space-y-4 w-full min-h-[300px] flex flex-col" style={{ display: 'flex' }}>
+              <div className="space-y-4 w-full min-h-[300px] flex flex-col">
                 {orders.length > 0 ? (
                   <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white w-full flex flex-col shadow-sm">
                     <table className="w-full text-left border-collapse">
@@ -409,7 +409,7 @@ export default function UserDetail() {
 
             {/* Documents Panel */}
             {activeTab === 'documents' && (
-              <div className="space-y-4 w-full min-h-[300px] flex flex-col" style={{ display: 'flex' }}>
+              <div className="space-y-4 w-full min-h-[300px] flex flex-col">
                 {documents.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                     {documents.map((doc) => (
@@ -445,7 +445,7 @@ export default function UserDetail() {
 
             {/* Invoices Panel */}
             {activeTab === 'invoices' && (
-              <div className="space-y-4 w-full min-h-[300px] flex flex-col" style={{ display: 'flex' }}>
+              <div className="space-y-4 w-full min-h-[300px] flex flex-col">
                 {invoices.length > 0 ? (
                   <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white w-full flex flex-col shadow-sm">
                     <table className="w-full text-left border-collapse">

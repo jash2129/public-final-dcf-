@@ -141,14 +141,6 @@ export default function ServicesCatalog() {
     );
   }, [searchQuery, allServices]);
 
-  const activeCategoryData = useMemo(() => {
-    return serviceCategories.find((c) => c.slug === activeCategory) || serviceCategories[0];
-  }, [activeCategory]);
-
-  const ActiveCategoryIcon = useMemo(() => {
-    return activeCategoryData ? (categoryIcons[activeCategoryData.title] || FileText) : FileText;
-  }, [activeCategoryData]);
-
   return (
     <div className="bg-background min-h-screen py-12 md:py-20 relative overflow-hidden">
       {/* Background Pattern */}
@@ -300,76 +292,72 @@ export default function ServicesCatalog() {
               </div>
             </div>
 
-            {/* Selected Category Listing */}
-            {activeCategoryData && (
-              <motion.div 
-                key={activeCategoryData.slug} 
-                id={activeCategoryData.slug} 
-                className="mb-24 px-2 sm:px-0"
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
-              >
-                {/* Category Header */}
-                <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-slate-200/60 pb-6">
-                  <div className="flex items-center gap-4 sm:gap-5">
-                    <div className="bg-gradient-to-br from-dark to-dark-200 text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-xl shadow-dark/10 ring-1 ring-white/10 shrink-0">
-                      <ActiveCategoryIcon className="h-6 w-6 sm:h-8 sm:w-8" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark tracking-tight">{activeCategoryData.title}</h2>
-                      <p className="text-dark-400 mt-1 sm:mt-2 text-sm sm:text-base md:text-lg">Professional {activeCategoryData.title.toLowerCase()} services for your business.</p>
+            {/* Category Listings — all categories are kept in the DOM (toggled via CSS)
+                so every service page gets a real internal link, not just the active tab. */}
+            {serviceCategories.map((category) => {
+              const CategoryIcon = categoryIcons[category.title] || FileText;
+              const isActive = activeCategory === category.slug;
+              return (
+                <div
+                  key={category.slug}
+                  id={category.slug}
+                  className={`mb-24 px-2 sm:px-0 ${isActive ? 'block' : 'hidden'}`}
+                >
+                  {/* Category Header */}
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-slate-200/60 pb-6">
+                    <div className="flex items-center gap-4 sm:gap-5">
+                      <div className="bg-gradient-to-br from-dark to-dark-200 text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-xl shadow-dark/10 ring-1 ring-white/10 shrink-0">
+                        <CategoryIcon className="h-6 w-6 sm:h-8 sm:w-8" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark tracking-tight">{category.title}</h2>
+                        <p className="text-dark-400 mt-1 sm:mt-2 text-sm sm:text-base md:text-lg">Professional {category.title.toLowerCase()} services for your business.</p>
+                      </div>
                     </div>
                   </div>
-                </motion.div>
-                
-                {loading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="h-48 bg-slate-50 animate-pulse rounded-3xl border border-slate-200/60" />
-                    ))}
-                  </div>
-                ) : (
-                  <motion.div 
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    {activeCategoryData.services.map((service) => (
-                      <motion.div 
-                        variants={itemVariants}
-                        key={service} 
-                        className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden flex flex-col hover:border-brand/50 hover:shadow-2xl hover:shadow-brand/5 transition-all duration-500 group relative"
-                      >
-                        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-brand-lightest/80 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        
-                        <div className="p-5 sm:p-8 flex-grow relative z-10">
-                          {/* Compact mobile layout, vertical desktop layout */}
-                          <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0 mb-4 sm:mb-8">
-                            <div className="h-12 w-12 sm:h-14 sm:w-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:border-brand group-hover:text-dark transition-all duration-300 text-dark-400 shadow-sm sm:mb-6">
-                              <ActiveCategoryIcon className="h-6 w-6 sm:h-7 sm:w-7" />
+
+                  {loading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-48 bg-slate-50 animate-pulse rounded-3xl border border-slate-200/60" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                      {category.services.map((service) => (
+                        <div
+                          key={service}
+                          className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden flex flex-col hover:border-brand/50 hover:shadow-2xl hover:shadow-brand/5 transition-all duration-500 group relative"
+                        >
+                          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-brand-lightest/80 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                          <div className="p-5 sm:p-8 flex-grow relative z-10">
+                            {/* Compact mobile layout, vertical desktop layout */}
+                            <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0 mb-4 sm:mb-8">
+                              <div className="h-12 w-12 sm:h-14 sm:w-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:border-brand group-hover:text-dark transition-all duration-300 text-dark-400 shadow-sm sm:mb-6">
+                                <CategoryIcon className="h-6 w-6 sm:h-7 sm:w-7" />
+                              </div>
+                              <h3 className="font-bold text-base sm:text-lg md:text-xl text-dark group-hover:text-brand-hover transition-colors leading-tight">{service}</h3>
                             </div>
-                            <h3 className="font-bold text-base sm:text-lg md:text-xl text-dark group-hover:text-brand-hover transition-colors leading-tight">{service}</h3>
+
+                            <p className="text-dark-400 text-xs sm:text-sm leading-relaxed">{getServiceDescription(service)}</p>
                           </div>
-                          
-                          <p className="text-dark-400 text-xs sm:text-sm leading-relaxed">{getServiceDescription(service)}</p>
+
+                          <div className="px-5 pb-5 pt-1 sm:px-8 sm:pb-8 sm:pt-2 relative z-10 mt-auto">
+                            <Link to={`/services/${category.slug}/${generateSlug(service)}`} className="inline-flex items-center gap-2 text-dark font-bold hover:text-brand transition-colors group/link text-xs sm:text-sm">
+                              View Details
+                              <span className="bg-slate-100 p-1.5 rounded-full group-hover/link:bg-brand group-hover/link:text-dark transition-colors">
+                                <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover/link:translate-x-0.5 transition-transform" />
+                              </span>
+                            </Link>
+                          </div>
                         </div>
-                        
-                        <div className="px-5 pb-5 pt-1 sm:px-8 sm:pb-8 sm:pt-2 relative z-10 mt-auto">
-                          <Link to={`/services/${activeCategoryData.slug}/${generateSlug(service)}`} className="inline-flex items-center gap-2 text-dark font-bold hover:text-brand transition-colors group/link text-xs sm:text-sm">
-                            View Details 
-                            <span className="bg-slate-100 p-1.5 rounded-full group-hover/link:bg-brand group-hover/link:text-dark transition-colors">
-                              <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover/link:translate-x-0.5 transition-transform" />
-                            </span>
-                          </Link>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </>
         )}
       </div>
