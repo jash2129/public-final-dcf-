@@ -45,17 +45,17 @@ Crawled pages: 124 | Indexable pages: 129 | Criticals: 223
 - [ ] Serve images in next-gen formats — 10 pages
 
 ## Social Media (4 issues)
-- [ ] Open Graph tags incomplete — 10 pages
-- [ ] Home page has no links to social media pages — site-level
-- [ ] Twitter card missing — 12 pages
-- [ ] Open Graph tags missing — 2 pages
+- [x] Open Graph tags incomplete — 10 pages
+- [x] Home page has no links to social media pages — site-level
+- [x] Twitter card missing — 12 pages
+- [x] Open Graph tags missing — 2 pages
 
 ## Code Validation (2 issues)
-- [ ] Headings hierarchy is broken — 10 pages
-- [ ] Page has tags with style attributes — 12 pages
+- [x] Headings hierarchy is broken — 10 pages
+- [x] Page has tags with style attributes — 12 pages
 
 ## XML Sitemaps (1 issue)
-- [ ] 4xx client errors in XML sitemaps — 53 pages
+- [x] 4xx client errors in XML sitemaps — 53 pages
 
 ## Categories with 0 issues
 - Redirects
