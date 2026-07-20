@@ -36,7 +36,9 @@ export interface OrderItem {
  */
 export async function createOrderWithItems(
   userId: number,
-  items: { serviceId: number; priceAtPurchase: number; quantity: number }[]
+  items: { serviceId: number; priceAtPurchase: number; quantity: number }[],
+  couponCode?: string,
+  discountAmount: number = 0
 ): Promise<string> {
   const connection = await pool.getConnection();
   try {
@@ -74,14 +76,18 @@ export async function createOrderWithItems(
     for (const item of items) {
       basePrice += item.priceAtPurchase * item.quantity;
     }
-    const cgst = basePrice * 0.09;
-    const sgst = basePrice * 0.09;
-    const totalAmount = basePrice + cgst + sgst;
+    
+    // Apply discount
+    const discountedBasePrice = Math.max(0, basePrice - discountAmount);
+    
+    const cgst = discountedBasePrice * 0.09;
+    const sgst = discountedBasePrice * 0.09;
+    const totalAmount = discountedBasePrice + cgst + sgst;
 
     // 3. Insert order record
     await connection.execute(
-      'INSERT INTO orders (id, user_id, status, total_amount, base_price, cgst, sgst) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [orderId, userId, 'placed', totalAmount, basePrice, cgst, sgst]
+      'INSERT INTO orders (id, user_id, status, total_amount, base_price, cgst, sgst, discount_amount, coupon_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [orderId, userId, 'placed', totalAmount, basePrice, cgst, sgst, discountAmount, couponCode || null]
     );
 
     // 4. Insert order items

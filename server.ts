@@ -22,6 +22,7 @@ import contactRouter from "./server/routes/contact.routes";
 import leadsRouter from "./server/routes/leads.routes";
 import blogRouter from "./server/routes/blog.routes";
 import webhookRoutes from "./server/routes/webhook.routes";
+import couponRouter from "./server/routes/coupon.routes";
 import { errorHandler } from "./server/middlewares/error.middleware";
 import { serviceCategories, generateSlug } from "./src/data/services";
 import { getAllBlogPosts } from "./server/services/blog.service";
@@ -184,6 +185,7 @@ async function startServer() {
   app.use("/api/contact", contactRouter);
   app.use("/api/leads", leadsRouter);
   app.use("/api/blogs", blogRouter);
+  app.use("/api/coupons", couponRouter);
   app.use("/api", profileRouter); // Matches: /api/user/*, /api/invoices, /api/stats/*
 
   // --- Dynamic Sitemap Endpoint ---

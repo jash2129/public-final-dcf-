@@ -253,6 +253,22 @@ export async function setupDatabase(): Promise<mysql.Pool> {
       console.error("Failed to alter orders table to add tax columns:", e.message);
     }
 
+    // Alter orders table to add discount columns if they do not exist
+    try {
+      const [cols] = await pool.query<mysql.RowDataPacket[]>('SHOW COLUMNS FROM orders LIKE "discount_amount"');
+      if (cols.length === 0) {
+        console.log("Adding discount columns to orders table...");
+        await pool.query(`
+          ALTER TABLE orders 
+          ADD COLUMN discount_amount DECIMAL(10, 2) DEFAULT 0,
+          ADD COLUMN coupon_code VARCHAR(50) NULL
+        `);
+        console.log("Discount columns added successfully to orders table.");
+      }
+    } catch (e: any) {
+      console.error("Failed to alter orders table to add discount columns:", e.message);
+    }
+
     // 4. Create order_items table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS order_items (
@@ -362,6 +378,23 @@ export async function setupDatabase(): Promise<mysql.Pool> {
       ) ENGINE=InnoDB;
     `);
 
+    // 11. Create coupons table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS coupons (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(50) NOT NULL UNIQUE,
+        discount_type VARCHAR(20) NOT NULL DEFAULT 'percentage',
+        discount_value DECIMAL(10, 2) NOT NULL,
+        max_discount DECIMAL(10, 2) NULL,
+        min_order_value DECIMAL(10, 2) NULL,
+        valid_until DATETIME NULL,
+        usage_limit INT NULL,
+        times_used INT NOT NULL DEFAULT 0,
+        active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
+
     // Seed default admin accounts
     const hashedAdminPassword = await bcrypt.hash('admin123', 10);
 
@@ -397,6 +430,9 @@ export async function setupDatabase(): Promise<mysql.Pool> {
 
     // Seed default blog posts
     await seedBlogPosts();
+
+    // Seed test coupon
+    await seedTestCoupon();
 
     return pool;
   } catch (error) {
@@ -667,7 +703,26 @@ async function seedBlogPosts() {
       );
     }
     console.log('Blog posts successfully seeded.');
+  } catch (err) {
+    console.error("Error seeding blog posts:", err);
+  }
+}
+
+/**
+ * Seed a test coupon for development
+ */
+async function seedTestCoupon() {
+  try {
+    const [existing] = await pool.query<mysql.RowDataPacket[]>('SELECT id FROM coupons WHERE code = ?', ['LAUNCH50']);
+    if (existing.length === 0) {
+      await pool.execute(
+        `INSERT INTO coupons (code, discount_type, discount_value, max_discount, min_order_value, usage_limit)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        ['LAUNCH50', 'percentage', 50.00, 1000.00, 500.00, 100]
+      );
+      console.log('Seeded test coupon: LAUNCH50 (50% off up to ₹1,000)');
+    }
   } catch (error) {
-    console.error("Error during blog posts database seeding:", error);
+    console.error("Error seeding test coupon:", error);
   }
 }

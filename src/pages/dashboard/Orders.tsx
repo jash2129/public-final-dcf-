@@ -43,11 +43,20 @@ export default function Orders() {
     amount: ''
   });
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  
+  // Coupon State
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{code: string, discount: number} | null>(null);
+  const [couponError, setCouponError] = useState('');
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
   useEffect(() => {
     if (!isModalOpen) {
       setSelectedCategory('');
       setFormData({ service: '', amount: '' });
+      setCouponCode('');
+      setAppliedCoupon(null);
+      setCouponError('');
     }
   }, [isModalOpen]);
 
@@ -195,7 +204,8 @@ export default function Orders() {
           service: formData.service,
           date: currentDate,
           status: 'Processing',
-          amount: `₹${parseFloat(formData.amount).toLocaleString('en-IN')}`
+          amount: formData.amount,
+          couponCode: appliedCoupon?.code
         })
       });
 
@@ -205,6 +215,9 @@ export default function Orders() {
       await fetchOrders();
       setIsModalOpen(false);
       setFormData({ service: '', amount: '' });
+      setCouponCode('');
+      setAppliedCoupon(null);
+      setCouponError('');
     } catch (err) {
       console.error(err);
       alert('Failed to place order. Please try again.');
@@ -310,6 +323,32 @@ export default function Orders() {
     } catch (err: any) {
       console.error('Payment initiation error:', err);
       alert('Failed to launch payment checkout: ' + err.message);
+    }
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim() || !formData.amount) return;
+    setIsValidatingCoupon(true);
+    setCouponError('');
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ code: couponCode, amount: formData.amount })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to apply coupon');
+      
+      setAppliedCoupon({ code: couponCode, discount: data.discountAmount });
+    } catch (err: any) {
+      setCouponError(err.message);
+      setAppliedCoupon(null);
+    } finally {
+      setIsValidatingCoupon(false);
     }
   };
 
@@ -677,6 +716,8 @@ export default function Orders() {
                         onChange={(e) => {
                           setSelectedCategory(e.target.value);
                           setFormData({ service: '', amount: '' });
+                          setAppliedCoupon(null);
+                          setCouponError('');
                         }}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-brand transition-all appearance-none cursor-pointer"
                       >
@@ -710,6 +751,8 @@ export default function Orders() {
                             service: serviceName,
                             amount: matchedPrice
                           });
+                          setAppliedCoupon(null);
+                          setCouponError('');
                         }}
                         className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-bold outline-none transition-all appearance-none cursor-pointer ${
                           !selectedCategory ? 'opacity-50 cursor-not-allowed border-slate-200' : 'border-slate-200 focus:ring-2 focus:ring-brand hover:border-slate-300'
@@ -742,17 +785,49 @@ export default function Orders() {
                     </div>
                   </div>
 
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-dark ml-1">Coupon Code (Optional)</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text"
+                        placeholder="e.g. LAUNCH50"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        disabled={!formData.amount}
+                        className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand font-bold uppercase disabled:bg-slate-100"
+                      />
+                      <button 
+                        type="button" 
+                        onClick={handleApplyCoupon}
+                        disabled={!couponCode || isValidatingCoupon || !formData.amount}
+                        className="px-6 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 disabled:opacity-50 transition-all flex items-center gap-2"
+                      >
+                        {isValidatingCoupon ? <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Apply'}
+                      </button>
+                    </div>
+                    {couponError && <p className="text-red-500 text-xs ml-1 font-bold">{couponError}</p>}
+                    {appliedCoupon && <p className="text-emerald-500 text-xs ml-1 font-bold">Coupon applied successfully!</p>}
+                  </div>
+
                   {formData.amount && (() => {
-                    const basePrice = parseFloat(formData.amount) || 0;
+                    const originalBasePrice = parseFloat(formData.amount) || 0;
+                    const discount = appliedCoupon ? appliedCoupon.discount : 0;
+                    const basePrice = Math.max(0, originalBasePrice - discount);
                     const cgst = basePrice * 0.09;
                     const sgst = basePrice * 0.09;
-                    const totalAmount = basePrice * 1.18;
+                    const totalAmount = basePrice + cgst + sgst;
                     return (
                       <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2 text-sm text-slate-600 font-medium">
                         <div className="flex justify-between">
                           <span>Base Price:</span>
-                          <span>₹{basePrice.toFixed(2)}</span>
+                          <span>₹{originalBasePrice.toFixed(2)}</span>
                         </div>
+                        {appliedCoupon && (
+                          <div className="flex justify-between text-brand font-bold">
+                            <span>Discount Applied ({appliedCoupon.code}):</span>
+                            <span>-₹{discount.toFixed(2)}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between">
                           <span>CGST (9%):</span>
                           <span>₹{cgst.toFixed(2)}</span>

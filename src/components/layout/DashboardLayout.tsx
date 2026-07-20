@@ -18,6 +18,7 @@ import {
   Wrench,
   Calculator,
   Tag,
+  Ticket,
   X,
   Sun,
   Moon
@@ -88,6 +89,7 @@ export default function DashboardLayout() {
     { name: 'All Documents', path: '/admin/documents', icon: FileText },
     { name: 'All Compliance', path: '/admin/compliance', icon: CalendarCheck },
     { name: 'Service Catalog', path: '/admin/services', icon: Tag },
+    { name: 'Coupons', path: '/admin/coupons', icon: Ticket },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ];
 

@@ -1,6 +1,7 @@
 import * as orderModel from '../models/order.model';
 import * as serviceModel from '../models/service.model';
 import * as userModel from '../models/user.model';
+import * as couponModel from '../models/coupon.model';
 import { notifyOrderPlacement, notifyOrderStatusChange } from './notification.service';
 import { formatCurrency, formatLegacyDate, generateSlug } from '../utils/helpers';
 
@@ -39,7 +40,7 @@ function getCategoryForService(name: string): string {
  */
 export async function checkout(
   userId: number,
-  payload: { serviceId?: number; service?: string; quantity?: number; amount?: string }
+  payload: { serviceId?: number; service?: string; quantity?: number; amount?: string; couponCode?: string }
 ): Promise<string> {
   const quantity = payload.quantity || 1;
   let service: serviceModel.Service | null = null;
@@ -102,8 +103,23 @@ export async function checkout(
     }
   ];
 
+  let discountAmount = 0;
+  if (payload.couponCode) {
+    const coupon = await couponModel.findCouponByCode(payload.couponCode);
+    if (!coupon) {
+      throw { status: 400, message: 'Invalid coupon code.' };
+    }
+    const baseOrderAmount = service.price * quantity;
+    const validation = couponModel.validateCoupon(coupon, baseOrderAmount);
+    if (!validation.isValid) {
+      throw { status: 400, message: validation.error };
+    }
+    discountAmount = validation.discountAmount;
+    await couponModel.incrementCouponUsage(coupon.code);
+  }
+
   // Insert order using atomic transaction with database locking
-  const orderId = await orderModel.createOrderWithItems(userId, items);
+  const orderId = await orderModel.createOrderWithItems(userId, items, payload.couponCode, discountAmount);
 
   // Trigger Notifications (runs in background)
   triggerOrderNotification(userId, orderId, service.name, service.price * quantity);
