@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, User, ArrowRight, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import SEO from '../components/SEO';
 
 interface BlogPost {
@@ -23,9 +23,17 @@ export default function Blog() {
   const [error, setError] = useState('');
   
   // State variables
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
+
+  useEffect(() => {
+    const pageInUrl = parseInt(searchParams.get('page') || '1', 10);
+    if (pageInUrl !== currentPage) {
+      setCurrentPage(pageInUrl);
+    }
+  }, [searchParams, currentPage]);
   const POSTS_PER_PAGE = 6;
 
   useEffect(() => {
@@ -155,7 +163,7 @@ export default function Blog() {
                         <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {post.date}</span>
                       </div>
                       <Link to={`/blog/${post.id}`} className="text-brand hover:text-brand-hover font-bold flex items-center gap-1 transition-colors">
-                        Read More <ArrowRight className="h-3.5 w-3.5" />
+                        Read full article <ArrowRight className="h-3.5 w-3.5" />
                       </Link>
                     </div>
                   </div>
@@ -177,18 +185,23 @@ export default function Blog() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-16 flex justify-center items-center gap-2">
-              <button 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
+              {currentPage > 1 ? (
+                <Link 
+                  to={`?page=${Math.max(1, currentPage - 1)}`}
+                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Link>
+              ) : (
+                <button disabled className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 opacity-50 cursor-not-allowed">
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+              )}
               
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
+                <Link
+                  to={`?page=${page}`}
                   key={page}
-                  onClick={() => setCurrentPage(page)}
                   className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-colors cursor-pointer ${
                     currentPage === page
                       ? 'bg-brand text-dark'
@@ -196,16 +209,21 @@ export default function Blog() {
                   }`}
                 >
                   {page}
-                </button>
+                </Link>
               ))}
 
-              <button 
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
+              {currentPage < totalPages ? (
+                <Link 
+                  to={`?page=${Math.min(totalPages, currentPage + 1)}`}
+                  className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              ) : (
+                <button disabled className="w-10 h-10 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 opacity-50 cursor-not-allowed">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              )}
             </div>
           )}
 

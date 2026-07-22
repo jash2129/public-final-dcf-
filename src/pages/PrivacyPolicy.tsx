@@ -1,8 +1,13 @@
 import { Shield, Lock, Eye, FileText } from 'lucide-react';
+import SEO from '../components/SEO';
 
 export default function PrivacyPolicy() {
   return (
     <div className="bg-slate-50 min-h-screen py-20 px-4 sm:px-6 lg:px-8">
+      <SEO 
+        title="Privacy Policy | Deccan Filings" 
+        description="Learn how Deccan Filings collects, uses, and safeguards your data and personal information securely."
+      />
       <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="bg-dark p-12 text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2"></div>

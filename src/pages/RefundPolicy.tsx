@@ -1,8 +1,13 @@
 import { RefreshCcw, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
+import SEO from '../components/SEO';
 
 export default function RefundPolicy() {
   return (
     <div className="bg-slate-50 min-h-screen py-20 px-4 sm:px-6 lg:px-8">
+      <SEO 
+        title="Refund Policy | Deccan Filings" 
+        description="Review our refund and cancellation policy regarding professional fees and government application charges."
+      />
       <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="bg-dark p-12 text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2"></div>

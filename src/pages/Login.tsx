@@ -182,9 +182,9 @@ export default function Login() {
           </Link>
 
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-dark mb-2">
+            <h1 className="text-3xl font-bold tracking-tight text-dark mb-2">
               Welcome back
-            </h2>
+            </h1>
             <p className="text-dark-400">
               Don't have an account?{' '}
               <Link to="/register" className="font-bold text-dark underline decoration-brand decoration-2 hover:text-secondary transition-colors">
@@ -314,10 +314,10 @@ export default function Login() {
               <Star className="h-4 w-4 text-brand fill-current" />
               Trusted by 100,000+ Businesses
             </div>
-            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
               Manage your compliance <br />
               <span className="text-brand">all in one place.</span>
-            </h3>
+            </h2>
             
             <div className="space-y-4 mt-8">
               {[

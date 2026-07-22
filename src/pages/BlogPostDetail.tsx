@@ -82,6 +82,7 @@ export default function BlogPostDetail() {
       <Helmet>
         <title>{post.title} | Deccan Filings Blog</title>
         <meta name="description" content={post.excerpt} />
+        <link rel="canonical" href={`https://deccanfilings.com/blog/${post.id}`} />
       </Helmet>
 
       {/* Breadcrumbs & Back Nav */}
@@ -171,7 +172,7 @@ export default function BlogPostDetail() {
       {relatedPosts.length > 0 && (
         <section className="bg-white border-t border-slate-200 py-16">
           <div className="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8">
-            <h3 className="text-2xl font-black text-dark mb-8">Related Articles</h3>
+            <h2 className="text-2xl font-black text-dark mb-8">Related Articles</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {relatedPosts.map((rPost) => (
@@ -185,9 +186,9 @@ export default function BlogPostDetail() {
                   </div>
                   <div>
                     <span className="text-xs font-bold text-brand uppercase tracking-wider">{rPost.category}</span>
-                    <h4 className="font-bold text-lg text-dark mt-1 group-hover:text-secondary transition-colors line-clamp-2">
+                    <h3 className="font-bold text-lg text-dark mt-1 group-hover:text-secondary transition-colors line-clamp-2">
                       {rPost.title}
-                    </h4>
+                    </h3>
                   </div>
                 </Link>
               ))}

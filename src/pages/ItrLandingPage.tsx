@@ -125,9 +125,15 @@ export default function ItrLandingPage() {
     <div className="min-h-screen bg-[#F8F6F0] dark:bg-[#0F0E0E] text-[#1A1715] dark:text-[#F8F6F0] font-sans antialiased overflow-x-hidden">
       <Helmet>
         <title>Stop Overpaying on ITR for Your RSUs & ESOPs | Deccan Filings</title>
+        <meta name="robots" content="noindex" />
         <meta name="description" content="We pair tech professionals and high-earners with Senior CAs to guarantee maximum legal refunds and zero Sec 234F penalties. 100% Online." />
         <meta property="og:title" content="Deccan Filings ITR Strategy - RSU & ESOP Experts" />
         <meta property="og:description" content="Claim your free tax strategy review and lock in 50% off assisted tax filings today." />
+        <link rel="canonical" href="https://deccanfilings.com/itr-filing" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Stop Overpaying on ITR for Your RSUs & ESOPs | Deccan Filings" />
+        <meta name="twitter:description" content="We pair tech professionals and high-earners with Senior CAs to guarantee maximum legal refunds and zero Sec 234F penalties. 100% Online." />
+        <meta name="twitter:image" content="https://deccanfilings.com/og-image.jpg" />
       </Helmet>
 
       {/* Urgent Warning Eyebrow Banner */}
@@ -145,11 +151,16 @@ export default function ItrLandingPage() {
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex justify-between items-center">
           <div className="flex items-center">
-            <img
-              src="/logo.png"
-              alt="Deccan Filings"
-              className="h-8 sm:h-11 w-auto object-contain transition-transform duration-300 hover:scale-105"
-            />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img
+                src="/logo.png"
+                alt="Deccan Filings"
+                width="160"
+                height="44"
+                className="h-8 sm:h-11 w-auto object-contain transition-transform duration-300 hover:scale-105"
+              />
+            </picture>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <span className="hidden md:inline-block text-xs font-black text-[#8C8480] dark:text-[#9E9692] uppercase tracking-wider">
@@ -411,7 +422,7 @@ export default function ItrLandingPage() {
             <div>
               <h2 className="text-lg sm:text-xl font-bold font-display text-[#1A1715] dark:text-[#F8F6F0] leading-tight text-center lg:text-left mb-4">
                 Secure Your Filing Slot & Lock In 50% Off
-              </h3>
+              </h2>
 
               {/* Plan Selector tabs inside form */}
               <div className="grid grid-cols-2 gap-2 bg-[#F8F6F0] dark:bg-[#221F1E] p-1.5 rounded-[12px] border border-[#EAE6DF] dark:border-[#242220] mb-2">
@@ -584,11 +595,16 @@ export default function ItrLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12 text-left">
             <div className="lg:col-span-2 pr-8">
               <div className="inline-flex items-center mb-6 bg-white p-3.5 rounded-2xl shadow-sm">
-                <img 
-                  src="/logo.png" 
-                  alt="Deccan Filings" 
-                  className="h-12 w-auto object-contain" 
-                />
+                <picture>
+                  <source srcSet="/logo.webp" type="image/webp" />
+                  <img 
+                    src="/logo.png" 
+                    alt="Deccan Filings" 
+                    width="160"
+                    height="48"
+                    className="h-12 w-auto object-contain" 
+                  />
+                </picture>
               </div>
               <p className="text-sm text-slate-400 mb-6 leading-relaxed">
                 Deccan Filings is India's largest cloud-based business services platform dedicated to helping Entrepreneurs easily start and grow their business, at an affordable cost.
@@ -612,26 +628,12 @@ export default function ItrLandingPage() {
             {/* Footer Links */}
             {serviceCategories.slice(0, 5).map((category) => (
               <div key={category.title}>
-                <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-wider">{category.title}</h3>
-                <ul className="space-y-2.5 text-sm">
-                  {category.services.slice(0, 6).map(service => (
-                    <li key={service}>
-                      <Link 
-                        to={`/services/${category.slug}/${generateSlug(service)}`} 
-                        className="text-slate-400 hover:text-brand transition-colors relative py-0.5 inline-block after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-brand after:transition-transform after:duration-300 hover:after:scale-x-100"
-                      >
-                        {service}
-                      </Link>
-                    </li>
-                  ))}
-                  {category.services.length > 6 && (
-                    <li>
-                      <Link to={`/services#${category.slug}`} className="text-secondary hover:text-secondary-hover font-bold inline-block">
-                        View all &rarr;
-                      </Link>
-                    </li>
-                  )}
-                </ul>
+                <Link to={`/services#${category.slug}`} className="font-bold text-white mb-2 uppercase text-xs tracking-wider hover:text-brand transition-colors inline-block">
+                  {category.title}
+                </Link>
+                <p className="text-sm text-slate-400 leading-relaxed pr-4">
+                  Explore our complete range of {category.title.toLowerCase()} services to keep your business compliant.
+                </p>
               </div>
             ))}
           </div>
@@ -685,8 +687,7 @@ export default function ItrLandingPage() {
       <div
         className={`fixed bottom-0 left-0 w-full md:hidden z-40 transition-all duration-500 transform ${
           showStickyBar ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
-        }`}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        } pb-safe`}
       >
         <div className="bg-white/95 dark:bg-[#171514]/95 backdrop-blur-md border-t border-[#EAE6DF] dark:border-[#242220] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] p-3 flex items-center justify-between gap-3">
           <div className="text-left pl-1 min-w-0">

@@ -133,7 +133,16 @@ export default function ServicePage() {
     'annual-return-filing': {
       metaTitle: 'Annual Return Filing (AOC-4, MGT-7) Guide',
       metaDescription: 'File your company or LLP Annual Return (AOC-4, MGT-7) with expert CA/CS help. 100% online MCA compliance, fast processing, and accurate filing.',
-      whatIs: `Annual Return Filing is a mandatory compliance requirement for all registered companies and LLPs in India. It involves submitting your company's financial and operational data to the Registrar of Companies (ROC) via the MCA portal.`,
+      whatIs: (
+        <>
+          <p className="mb-4">
+            Annual Return Filing is a mandatory compliance requirement for all registered companies in India, including <Link to="/services/startup-registrations/private-limited-company-registration" className="text-brand hover:underline font-medium">Private Limited Companies</Link>, One Person Companies, and Limited Liability Partnerships. It involves submitting comprehensive details of a company's financial and operational activities to the Registrar of Companies (RoC).
+          </p>
+          <p>
+            The annual return typically encompasses the company's audited financial statements, a list of shareholders and directors, details of registered office address changes, and a record of any debentures or shares issued during the financial year. Failure to file on time can result in substantial penalties and potential strike-off by the MCA. We also highly recommend maintaining a strict <Link to="/tools/compliance-calendar" className="text-brand hover:underline font-medium">Compliance Calendar</Link> to track deadlines.
+          </p>
+        </>
+      ),
       whoNeeds: [
         { title: 'Private Limited Companies', desc: 'Must file AOC-4 and MGT-7 annually.' },
         { title: 'Public Limited Companies', desc: 'Strict compliance required to maintain active status.' },
@@ -165,7 +174,16 @@ export default function ServicePage() {
     'startup-india': {
       metaTitle: 'Startup India Registration (DPIIT) Guide',
       metaDescription: 'Get DPIIT-recognized Startup India registration online. Unlock tax exemptions, funding access, and fast-tracked patents with expert guidance.',
-      whatIs: `Startup India Registration (DPIIT Recognition) provides eligible startups with numerous benefits including tax exemptions, easier compliance, fast-tracked patent applications, and access to government funding.`,
+      whatIs: (
+        <>
+          <p className="mb-4">
+            Startup India Registration, also known as DPIIT Recognition, is a flagship initiative launched by the Government of India to catalyze startup culture and build a strong and inclusive ecosystem for innovation and entrepreneurship.
+          </p>
+          <p>
+            Obtaining this recognition provides eligible startups with numerous substantial benefits. These include up to three years of income tax exemptions, easier regulatory compliance through self-certification, fast-tracked patent and <Link to="/services/trademark/trademark-registration-indian" className="text-brand hover:underline font-medium">Trademark Registration</Link> with significantly reduced government fees, and exclusive access to the ₹10,000 crore Fund of Funds for Startups (FFS).
+          </p>
+        </>
+      ),
       whoNeeds: [
         { title: 'Tech Startups', desc: 'Building innovative, scalable products.' },
         { title: 'SMEs', desc: 'Working on product/process improvements with high employment potential.' }
@@ -320,6 +338,10 @@ export default function ServicePage() {
         description={specificContent?.metaDescription || `Register for ${serviceName} online in India. 100% online process with expert CA/CS assistance. Fast, reliable, and affordable compliance services.`}
       />
       <Helmet>
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${serviceName} | Deccan Filings`} />
+        <meta name="twitter:description" content={`Register for ${serviceName} online in India with expert assistance.`} />
+        <meta name="twitter:image" content="https://deccanfilings.com/og-image.jpg" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -414,16 +436,16 @@ export default function ServicePage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-brand-lightest to-white rounded-3xl transform rotate-3 scale-105 -z-10 border border-slate-100"></div>
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 lg:p-10 relative z-10">
             <div className="absolute top-0 left-8 right-8 h-1 bg-gradient-to-r from-brand to-secondary rounded-b-md"></div>
-            <h3 className="text-3xl font-bold mb-2 text-dark">Request a Callback</h3>
+            <h2 className="text-3xl font-bold mb-2 text-dark">Request a Callback</h2>
             <p className="text-dark-400 mb-8">Get free expert consultation for {serviceName}.</p>
             
             {/* Form Progress Indicator */}
             {isSuccess ? (
               <div className="py-8 text-center space-y-4">
                 <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-50 text-emerald-500 mb-2 border border-emerald-100">
-                  <CheckCircle className="h-10 w-10 animate-bounce" />
+                  <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
                 </div>
-                <h4 className="text-2xl font-bold text-dark">Thank you!</h4>
+                <h3 className="text-2xl font-bold text-dark">Thank you!</h3>
                 <p className="text-dark-400 text-sm max-w-sm mx-auto leading-relaxed">
                   Our experts have received your request and will contact you shortly.
                 </p>
@@ -524,19 +546,25 @@ export default function ServicePage() {
       <section className="bg-brand-lightest border-y border-brand-light py-12">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
           <div className="flex flex-col items-center">
-            <Shield className="h-10 w-10 text-dark mb-4" />
-            <h4 className="font-bold text-lg mb-2 text-dark">Govt. Authorized</h4>
-            <p className="text-dark-400 text-sm">We are an authorized partner for government filings.</p>
+              <div className="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm text-center">
+                <Shield className="h-10 w-10 text-brand mx-auto mb-4" />
+                <h2 className="font-bold text-lg mb-2 text-dark">Govt. Authorized</h2>
+                <p className="text-dark-400 text-sm">We are an authorized partner for government filings.</p>
+              </div>
           </div>
           <div className="flex flex-col items-center">
-            <Clock className="h-10 w-10 text-dark mb-4" />
-            <h4 className="font-bold text-lg mb-2 text-dark">Fastest Processing</h4>
-            <p className="text-dark-400 text-sm">Get your documents processed in record time.</p>
+              <div className="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm text-center">
+                <Clock className="h-10 w-10 text-brand mx-auto mb-4" />
+                <h2 className="font-bold text-lg mb-2 text-dark">Fastest Processing</h2>
+                <p className="text-dark-400 text-sm">Get your documents processed in record time.</p>
+              </div>
           </div>
           <div className="flex flex-col items-center">
-            <Users className="h-10 w-10 text-dark mb-4" />
-            <h4 className="font-bold text-lg mb-2 text-dark">Expert CA/CS Team</h4>
-            <p className="text-dark-400 text-sm">Dedicated professionals to handle your case.</p>
+              <div className="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm text-center">
+                <Users className="h-10 w-10 text-brand mx-auto mb-4" />
+                <h2 className="font-bold text-lg mb-2 text-dark">Expert CA/CS Team</h2>
+                <p className="text-dark-400 text-sm">Dedicated professionals to handle your case.</p>
+              </div>
           </div>
         </div>
       </section>
@@ -648,7 +676,7 @@ export default function ServicePage() {
                     <div className="absolute -left-[17px] top-0 h-8 w-8 rounded-full bg-brand text-dark font-bold flex items-center justify-center border-4 border-white shadow-sm">
                       {i + 1}
                     </div>
-                    <h4 className="font-bold text-xl text-dark mb-2">{step.title}</h4>
+                    <h3 className="font-bold text-xl text-dark mb-2">{step.title}</h3>
                     <p className="text-dark-400">{step.desc}</p>
                   </div>
                 ))}

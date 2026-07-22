@@ -173,6 +173,7 @@ export default function Careers() {
       <Helmet>
         <title>Careers | Deccan Filings — Join Our Team</title>
         <meta name="description" content="Join the Deccan Filings team. Explore open positions in CA/CS, operations, sales, marketing and tech at Hyderabad's leading business compliance firm." />
+        <link rel="canonical" href="https://deccanfilings.com/careers" />
       </Helmet>
 
       {/* ── Hero ── */}

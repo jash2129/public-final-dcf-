@@ -73,6 +73,21 @@ function formatLegacyDate(date = /* @__PURE__ */ new Date()) {
     year: "numeric"
   });
 }
+function formatPhoneWithCountryCode(phone) {
+  if (phone === void 0 || phone === null) return null;
+  const cleaned = String(phone).trim().replace(/\s+/g, "").replace(/[-()]/g, "");
+  if (!cleaned) return null;
+  if (cleaned.startsWith("+")) {
+    return cleaned;
+  }
+  if (cleaned.length === 12 && cleaned.startsWith("91")) {
+    return `+${cleaned}`;
+  }
+  if (cleaned.length === 10) {
+    return `+91${cleaned}`;
+  }
+  return cleaned;
+}
 var init_helpers = __esm({
   "server/utils/helpers.ts"() {
   }
@@ -282,6 +297,20 @@ async function setupDatabase() {
     } catch (e) {
       console.error("Failed to alter orders table to add tax columns:", e.message);
     }
+    try {
+      const [cols] = await pool.query('SHOW COLUMNS FROM orders LIKE "discount_amount"');
+      if (cols.length === 0) {
+        console.log("Adding discount columns to orders table...");
+        await pool.query(`
+          ALTER TABLE orders 
+          ADD COLUMN discount_amount DECIMAL(10, 2) DEFAULT 0,
+          ADD COLUMN coupon_code VARCHAR(50) NULL
+        `);
+        console.log("Discount columns added successfully to orders table.");
+      }
+    } catch (e) {
+      console.error("Failed to alter orders table to add discount columns:", e.message);
+    }
     await pool.query(`
       CREATE TABLE IF NOT EXISTS order_items (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -377,6 +406,21 @@ async function setupDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB;
     `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS coupons (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(50) NOT NULL UNIQUE,
+        discount_type VARCHAR(20) NOT NULL DEFAULT 'percentage',
+        discount_value DECIMAL(10, 2) NOT NULL,
+        max_discount DECIMAL(10, 2) NULL,
+        min_order_value DECIMAL(10, 2) NULL,
+        valid_until DATETIME NULL,
+        usage_limit INT NULL,
+        times_used INT NOT NULL DEFAULT 0,
+        active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
     const hashedAdminPassword = await bcrypt.hash("admin123", 10);
     const [adminRows] = await pool.query("SELECT * FROM users WHERE email = ?", ["admin@deccanfilings.com"]);
     if (adminRows.length === 0) {
@@ -402,6 +446,7 @@ async function setupDatabase() {
     }
     await seedTestData();
     await seedBlogPosts();
+    await seedTestCoupon();
     return pool;
   } catch (error) {
     rawPool = void 0;
@@ -628,8 +673,23 @@ async function seedBlogPosts() {
       );
     }
     console.log("Blog posts successfully seeded.");
+  } catch (err) {
+    console.error("Error seeding blog posts:", err);
+  }
+}
+async function seedTestCoupon() {
+  try {
+    const [existing] = await pool.query("SELECT id FROM coupons WHERE code = ?", ["LAUNCH50"]);
+    if (existing.length === 0) {
+      await pool.execute(
+        `INSERT INTO coupons (code, discount_type, discount_value, max_discount, min_order_value, usage_limit)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        ["LAUNCH50", "percentage", 50, 1e3, 500, 100]
+      );
+      console.log("Seeded test coupon: LAUNCH50 (50% off up to \u20B91,000)");
+    }
   } catch (error) {
-    console.error("Error during blog posts database seeding:", error);
+    console.error("Error seeding test coupon:", error);
   }
 }
 var rawPool, pool;
@@ -769,7 +829,7 @@ __export(order_model_exports, {
   updateOrderAmountAndItems: () => updateOrderAmountAndItems,
   updateOrderStatus: () => updateOrderStatus
 });
-async function createOrderWithItems(userId, items) {
+async function createOrderWithItems(userId, items, couponCode, discountAmount = 0) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -799,12 +859,13 @@ async function createOrderWithItems(userId, items) {
     for (const item of items) {
       basePrice += item.priceAtPurchase * item.quantity;
     }
-    const cgst = basePrice * 0.09;
-    const sgst = basePrice * 0.09;
-    const totalAmount = basePrice + cgst + sgst;
+    const discountedBasePrice = Math.max(0, basePrice - discountAmount);
+    const cgst = discountedBasePrice * 0.09;
+    const sgst = discountedBasePrice * 0.09;
+    const totalAmount = discountedBasePrice + cgst + sgst;
     await connection.execute(
-      "INSERT INTO orders (id, user_id, status, total_amount, base_price, cgst, sgst) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [orderId, userId, "placed", totalAmount, basePrice, cgst, sgst]
+      "INSERT INTO orders (id, user_id, status, total_amount, base_price, cgst, sgst, discount_amount, coupon_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [orderId, userId, "placed", totalAmount, basePrice, cgst, sgst, discountAmount, couponCode || null]
     );
     for (const item of items) {
       await connection.execute(
@@ -967,6 +1028,8 @@ import express2 from "express";
 import { createServer as createViteServer } from "vite";
 import path5 from "path";
 import fs5 from "fs";
+import helmet from "helmet";
+import compression from "compression";
 
 // server/services/scheduler.service.ts
 init_db();
@@ -1111,6 +1174,55 @@ Message: ${message}
   }
   return true;
 }
+async function sendWhatsAppTemplate(toPhone, templateName, params, userId) {
+  const phoneId = process.env.WHATSAPP_PHONE_ID;
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  if (!phoneId || !token) {
+    console.log(`[WHATSAPP MOCK] Missing credentials. Would send template '${templateName}' to ${toPhone} with params:`, params);
+    logNotificationToFile("WHATSAPP_TEMPLATE", toPhone, templateName, JSON.stringify(params));
+    return true;
+  }
+  const components = params.length > 0 ? [
+    {
+      type: "body",
+      parameters: params.map((p) => ({ type: "text", text: p }))
+    }
+  ] : [];
+  try {
+    const cleanPhone = toPhone.replace(/\D/g, "");
+    const response = await fetch(`https://graph.facebook.com/v17.0/${phoneId}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: cleanPhone,
+        type: "template",
+        template: {
+          name: templateName,
+          language: { code: "en" },
+          // Adjust if you use a different default language
+          components
+        }
+      })
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      console.error(`[WHATSAPP ERROR] Failed to send template ${templateName} to ${toPhone}:`, result);
+      return false;
+    }
+    console.log(`[WHATSAPP] Sent template ${templateName} to ${toPhone}`);
+    if (userId) {
+      await logToActivityDB(userId, "WhatsApp Template Dispatched", `Template: ${templateName}`);
+    }
+    return true;
+  } catch (error) {
+    console.error(`[WHATSAPP ERROR] Exception while sending template ${templateName} to ${toPhone}:`, error);
+    return false;
+  }
+}
 async function notifyOrderPlacement(orderId, userEmail, userPhone, userName, serviceNames, amount, userId) {
   const basePrice = amount / 1.18;
   const cgst = basePrice * 0.09;
@@ -1139,6 +1251,7 @@ Team Deccan Filings`;
   const smsMessage = `Hi ${userName}, order ${orderId} for ${serviceNames} (Amt: ${formattedTotal}) has been placed successfully. Team Deccan Filings`;
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
+    await sendWhatsAppTemplate(userPhone, "utility_order_placed", [userName, orderId, serviceNames, formattedTotal], userId);
   }
 }
 async function notifyOrderStatusChange(orderId, status, userEmail, userPhone, userName, userId) {
@@ -1156,6 +1269,7 @@ Team Deccan Filings`;
   const smsMessage = `Hi ${userName}, status of your order ${orderId} has been updated to ${statusDisplay}. Log in to dashboard to check. Team Deccan Filings`;
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
+    await sendWhatsAppTemplate(userPhone, "utility_order_status", [userName, orderId, statusDisplay], userId);
   }
 }
 async function notifyComplianceDeadline(taskTitle, dueDate, userEmail, userPhone, userName, status, daysRemaining, userId) {
@@ -1170,6 +1284,11 @@ Team Deccan Filings`;
   const smsMessage = status === "overdue" ? `Hi ${userName}, compliance for ${taskTitle} was due on ${dueDate} and is OVERDUE. Please share documents immediately to avoid penalties. Team Deccan Filings` : `Hi ${userName}, compliance for ${taskTitle} is due on ${dueDate}. Please share required documents at the earliest. Team Deccan Filings`;
   if (userPhone) {
     await sendSMS(userPhone, smsMessage, userId);
+    if (status === "overdue") {
+      await sendWhatsAppTemplate(userPhone, "utility_compliance_overdue", [userName, taskTitle, dueDate], userId);
+    } else {
+      await sendWhatsAppTemplate(userPhone, "utility_compliance_upcoming", [userName, taskTitle, dueDate, daysRemaining.toString()], userId);
+    }
   }
 }
 async function notifyPaymentSuccess(orderId, amount, userEmail, userName, userId, serviceName) {
@@ -1217,6 +1336,17 @@ Team Deccan Filings`;
     console.error(`Failed to generate invoice PDF for order ${orderId}:`, err);
   }
   await sendEmail(userEmail, emailSubject, emailBody, userId, attachments);
+  try {
+    const [userRows] = await pool.query("SELECT phone FROM users WHERE id = ?", [userId]);
+    if (userRows.length > 0 && userRows[0].phone) {
+      const phone = userRows[0].phone;
+      const smsMessage = `Hi ${userName}, we have received your payment of ${formattedTotal} for Order ${orderId}. Team Deccan Filings`;
+      await sendSMS(phone, smsMessage, userId);
+      await sendWhatsAppTemplate(phone, "utility_payment_success", [userName, formattedTotal, orderId], userId);
+    }
+  } catch (err) {
+    console.error(`Failed to dispatch payment success SMS/WhatsApp for order ${orderId}:`, err);
+  }
 }
 async function notifyWelcome(email, name, userId, phone) {
   const subject = `Welcome to Deccan Filings, ${name}!`;
@@ -1290,7 +1420,93 @@ Team Deccan Filings`;
   if (phone) {
     const smsMessage = `Hi ${name}, welcome to Deccan Filings! We're excited to partner with you. Track your business filings & consult experts at deccanfilings.com.`;
     await sendSMS(phone, smsMessage, userId);
+    await sendWhatsAppTemplate(phone, "utility_welcome", [name], userId);
   }
+}
+async function sendMarketingEmail(name, email, phone, serviceName, step) {
+  let subject = "";
+  let textBody = "";
+  let templateName = "";
+  let templateParams = [];
+  if (step === 0) {
+    subject = `We received your request, ${name}!`;
+    textBody = `Hi ${name},
+
+Thank you for requesting a callback regarding ${serviceName}. Our team of CA/CS experts has received your request and will be reaching out to you shortly.
+
+In the meantime, feel free to reply to this email if you have any immediate questions!
+
+Best regards,
+Team Deccan Filings`;
+    templateName = "marketing_drip_day_0";
+    templateParams = [name, serviceName];
+  } else if (step === 1) {
+    subject = `Everything you need to know about ${serviceName}`;
+    textBody = `Hi ${name},
+
+Yesterday you asked about ${serviceName}. We know that compliance can be confusing, so we wanted to share a quick tip: The most important thing when starting with ${serviceName} is having your basic documents (PAN, Aadhaar, and Address Proof) ready. This can speed up your processing time by up to 40%!
+
+Our team is here to help you get everything sorted without the headache. Let us know when you're ready to proceed.
+
+Best regards,
+Team Deccan Filings`;
+    templateName = "marketing_drip_day_1";
+    templateParams = [name, serviceName];
+  } else if (step === 3) {
+    subject = `Why 10,000+ Founders Trust Deccan Filings \u{1F680}`;
+    textBody = `Hi ${name},
+
+Still thinking about ${serviceName}? We get it, choosing the right compliance partner is a big decision. Here is why founders across India trust us:
+1. 100% Online Process: No office visits required.
+2. Expert CA/CS Support: We don't just file forms; we offer strategic advice.
+3. Transparent Pricing: No hidden fees, ever.
+
+Ready to take the next step? Reply to this email or call us directly!
+
+Best regards,
+Team Deccan Filings`;
+    templateName = "marketing_drip_day_3";
+    templateParams = [serviceName, name];
+  } else if (step === 7) {
+    subject = `Final Follow-up: Let's get your ${serviceName} sorted`;
+    textBody = `Hi ${name},
+
+We haven't heard from you in a few days regarding your interest in ${serviceName}. If you've already found a solution, that's great! If you're still on the fence or have questions holding you back, we'd love to chat. You can schedule a free 15-minute consultation with one of our senior experts by replying to this email. We're here when you need us.
+
+Best regards,
+Team Deccan Filings`;
+    templateName = "marketing_drip_day_7";
+    templateParams = [name, serviceName];
+  } else {
+    return;
+  }
+  await sendEmail(email, subject, textBody);
+  if (phone) {
+    await sendWhatsAppTemplate(phone, templateName, templateParams);
+  }
+}
+
+// server/models/lead.model.ts
+init_db();
+async function createLead(lead) {
+  const [result] = await pool.execute(
+    `INSERT INTO leads (full_name, mobile_number, email_address, city, service_name, sequence_step, status) 
+     VALUES (?, ?, ?, ?, ?, 0, 'active')`,
+    [lead.full_name, lead.mobile_number, lead.email_address, lead.city, lead.service_name]
+  );
+  return result.insertId;
+}
+async function getActiveLeadsForFollowUp() {
+  const [rows] = await pool.query(
+    `SELECT * FROM leads WHERE status = 'active'`
+  );
+  return rows;
+}
+async function updateLeadSequence(id, nextStep) {
+  await pool.execute(
+    `UPDATE leads SET sequence_step = ?, last_email_sent_at = CURRENT_TIMESTAMP WHERE id = ?`,
+    [nextStep, id]
+  );
 }
 
 // server/services/scheduler.service.ts
@@ -1390,15 +1606,50 @@ async function runComplianceScan() {
   }
   return result;
 }
+async function runMarketingDripScan() {
+  try {
+    const leads = await getActiveLeadsForFollowUp();
+    const today = /* @__PURE__ */ new Date();
+    let sentCount = 0;
+    for (const lead of leads) {
+      if (!lead.id || !lead.last_email_sent_at) continue;
+      const diffTime = today.getTime() - new Date(lead.last_email_sent_at).getTime();
+      const diffDays = Math.floor(diffTime / (1e3 * 60 * 60 * 24));
+      let nextStep = -1;
+      if (lead.sequence_step === 0 && diffDays >= 1) {
+        nextStep = 1;
+      } else if (lead.sequence_step === 1 && diffDays >= 2) {
+        nextStep = 3;
+      } else if (lead.sequence_step === 3 && diffDays >= 4) {
+        nextStep = 7;
+      }
+      if (nextStep !== -1) {
+        try {
+          await sendMarketingEmail(lead.full_name, lead.email_address, lead.mobile_number, lead.service_name, nextStep);
+          await updateLeadSequence(lead.id, nextStep);
+          sentCount++;
+          console.log(`Sent marketing drip step ${nextStep} to ${lead.email_address}`);
+        } catch (err) {
+          console.error(`Failed to send marketing drip step ${nextStep} to ${lead.email_address}:`, err);
+        }
+      }
+    }
+    console.log(`Marketing drip scan completed. Sent ${sentCount} emails.`);
+  } catch (error) {
+    console.error("Marketing drip scan encountered error:", error);
+  }
+}
 function initScheduler() {
   const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1e3;
   setTimeout(() => {
     console.log("Running initial compliance scheduler scan...");
     runComplianceScan();
+    runMarketingDripScan();
   }, 3e4);
   setInterval(() => {
     console.log("Running daily compliance scheduler scan...");
     runComplianceScan();
+    runMarketingDripScan();
   }, TWENTY_FOUR_HOURS);
 }
 
@@ -1407,6 +1658,7 @@ import { Router } from "express";
 
 // server/models/user.model.ts
 init_db();
+init_helpers();
 async function findUserByEmail(email) {
   const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
   if (rows.length === 0) return null;
@@ -1424,17 +1676,17 @@ async function createUser(user) {
   const [result] = await pool.execute(
     "INSERT INTO users (name, email, password, role, avatar, phone, whatsapp_number, company_name, address, gstin, notification_prefs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
-      user.name,
-      user.email,
-      user.password,
+      user.name ?? null,
+      user.email ?? null,
+      user.password ?? null,
       user.role || "user",
-      user.avatar || null,
-      user.phone || null,
-      user.whatsapp_number || null,
-      user.company_name || null,
-      user.address || null,
-      user.gstin || null,
-      user.notification_prefs || JSON.stringify({ email: true, sms: false })
+      user.avatar ?? null,
+      formatPhoneWithCountryCode(user.phone) ?? null,
+      formatPhoneWithCountryCode(user.whatsapp_number) ?? null,
+      user.company_name ?? null,
+      user.address ?? null,
+      user.gstin ?? null,
+      user.notification_prefs ?? JSON.stringify({ email: true, sms: false })
     ]
   );
   return result.insertId;
@@ -1495,13 +1747,15 @@ function verifyToken(token) {
 }
 
 // server/services/auth.service.ts
+init_helpers();
 async function register(userData) {
   const existingUser = await findUserByEmail(userData.email);
   if (existingUser) {
     throw { status: 400, message: "Email address is already in use" };
   }
-  if (userData.whatsapp_number) {
-    const existingWhatsapp = await findUserByWhatsappNumber(userData.whatsapp_number);
+  const formattedWhatsapp = formatPhoneWithCountryCode(userData.whatsapp_number);
+  if (formattedWhatsapp) {
+    const existingWhatsapp = await findUserByWhatsappNumber(formattedWhatsapp);
     if (existingWhatsapp) {
       throw { status: 400, message: "WhatsApp number is already in use" };
     }
@@ -2094,6 +2348,9 @@ async function updateServiceDetails(id, updateData) {
 var router2 = Router2();
 router2.get("/", async (req, res, next) => {
   try {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
     const services = await getServicesCatalog();
     return res.json(services);
   } catch (error) {
@@ -2122,6 +2379,118 @@ import { Router as Router3 } from "express";
 
 // server/services/order.service.ts
 init_order_model();
+
+// server/models/coupon.model.ts
+init_db();
+async function findCouponByCode(code) {
+  const [rows] = await pool.query(
+    "SELECT * FROM coupons WHERE code = ?",
+    [code]
+  );
+  if (rows.length === 0) return null;
+  const coupon = rows[0];
+  coupon.discount_value = parseFloat(coupon.discount_value);
+  if (coupon.max_discount !== null) {
+    coupon.max_discount = parseFloat(coupon.max_discount);
+  }
+  if (coupon.min_order_value !== null) {
+    coupon.min_order_value = parseFloat(coupon.min_order_value);
+  }
+  return coupon;
+}
+function validateCoupon(coupon, baseOrderAmount) {
+  if (!coupon.active) {
+    return { isValid: false, discountAmount: 0, error: "This coupon is no longer active." };
+  }
+  if (coupon.valid_until && new Date(coupon.valid_until) < /* @__PURE__ */ new Date()) {
+    return { isValid: false, discountAmount: 0, error: "This coupon has expired." };
+  }
+  if (coupon.usage_limit !== null && coupon.times_used >= coupon.usage_limit) {
+    return { isValid: false, discountAmount: 0, error: "This coupon has reached its usage limit." };
+  }
+  if (coupon.min_order_value !== null && baseOrderAmount < coupon.min_order_value) {
+    return { isValid: false, discountAmount: 0, error: `Order amount must be at least \u20B9${coupon.min_order_value} to use this coupon.` };
+  }
+  let discountAmount = 0;
+  if (coupon.discount_type === "percentage") {
+    discountAmount = baseOrderAmount * coupon.discount_value / 100;
+    if (coupon.max_discount !== null && discountAmount > coupon.max_discount) {
+      discountAmount = coupon.max_discount;
+    }
+  } else if (coupon.discount_type === "fixed") {
+    discountAmount = coupon.discount_value;
+  }
+  if (discountAmount > baseOrderAmount) {
+    discountAmount = baseOrderAmount;
+  }
+  return { isValid: true, discountAmount };
+}
+async function incrementCouponUsage(code) {
+  await pool.execute(
+    "UPDATE coupons SET times_used = times_used + 1 WHERE code = ?",
+    [code]
+  );
+}
+async function getAllCoupons() {
+  const [rows] = await pool.query(
+    "SELECT * FROM coupons ORDER BY id DESC"
+  );
+  return rows.map((row) => {
+    const coupon = row;
+    coupon.discount_value = parseFloat(coupon.discount_value);
+    if (coupon.max_discount !== null) {
+      coupon.max_discount = parseFloat(coupon.max_discount);
+    }
+    if (coupon.min_order_value !== null) {
+      coupon.min_order_value = parseFloat(coupon.min_order_value);
+    }
+    return coupon;
+  });
+}
+async function createCoupon(coupon) {
+  const [result] = await pool.execute(
+    `INSERT INTO coupons (
+      code, discount_type, discount_value, max_discount, 
+      min_order_value, valid_until, usage_limit, active
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      coupon.code,
+      coupon.discount_type,
+      coupon.discount_value,
+      coupon.max_discount || null,
+      coupon.min_order_value || null,
+      coupon.valid_until || null,
+      coupon.usage_limit || null,
+      coupon.active !== void 0 ? coupon.active : true
+    ]
+  );
+  return result.insertId;
+}
+async function updateCoupon(id, updates) {
+  const fields = [];
+  const values = [];
+  for (const [key, value] of Object.entries(updates)) {
+    if (key === "id" || key === "times_used") continue;
+    fields.push(`${key} = ?`);
+    values.push(value !== void 0 ? value : null);
+  }
+  if (fields.length === 0) return false;
+  values.push(id);
+  const [result] = await pool.execute(
+    `UPDATE coupons SET ${fields.join(", ")} WHERE id = ?`,
+    values
+  );
+  return result.affectedRows > 0;
+}
+async function deleteCoupon(id) {
+  const [result] = await pool.execute(
+    "DELETE FROM coupons WHERE id = ?",
+    [id]
+  );
+  return result.affectedRows > 0;
+}
+
+// server/services/order.service.ts
 init_helpers();
 function getCategoryForService(name) {
   const lower = name.toLowerCase();
@@ -2202,7 +2571,21 @@ async function checkout(userId, payload) {
       quantity
     }
   ];
-  const orderId = await createOrderWithItems(userId, items);
+  let discountAmount = 0;
+  if (payload.couponCode) {
+    const coupon = await findCouponByCode(payload.couponCode);
+    if (!coupon) {
+      throw { status: 400, message: "Invalid coupon code." };
+    }
+    const baseOrderAmount = service.price * quantity;
+    const validation = validateCoupon(coupon, baseOrderAmount);
+    if (!validation.isValid) {
+      throw { status: 400, message: validation.error };
+    }
+    discountAmount = validation.discountAmount;
+    await incrementCouponUsage(coupon.code);
+  }
+  const orderId = await createOrderWithItems(userId, items, payload.couponCode, discountAmount);
   triggerOrderNotification(userId, orderId, service.name, service.price * quantity);
   return orderId;
 }
@@ -2273,7 +2656,8 @@ function mapToLegacyOrder(dbOrder) {
     date: dbOrder.created_at ? formatLegacyDate(new Date(dbOrder.created_at)) : formatLegacyDate(/* @__PURE__ */ new Date()),
     created_at: dbOrder.created_at,
     amount: formatCurrency(dbOrder.total_amount),
-    status: dbOrder.status === "placed" ? "Placed" : dbOrder.status === "in_progress" ? "Processing" : dbOrder.status === "completed" ? "Completed" : "Action Required"
+    status: dbOrder.status === "placed" ? "Placed" : dbOrder.status === "in_progress" ? "Processing" : dbOrder.status === "completed" ? "Completed" : "Action Required",
+    payment_status: dbOrder.payment_status || "pending"
   };
 }
 
@@ -2421,6 +2805,9 @@ router3.use(authenticate);
 router3.post("/", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+    if (!req.user.phone || req.user.phone.trim() === "") {
+      return res.status(403).json({ error: "Phone number is required to place an order." });
+    }
     const validation = validateOrder(req.body);
     if (!validation.isValid) {
       return res.status(400).json({ error: "Validation failed", details: validation.errors });
@@ -3147,6 +3534,7 @@ import multer2 from "multer";
 import path4 from "path";
 import fs4 from "fs";
 import bcrypt4 from "bcryptjs";
+init_helpers();
 var router8 = Router8();
 var uploadsDir2 = path4.join(process.cwd(), "uploads");
 var avatarsDir = path4.join(uploadsDir2, "avatars");
@@ -3208,13 +3596,15 @@ router8.patch("/user/profile", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const { name, email, phone, whatsapp_number, company_name, address, gstin } = req.body;
-    if (whatsapp_number) {
-      if (!/^\+?[0-9]{10,15}$/.test(whatsapp_number.trim())) {
+    const formattedPhone = formatPhoneWithCountryCode(phone);
+    const formattedWhatsapp = formatPhoneWithCountryCode(whatsapp_number);
+    if (formattedWhatsapp) {
+      if (!/^\+?[0-9]{10,15}$/.test(formattedWhatsapp)) {
         return res.status(400).json({ error: "A valid WhatsApp number is required (10-15 digits)" });
       }
       const [existing] = await pool.query(
         "SELECT id FROM users WHERE whatsapp_number = ? AND id != ?",
-        [whatsapp_number, req.user.id]
+        [formattedWhatsapp, req.user.id]
       );
       if (existing.length > 0) {
         return res.status(400).json({ error: "WhatsApp number is already in use" });
@@ -3222,7 +3612,16 @@ router8.patch("/user/profile", async (req, res, next) => {
     }
     await pool.execute(
       "UPDATE users SET name = ?, email = ?, phone = ?, whatsapp_number = ?, company_name = ?, address = ?, gstin = ? WHERE id = ?",
-      [name, email, phone, whatsapp_number, company_name, address, gstin, req.user.id]
+      [
+        name ?? null,
+        email ?? null,
+        formattedPhone ?? null,
+        formattedWhatsapp ?? null,
+        company_name ?? null,
+        address ?? null,
+        gstin ?? null,
+        req.user.id
+      ]
     );
     await logActivity3(req.user.id, "PROFILE_UPDATE", "Updated profile information");
     return res.json({ message: "Profile updated successfully" });
@@ -3407,6 +3806,7 @@ var profile_routes_default = router8;
 // server/routes/contact.routes.ts
 import { Router as Router9 } from "express";
 import nodemailer3 from "nodemailer";
+init_helpers();
 var router9 = Router9();
 router9.post("/", async (req, res) => {
   const { name, mobile, email, category, service, address } = req.body;
@@ -3414,6 +3814,26 @@ router9.post("/", async (req, res) => {
     return res.status(400).json({ error: "Please fill in all required fields." });
   }
   try {
+    const formattedMobile = formatPhoneWithCountryCode(mobile) || mobile;
+    const serviceName = service || category || "General Inquiry";
+    try {
+      await createLead({
+        full_name: name,
+        mobile_number: formattedMobile,
+        email_address: email,
+        city: address,
+        service_name: serviceName
+      });
+      console.log(`Lead saved to database from Contact Form: ${email}`);
+    } catch (dbErr) {
+      console.error("Failed to save lead to database:", dbErr);
+    }
+    try {
+      await sendMarketingEmail(name, email, formattedMobile, serviceName, 0);
+      console.log(`Day 0 marketing sequence triggered for: ${email}`);
+    } catch (emailErr) {
+      console.error("Failed to send Day 0 marketing sequence:", emailErr);
+    }
     let transporter2;
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
       transporter2 = nodemailer3.createTransport({
@@ -3486,15 +3906,35 @@ router9.post("/", async (req, res) => {
 var contact_routes_default = router9;
 
 // server/routes/leads.routes.ts
+init_helpers();
 import { Router as Router10 } from "express";
 import nodemailer4 from "nodemailer";
 var router10 = Router10();
 router10.post("/callback", async (req, res) => {
   const { fullName, mobileNumber, emailAddress, city, serviceName } = req.body;
+  const formattedMobile = formatPhoneWithCountryCode(mobileNumber) || mobileNumber;
   if (!fullName || !mobileNumber || !emailAddress || !city || !serviceName) {
     return res.status(400).json({ error: "Please fill in all required fields." });
   }
   try {
+    try {
+      await createLead({
+        full_name: fullName,
+        mobile_number: formattedMobile,
+        email_address: emailAddress,
+        city,
+        service_name: serviceName
+      });
+      console.log(`Lead saved to database: ${emailAddress}`);
+    } catch (dbErr) {
+      console.error("Failed to save lead to database:", dbErr);
+    }
+    try {
+      await sendMarketingEmail(fullName, emailAddress, formattedMobile, serviceName, 0);
+      console.log(`Day 0 marketing email triggered for: ${emailAddress}`);
+    } catch (emailErr) {
+      console.error("Failed to send Day 0 marketing email:", emailErr);
+    }
     let transporter2;
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
       transporter2 = nodemailer4.createTransport({
@@ -3508,7 +3948,7 @@ router10.post("/callback", async (req, res) => {
       });
     } else {
       console.log("=== CALLBACK REQUEST SUBMISSION (no SMTP configured) ===");
-      console.log({ fullName, mobileNumber, emailAddress, city, serviceName });
+      console.log({ fullName, mobileNumber: formattedMobile, emailAddress, city, serviceName });
       console.log("Would send to: deccanfilings@gmail.com");
       console.log("========================================================");
       return res.json({ success: true, message: "Callback request received! (SMTP not configured \u2014 logged to console)" });
@@ -3528,7 +3968,7 @@ router10.post("/callback", async (req, res) => {
           </tr>
           <tr style="background: #f8fafc; border-bottom: 1px solid #f1f5f9;">
             <td style="padding: 12px 16px; font-weight: bold; color: #64748b; font-size: 14px;">Mobile Number</td>
-            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px;">${mobileNumber}</td>
+            <td style="padding: 12px 16px; color: #0f172a; font-size: 14px;">${formattedMobile}</td>
           </tr>
           <tr style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
             <td style="padding: 12px 16px; font-weight: bold; color: #64748b; font-size: 14px;">Email Address</td>
@@ -3564,11 +4004,70 @@ router10.post("/callback", async (req, res) => {
 });
 var leads_routes_default = router10;
 
-// server/routes/webhook.routes.ts
+// server/routes/blog.routes.ts
 import { Router as Router11 } from "express";
-import express from "express";
+
+// server/services/blog.service.ts
+init_db();
+async function getAllBlogPosts() {
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM blog_posts ORDER BY id DESC"
+    );
+    return rows;
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    throw new Error("Failed to fetch blog posts from database");
+  }
+}
+async function getBlogPostById(id) {
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM blog_posts WHERE id = ?",
+      [id]
+    );
+    if (rows.length === 0) {
+      return null;
+    }
+    return rows[0];
+  } catch (error) {
+    console.error(`Error fetching blog post ${id}:`, error);
+    throw new Error("Failed to fetch blog post from database");
+  }
+}
+
+// server/routes/blog.routes.ts
 var router11 = Router11();
-router11.post(
+router11.get("/", async (req, res, next) => {
+  try {
+    const blogs = await getAllBlogPosts();
+    return res.json(blogs);
+  } catch (error) {
+    next(error);
+  }
+});
+router11.get("/:id", async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid blog ID format" });
+    }
+    const blog = await getBlogPostById(id);
+    if (!blog) {
+      return res.status(404).json({ error: "Blog post not found" });
+    }
+    return res.json(blog);
+  } catch (error) {
+    next(error);
+  }
+});
+var blog_routes_default = router11;
+
+// server/routes/webhook.routes.ts
+import { Router as Router12 } from "express";
+import express from "express";
+var router12 = Router12();
+router12.post(
   "/razorpay",
   express.raw({ type: "application/json" }),
   async (req, res) => {
@@ -3584,7 +4083,99 @@ router11.post(
     }
   }
 );
-var webhook_routes_default = router11;
+var webhook_routes_default = router12;
+
+// server/routes/coupon.routes.ts
+import { Router as Router13 } from "express";
+var router13 = Router13();
+router13.use(authenticate);
+router13.post("/validate", async (req, res, next) => {
+  try {
+    const { code, amount } = req.body;
+    if (!code || !amount) {
+      return res.status(400).json({ error: "Coupon code and order amount are required." });
+    }
+    const baseAmount = parseFloat(amount);
+    if (isNaN(baseAmount)) {
+      return res.status(400).json({ error: "Invalid order amount." });
+    }
+    const coupon = await findCouponByCode(code.toUpperCase());
+    if (!coupon) {
+      return res.status(404).json({ error: "Invalid coupon code." });
+    }
+    const validation = validateCoupon(coupon, baseAmount);
+    if (!validation.isValid) {
+      return res.status(400).json({ error: validation.error });
+    }
+    return res.json({
+      success: true,
+      discountAmount: validation.discountAmount,
+      message: "Coupon applied successfully."
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+router13.get("/", requireAdmin, async (req, res, next) => {
+  try {
+    const coupons = await getAllCoupons();
+    res.json(coupons);
+  } catch (error) {
+    next(error);
+  }
+});
+router13.post("/", requireAdmin, async (req, res, next) => {
+  try {
+    const data = req.body;
+    if (!data.code || !data.discount_type || data.discount_value === void 0) {
+      return res.status(400).json({ error: "Code, discount_type, and discount_value are required." });
+    }
+    data.code = data.code.trim().toUpperCase();
+    const existing = await findCouponByCode(data.code);
+    if (existing) {
+      return res.status(400).json({ error: "A coupon with this code already exists." });
+    }
+    const insertId = await createCoupon(data);
+    res.status(201).json({ success: true, id: insertId, message: "Coupon created successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+router13.put("/:id", requireAdmin, async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid coupon ID" });
+    }
+    const updates = req.body;
+    if (updates.code) {
+      updates.code = updates.code.trim().toUpperCase();
+    }
+    const success = await updateCoupon(id, updates);
+    if (!success) {
+      return res.status(404).json({ error: "Coupon not found or no changes made" });
+    }
+    res.json({ success: true, message: "Coupon updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+router13.delete("/:id", requireAdmin, async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid coupon ID" });
+    }
+    const success = await deleteCoupon(id);
+    if (!success) {
+      return res.status(404).json({ error: "Coupon not found" });
+    }
+    res.json({ success: true, message: "Coupon deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+var coupon_routes_default = router13;
 
 // server/middlewares/error.middleware.ts
 function errorHandler(err, req, res, next) {
@@ -3598,20 +4189,236 @@ function errorHandler(err, req, res, next) {
   });
 }
 
+// src/data/services.ts
+var serviceCategories = [
+  {
+    title: "StartUp Registrations",
+    slug: "startup-registrations",
+    services: [
+      "Proprietorship Registration",
+      "Partnership Firm Registration",
+      "One Person Company (OPC) Registration",
+      "Limited Liability Partnership (LLP) Registration",
+      "Private Limited Company Registration",
+      "Section 8 Company Registration",
+      "Trust Registration",
+      "Society Registration",
+      "Producer Company Registration",
+      "Indian Subsidiary Registration",
+      "Nidhi Company Registration",
+      "Foreign Company Registration",
+      "Public Limited Company registration"
+    ]
+  },
+  {
+    title: "License",
+    slug: "license",
+    services: [
+      "Startup India",
+      "Factory Pollution",
+      "MSME/Udyam Registration",
+      "Trade License",
+      "FSSAI License / Food License Registration",
+      "Labour license",
+      "ISO Certification",
+      "Import Export Code (IEC) Registration",
+      "Shop & Establishment License Registration",
+      "Professional Tax Registration",
+      "PF Registration",
+      "ESI Registration",
+      "ICEGATE Registration",
+      "Barcode Registration",
+      "RCMC Registration",
+      "Darpan Registration",
+      "FSSAI Food Product Approval",
+      "Drug License",
+      "Fire License / NOC",
+      "Halal Certification"
+    ]
+  },
+  {
+    title: "Income Tax",
+    slug: "income-tax",
+    services: [
+      "Tax Audit",
+      "Individual ITR Filing",
+      "Business ITR Filing",
+      "Tax Notice Handling",
+      "15CA / 15CB Form Filing",
+      "Company e-Taxing",
+      "TDS Return Filing",
+      "Form 16 Generation",
+      "Lower TDS Certificate"
+    ]
+  },
+  {
+    title: "GST",
+    slug: "gst",
+    services: [
+      "GST Registration",
+      "GST Registration for Foreigners",
+      "GST Cancellation",
+      "GST Amendment",
+      "GST LUT Form Filing",
+      "GST Monthly Return Filing",
+      "GST Quarterly Return Filing",
+      "GST Annual Return Filing",
+      "GST Nil Return Filing",
+      "GST Refund Filing",
+      "GST Invoicing and Filing Software",
+      "GST Software for Accountants",
+      "GST Notice Handling",
+      "GST Audit Assistance"
+    ]
+  },
+  {
+    title: "MCA",
+    slug: "mca",
+    services: [
+      "Annual ROC Filing",
+      "Annual Return Filing",
+      "DIR-3 KYC / DIN eKYC Filing",
+      "MCA Form Filings",
+      "Director Appointment / Resignation",
+      "Share Transfer",
+      "Address Change",
+      "Name Change - Company",
+      "Authorized Capital Increase",
+      "MOA Amendment",
+      "AOA Amendment",
+      "Object Clause Change",
+      "LLP Form Filings",
+      "LLP Agreement Drafting",
+      "LLP Annual Filing",
+      "Company Strike Off",
+      "LLP Closure / Winding Up"
+    ]
+  },
+  {
+    title: "Compliance",
+    slug: "compliance",
+    services: [
+      "MCA/ROC Registration",
+      "GST Compliance",
+      "TDS Compliance",
+      "PF/ESI Compliance",
+      "PT Compliance",
+      "Annual Returns",
+      "Accounting & Bookkeeping",
+      "Financial Statements preparation",
+      "Payroll Processing",
+      "FEMA Compliance",
+      "RBI Compliances filings",
+      "AGM Preparation",
+      "Statutory Register Maintenance",
+      "Company ComplianceCalendar & alerts",
+      "Company compliance Software/management",
+      "Invoice Management & Reconciliation",
+      "Accounting Software Integration",
+      "Board meetings Minutes",
+      "HR & Payroll Management",
+      "Employee Attendance Tracking",
+      "PF / ESI Calculations & Returns"
+    ]
+  },
+  {
+    title: "Trademark",
+    slug: "trademark",
+    services: [
+      "Trademark Registration (Indian)",
+      "International Trademark Registration",
+      "Expedited Trademark Registration",
+      "Trademark Search",
+      "Trademark Objection Reply",
+      "Trademark Opposition",
+      "Trademark Renewal",
+      "Trademark Assignment / Transfer",
+      "Trademark Infringement Notice",
+      "Copyright Registration",
+      "Patent Registration",
+      "Design Registration"
+    ]
+  },
+  {
+    title: "Finance",
+    slug: "finance",
+    services: [
+      "Loans",
+      "Insurance",
+      "Mutual Fund"
+    ]
+  },
+  {
+    title: "Global",
+    slug: "global",
+    services: [
+      "US Accounting",
+      "US Taxation"
+    ]
+  }
+];
+var generateSlug2 = (text) => {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+};
+
 // server.ts
 dotenv.config();
 async function startServer() {
   const app = express2();
+  app.set("trust proxy", true);
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
   const uploadsDir3 = path5.join(process.cwd(), "uploads");
   if (!fs5.existsSync(uploadsDir3)) {
     fs5.mkdirSync(uploadsDir3, { recursive: true });
   }
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    // Disabled to prevent blocking existing inline scripts/GTM
+    crossOriginEmbedderPolicy: false,
+    hsts: {
+      maxAge: 31536e3,
+      // 1 year
+      includeSubDomains: true,
+      preload: true
+    },
+    frameguard: {
+      action: "sameorigin"
+      // Sets X-Frame-Options: SAMEORIGIN
+    }
+  }));
+  app.use((req, res, next) => {
+    const host = req.headers.host || "";
+    if (host.startsWith("www.")) {
+      const nonWwwHost = host.replace(/^www\./, "");
+      return res.redirect(301, `https://${nonWwwHost}${req.originalUrl}`);
+    }
+    next();
+  });
+  const redirects = {
+    "/startup-registrations": "/services/startup",
+    "/license": "/services/licenses",
+    "/gst": "/services/gst",
+    "/startup-registrations/one-person-company-opc-registration": "/services/startup/opc-registration",
+    "/license/trade-license": "/services/licenses/trade-license",
+    "/gst/gst-registration-for-foreigners": "/services/gst/foreign-company-registration"
+  };
+  app.use((req, res, next) => {
+    const target = redirects[req.path];
+    if (target) {
+      return res.redirect(301, target);
+    }
+    if (req.path.length > 1 && req.path.endsWith("/")) {
+      const query = req.url.slice(req.path.length);
+      return res.redirect(301, req.path.slice(0, -1) + query);
+    }
+    next();
+  });
   app.use((req, res, next) => {
     console.log(`[${(/* @__PURE__ */ new Date()).toISOString()}] ${req.method} ${req.url}`);
     next();
   });
   app.use("/api/webhooks", webhook_routes_default);
+  app.use(compression());
   app.use(express2.json({ limit: "50mb" }));
   app.use(express2.urlencoded({ extended: true, limit: "50mb" }));
   app.get("/api/health", (_req, res) => {
@@ -3687,8 +4494,101 @@ async function startServer() {
   app.use("/api/documents", document_routes_default);
   app.use("/api/contact", contact_routes_default);
   app.use("/api/leads", leads_routes_default);
+  app.use("/api/blogs", blog_routes_default);
+  app.use("/api/coupons", coupon_routes_default);
   app.use("/api", profile_routes_default);
+  app.get("/sitemap.xml", async (_req, res) => {
+    try {
+      const baseUrl = "https://deccanfilings.com";
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+      const staticPages = [
+        "",
+        "/about",
+        "/contact",
+        "/blog",
+        "/services",
+        "/careers",
+        "/privacy",
+        "/terms",
+        "/refund",
+        "/tools/gst-calculator",
+        "/tools/compliance-calendar"
+      ];
+      for (const page of staticPages) {
+        xml += `
+  <url>
+    <loc>${baseUrl}${page}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>${page === "" ? "1.0" : "0.8"}</priority>
+  </url>`;
+      }
+      for (const category of serviceCategories) {
+        for (const service of category.services) {
+          const serviceSlug = generateSlug2(service);
+          xml += `
+  <url>
+    <loc>${baseUrl}/services/${category.slug}/${serviceSlug}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+        }
+      }
+      try {
+        const blogs = await getAllBlogPosts();
+        for (const blog of blogs) {
+          xml += `
+  <url>
+    <loc>${baseUrl}/blog/${blog.id}</loc>
+    <lastmod>${new Date(blog.created_at || blog.date || Date.now()).toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+        }
+      } catch (dbErr) {
+        console.error("Error fetching blogs for sitemap:", dbErr);
+      }
+      xml += `
+</urlset>`;
+      res.header("Content-Type", "application/xml");
+      res.send(xml);
+    } catch (err) {
+      console.error("Error generating sitemap:", err);
+      res.status(500).end();
+    }
+  });
   app.use("/uploads", express2.static(uploadsDir3));
+  const validRoutePrefixes = [
+    "/services",
+    "/tools",
+    "/blog",
+    "/about",
+    "/careers",
+    "/contact",
+    "/privacy",
+    "/terms",
+    "/refund",
+    "/itr-filing",
+    "/itr-filing-b",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/complete-profile",
+    "/dashboard",
+    "/admin"
+  ];
+  const check404 = (req, res, next) => {
+    if (req.path === "/" || req.path.startsWith("/api/") || req.path.startsWith("/uploads/") || req.path.includes(".")) {
+      return next();
+    }
+    const isValid = validRoutePrefixes.some((prefix) => req.path === prefix || req.path.startsWith(prefix + "/"));
+    if (!isValid) {
+      res.status(404);
+    }
+    next();
+  };
+  app.use(check404);
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -3697,9 +4597,53 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path5.join(process.cwd(), "dist");
-    app.use(express2.static(distPath));
-    app.get("*", (_req, res) => {
-      res.sendFile(path5.join(distPath, "index.html"));
+    app.use(express2.static(distPath, {
+      index: false,
+      setHeaders: (res, pathName) => {
+        if (pathName.includes("/assets/")) {
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        }
+      }
+    }));
+    app.get("*", async (req, res) => {
+      try {
+        let html = await fs5.promises.readFile(path5.join(distPath, "index.html"), "utf8");
+        let title = "Deccan Filings | Start & Grow Your Business in India";
+        let desc = "India's trusted compliance platform for Company Registration, GST, Trademark, and Tax Filings.";
+        if (req.path.startsWith("/services/")) {
+          const parts = req.path.split("/");
+          if (parts.length === 4) {
+            const slug = parts[3];
+            const formattedSlug = slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+            title = `${formattedSlug} Guide | Deccan Filings`;
+            desc = `Expert CA/CS assistance for ${formattedSlug}. Get 100% online compliance and fast processing with Deccan Filings.`;
+          } else {
+            title = "All Services | Deccan Filings";
+            desc = "Browse our complete catalog of business compliance, registration, and tax filing services.";
+          }
+        } else if (req.path.startsWith("/itr-filing")) {
+          title = "Income Tax Return (ITR) Filing | Deccan Filings";
+          desc = "Accurate and compliant ITR filing for individuals, salaried employees, freelancers, and businesses.";
+        } else if (req.path.startsWith("/blog")) {
+          title = "Blog & Updates | Deccan Filings";
+          desc = "Read the latest updates on tax, compliance, and business growth in India.";
+        }
+        html = html.replace(/<title>.*?<\/title>/i, `<title>${title}</title>`);
+        html = html.replace(/<meta property="og:title" content=".*?"\s*\/>/i, `<meta property="og:title" content="${title}" />`);
+        html = html.replace(/<meta name="twitter:title" content=".*?"\s*\/>/i, `<meta name="twitter:title" content="${title}" />`);
+        if (!html.includes('<meta name="description"')) {
+          html = html.replace("</head>", `<meta name="description" content="${desc}" />
+</head>`);
+        } else {
+          html = html.replace(/<meta name="description" content=".*?"\s*\/>/i, `<meta name="description" content="${desc}" />`);
+        }
+        html = html.replace(/<meta property="og:description" content=".*?"\s*\/>/i, `<meta property="og:description" content="${desc}" />`);
+        html = html.replace(/<meta name="twitter:description" content=".*?"\s*\/>/i, `<meta name="twitter:description" content="${desc}" />`);
+        res.send(html);
+      } catch (err) {
+        console.error("SSR Error:", err);
+        res.sendFile(path5.join(distPath, "index.html"));
+      }
     });
   }
   app.use(errorHandler);

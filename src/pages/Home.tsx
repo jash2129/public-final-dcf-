@@ -100,8 +100,8 @@ export default function Home() {
       <section className="bg-dark text-white pt-28 pb-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Abstract background pattern with pulse-glow animations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] rounded-full bg-brand/25 blur-3xl animate-pulse-glow"></div>
-          <div className="absolute top-[45%] -left-[10%] w-[50%] h-[50%] rounded-full bg-secondary/20 blur-3xl animate-pulse-glow animate-float-delayed"></div>
+          <div className="hidden md:block absolute -top-[20%] -right-[10%] w-[70%] h-[70%] rounded-full bg-brand/25 blur-3xl animate-pulse-glow"></div>
+          <div className="hidden md:block absolute top-[45%] -left-[10%] w-[50%] h-[50%] rounded-full bg-secondary/20 blur-3xl animate-pulse-glow animate-float-delayed"></div>
           
           {/* Grid Pattern */}
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwczovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIHN0cm9rZT0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjA1KSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMCA0MGg0MFYwSDB6Ii8+PC9nPjwvc3ZnPg==')] opacity-20"></div>
@@ -283,7 +283,7 @@ export default function Home() {
             </motion.div>
             
             {/* Glowing blur ball behind card */}
-            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-secondary/30 rounded-full blur-2xl -z-10 animate-pulse-glow"></div>
+            <div className="hidden md:block absolute -bottom-6 -left-6 w-32 h-32 bg-secondary/30 rounded-full blur-2xl -z-10 animate-pulse-glow"></div>
           </div>
         </div>
       </section>

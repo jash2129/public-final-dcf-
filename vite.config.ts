@@ -24,10 +24,21 @@ export default defineConfig(({mode}) => {
       allowedHosts: true,
     },
     build: {
+      target: 'es2022',
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+        },
+      },
       rollupOptions: {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+                return 'vendor-react';
+              }
               if (id.includes('recharts') || id.includes('d3')) {
                 return 'vendor-recharts';
               }

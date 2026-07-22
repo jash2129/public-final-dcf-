@@ -177,6 +177,7 @@ export default function ComplianceCalendar() {
       <Helmet>
         <title>Compliance Calendar 2026 | Deccan Filings</title>
         <meta name="description" content="Stay ahead of your statutory deadlines with our interactive Compliance Calendar 2026. Track GST, TDS, Payroll, and other statutory filings for your business." />
+        <link rel="canonical" href="https://deccanfilings.com/tools/compliance-calendar" />
       </Helmet>
       
       <div className="max-w-7xl mx-auto">
@@ -265,10 +266,10 @@ export default function ComplianceCalendar() {
           {/* Summary Sidebar */}
           <div className={`lg:col-span-3 space-y-6 order-2 lg:order-1 ${viewMode === 'schedule' ? 'hidden lg:block' : ''}`}>
             <div className="glass dark:glass-dark p-8 rounded-[32px] shadow-soft">
-              <h3 className="font-bold text-dark mb-6 flex items-center gap-2 text-lg">
+              <h2 className="font-bold text-dark mb-6 flex items-center gap-2 text-lg">
                 <Info className="h-5 w-5 text-secondary" />
                 Month Summary
-              </h3>
+              </h2>
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
                 <StatItem label="GST Filings" count={monthStats.gst} color="blue" />
                 <StatItem label="TDS Payments" count={monthStats.tds} color="purple" />
@@ -283,7 +284,7 @@ export default function ComplianceCalendar() {
             {!isAdmin && (
               <div className="bg-dark text-white p-8 rounded-[32px] shadow-premium relative overflow-hidden group">
                 <div className="absolute -top-12 -right-12 w-32 h-32 bg-brand rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                <h3 className="font-bold text-xl mb-3 relative z-10">Expert Help</h3>
+                <h2 className="font-bold text-xl mb-3 relative z-10">Expert Help</h2>
                 <p className="text-slate-400 text-sm mb-6 leading-relaxed relative z-10">
                   Let our compliance experts handle your filings while you grow.
                 </p>
@@ -411,9 +412,9 @@ export default function ComplianceCalendar() {
                           className="md:hidden bg-slate-50 border-t border-slate-100 p-4"
                         >
                           <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-sm font-black text-dark uppercase tracking-wider">
+                            <h3 className="text-sm font-black text-dark uppercase tracking-wider">
                               {monthData.name} {selectedDay}, 2026
-                            </h4>
+                            </h3>
                             <button onClick={() => setSelectedDay(null)} className="text-[10px] font-bold text-slate-400">Close</button>
                           </div>
                           {selectedTask ? (

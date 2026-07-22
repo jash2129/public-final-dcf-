@@ -52,9 +52,9 @@ export default function ForgotPassword() {
           </Link>
 
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-dark mb-2">
+            <h1 className="text-3xl font-bold tracking-tight text-dark mb-2">
               Forgot Password
-            </h2>
+            </h1>
             <p className="text-dark-400">
               Enter the email address associated with your account, and we will send you a link to reset your password.
             </p>
@@ -144,10 +144,10 @@ export default function ForgotPassword() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
               Secure access to your compliance <br />
               <span className="text-brand">simplified.</span>
-            </h3>
+            </h2>
             <p className="text-slate-300 text-lg leading-relaxed max-w-md">
               Need assistance? Our dedicated support team is always available to help recover your account securely.
             </p>

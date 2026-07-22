@@ -6,6 +6,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import fs from "fs";
 import helmet from "helmet";
+import compression from "compression";
 import { setupDatabase } from "./server/db";
 import { initScheduler } from "./server/services/scheduler.service";
 
@@ -97,6 +98,7 @@ async function startServer() {
   app.use('/api/webhooks', webhookRoutes);
 
   // JSON and URL-encoded body parser limits
+  app.use(compression());
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -199,8 +201,7 @@ async function startServer() {
       const staticPages = [
         '', '/about', '/contact', '/blog', '/services',
         '/careers', '/privacy', '/terms', '/refund',
-        '/tools/gst-calculator', '/tools/compliance-calendar',
-        '/itr-filing', '/itr-filing-b'
+        '/tools/gst-calculator', '/tools/compliance-calendar'
       ];
 
       for (const page of staticPages) {
@@ -290,9 +291,59 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    app.use(express.static(distPath, { 
+      index: false,
+      setHeaders: (res, pathName) => {
+        if (pathName.includes('/assets/')) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      }
+    })); // Prevent static index.html serving
+    
+    app.get('*', async (req, res) => {
+      try {
+        let html = await fs.promises.readFile(path.join(distPath, 'index.html'), 'utf8');
+        
+        let title = 'Deccan Filings | Start & Grow Your Business in India';
+        let desc = "India's trusted compliance platform for Company Registration, GST, Trademark, and Tax Filings.";
+        
+        if (req.path.startsWith('/services/')) {
+          const parts = req.path.split('/');
+          if (parts.length === 4) {
+            const slug = parts[3];
+            const formattedSlug = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            title = `${formattedSlug} Guide | Deccan Filings`;
+            desc = `Expert CA/CS assistance for ${formattedSlug}. Get 100% online compliance and fast processing with Deccan Filings.`;
+          } else {
+            title = 'All Services | Deccan Filings';
+            desc = 'Browse our complete catalog of business compliance, registration, and tax filing services.';
+          }
+        } else if (req.path.startsWith('/itr-filing')) {
+          title = 'Income Tax Return (ITR) Filing | Deccan Filings';
+          desc = 'Accurate and compliant ITR filing for individuals, salaried employees, freelancers, and businesses.';
+        } else if (req.path.startsWith('/blog')) {
+          title = 'Blog & Updates | Deccan Filings';
+          desc = 'Read the latest updates on tax, compliance, and business growth in India.';
+        }
+        
+        // Inject SSR Metadata
+        html = html.replace(/<title>.*?<\/title>/i, `<title>${title}</title>`);
+        html = html.replace(/<meta property="og:title" content=".*?"\s*\/>/i, `<meta property="og:title" content="${title}" />`);
+        html = html.replace(/<meta name="twitter:title" content=".*?"\s*\/>/i, `<meta name="twitter:title" content="${title}" />`);
+        
+        if (!html.includes('<meta name="description"')) {
+          html = html.replace('</head>', `<meta name="description" content="${desc}" />\n</head>`);
+        } else {
+          html = html.replace(/<meta name="description" content=".*?"\s*\/>/i, `<meta name="description" content="${desc}" />`);
+        }
+        html = html.replace(/<meta property="og:description" content=".*?"\s*\/>/i, `<meta property="og:description" content="${desc}" />`);
+        html = html.replace(/<meta name="twitter:description" content=".*?"\s*\/>/i, `<meta name="twitter:description" content="${desc}" />`);
+        
+        res.send(html);
+      } catch (err) {
+        console.error('SSR Error:', err);
+        res.sendFile(path.join(distPath, 'index.html'));
+      }
     });
   }
 

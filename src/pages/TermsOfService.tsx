@@ -1,8 +1,13 @@
 import { FileCheck, AlertCircle, Scale, Gavel } from 'lucide-react';
+import SEO from '../components/SEO';
 
 export default function TermsOfService() {
   return (
     <div className="bg-slate-50 min-h-screen py-20 px-4 sm:px-6 lg:px-8">
+      <SEO 
+        title="Terms of Service | Deccan Filings" 
+        description="Read the terms and conditions governing the use of Deccan Filings services for your business and legal compliance."
+      />
       <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="bg-dark p-12 text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-64 h-64 bg-secondary/10 blur-3xl rounded-full -translate-y-1/2 -translate-x-1/2"></div>

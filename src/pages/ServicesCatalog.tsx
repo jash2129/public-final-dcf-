@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import SEO from '../components/SEO';
 import { Building2, ArrowRight, FileText, Briefcase, CheckCircle, Globe, Scale, BookOpen, Calculator, Wallet, Search, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { serviceCategories, generateSlug } from '../data/services';
@@ -143,6 +144,7 @@ export default function ServicesCatalog() {
 
   return (
     <div className="bg-background min-h-screen py-12 md:py-20 relative overflow-hidden">
+      <SEO title="All Services | Deccan Filings" description="Browse our complete catalog of business compliance, registration, and tax filing services." />
       {/* Background Pattern */}
       <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
       

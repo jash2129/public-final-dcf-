@@ -252,6 +252,7 @@ export default function ItrLandingPageB() {
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F0E0E] text-[#0F172A] dark:text-[#F8F6F0] font-sans antialiased overflow-x-hidden">
       <Helmet>
         <title>File Your ITR in 24 Hours & Maximize Your Tax Refund | Deccan Filings</title>
+        <meta name="robots" content="noindex" />
         <meta
           name="description"
           content="Get a dedicated Chartered Accountant to optimize your tax regime, claim every legal deduction, and file your ITR securely today. 100% error-free. ISO 27001 certified."
@@ -261,6 +262,11 @@ export default function ItrLandingPageB() {
           property="og:description"
           content="Skip the confusing government portal. Expert CA assistance. 24-hour filing. Max refund guarantee."
         />
+        <link rel="canonical" href="https://deccanfilings.com/itr-filing" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="File Your ITR in 24 Hours & Maximize Your Tax Refund | Deccan Filings" />
+        <meta name="twitter:description" content="Get a dedicated Chartered Accountant to optimize your tax regime, claim every legal deduction, and file your ITR securely today. 100% error-free. ISO 27001 certified." />
+        <meta name="twitter:image" content="https://deccanfilings.com/og-image.jpg" />
       </Helmet>
 
       {/* ══════════════════════════════════════════════════
@@ -283,14 +289,19 @@ export default function ItrLandingPageB() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex justify-between items-center">
           {/* Brand */}
           <div className="flex items-center gap-2.5">
-            <img
-              src="/logo.png"
-              alt="Deccan Filings"
-              className="h-8 sm:h-10 w-auto object-contain"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = 'none';
-              }}
-            />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img
+                src="/logo.png"
+                alt="Deccan Filings"
+                width="160"
+                height="40"
+                className="h-8 sm:h-10 w-auto object-contain"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).classList.add('hidden');
+                }}
+              />
+            </picture>
             <span className="font-black text-lg sm:text-xl text-[#0F172A] tracking-tight hidden xs:block">
               Deccan Filings
             </span>
@@ -1135,7 +1146,10 @@ export default function ItrLandingPageB() {
         <div className="max-w-5xl mx-auto space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="Deccan Filings" className="h-8 w-auto object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+              <picture>
+                <source srcSet="/logo.webp" type="image/webp" />
+                <img src="/logo.png" alt="Deccan Filings" width="128" height="32" className="h-8 w-auto object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).classList.add('hidden'); }} />
+              </picture>
               <span className="font-black text-white text-base">Deccan Filings</span>
             </div>
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500 justify-center">
@@ -1189,8 +1203,7 @@ export default function ItrLandingPageB() {
       ══════════════════════════════════════════════════ */}
       <div
         className={`fixed bottom-0 left-0 w-full md:hidden z-40 transition-all duration-500 ${showStickyBar ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
-          }`}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          } pb-safe`}
       >
         <div className="bg-white/95 dark:bg-[#171514]/95 backdrop-blur-md border-t border-slate-200 dark:border-[#242220] shadow-[0_-8px_30px_rgba(0,0,0,0.10)] p-3 flex items-center justify-between gap-3">
           <div className="text-left pl-1 min-w-0">

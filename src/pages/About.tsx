@@ -23,6 +23,7 @@ export default function About() {
       <Helmet>
         <title>About Us | Deccan Filings - Our Mission & Team</title>
         <meta name="description" content="Learn about Deccan Filings, India's leading cloud-based business services platform. Our mission is to empower entrepreneurs through technology and expertise." />
+        <link rel="canonical" href="https://deccanfilings.com/about" />
       </Helmet>
       {/* Hero Section */}
       <section className="relative py-24 bg-dark overflow-hidden">

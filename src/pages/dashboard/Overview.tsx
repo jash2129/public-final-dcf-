@@ -197,7 +197,7 @@ export default function Overview() {
           <div className="clean-card-premium rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-slate-200/50 flex justify-between items-center">
               <h2 className="font-bold text-lg text-dark">Recent Orders</h2>
-              <Link to="/dashboard/orders" className="text-sm font-bold text-dark hover:text-secondary transition-colors">View All</Link>
+              <Link to="/dashboard/orders" className="text-sm font-bold text-dark hover:text-secondary transition-colors">View All Orders</Link>
             </div>
             <div className="divide-y divide-slate-100">
               {recentOrders.length === 0 ? (

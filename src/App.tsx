@@ -3,60 +3,63 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PublicLayout from './components/layout/PublicLayout';
 import ScrollToTop from './components/layout/ScrollToTop';
 import DashboardLayout from './components/layout/DashboardLayout';
-import Home from './pages/Home';
-import ServicePage from './pages/ServicePage';
-import ServicesCatalog from './pages/ServicesCatalog';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import CompleteProfile from './pages/CompleteProfile';
-import DashboardOverview from './pages/dashboard/Overview';
-import DashboardOrders from './pages/dashboard/Orders';
-import DashboardDocuments from './pages/dashboard/Documents';
-import DashboardCompliance from './pages/dashboard/Compliance';
-import DashboardInvoices from './pages/dashboard/Invoices';
-import DashboardSettings from './pages/dashboard/Settings';
-import Blog from './pages/Blog';
-import BlogPostDetail from './pages/BlogPostDetail';
-import Careers from './pages/Careers';
-import Contact from './pages/Contact';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsOfService from './pages/TermsOfService';
-import RefundPolicy from './pages/RefundPolicy';
-import NotFound from './pages/NotFound';
+const Home = lazy(() => import('./pages/Home'));
+const ServicePage = lazy(() => import('./pages/ServicePage'));
+const ServicesCatalog = lazy(() => import('./pages/ServicesCatalog'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const CompleteProfile = lazy(() => import('./pages/CompleteProfile'));
+const DashboardOverview = lazy(() => import('./pages/dashboard/Overview'));
+const DashboardOrders = lazy(() => import('./pages/dashboard/Orders'));
+const DashboardDocuments = lazy(() => import('./pages/dashboard/Documents'));
+const DashboardCompliance = lazy(() => import('./pages/dashboard/Compliance'));
+const DashboardInvoices = lazy(() => import('./pages/dashboard/Invoices'));
+const DashboardSettings = lazy(() => import('./pages/dashboard/Settings'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPostDetail = lazy(() => import('./pages/BlogPostDetail'));
+const Careers = lazy(() => import('./pages/Careers'));
+const Contact = lazy(() => import('./pages/Contact'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import AdminOverview from './pages/admin/Overview';
-import AdminOrders from './pages/admin/Orders';
-import AdminCompliance from './pages/admin/Compliance';
-import ManageAdmins from './pages/admin/ManageAdmins';
-import AdminDocuments from './pages/admin/Documents';
-import ActivityLog from './pages/admin/ActivityLog';
-import AdminServices from './pages/admin/Services';
-import AdminCoupons from './pages/admin/Coupons';
-import UserDetail from './pages/admin/UserDetail';
-import About from './pages/About';
-import GSTCalculator from './pages/tools/GSTCalculator';
-import ComplianceCalendar from './pages/tools/ComplianceCalendar';
-import ItrLandingPage from './pages/ItrLandingPage';
-import ItrLandingPageB from './pages/ItrLandingPageB';
+const AdminOverview = lazy(() => import('./pages/admin/Overview'));
+const AdminOrders = lazy(() => import('./pages/admin/Orders'));
+const AdminCompliance = lazy(() => import('./pages/admin/Compliance'));
+const ManageAdmins = lazy(() => import('./pages/admin/ManageAdmins'));
+const AdminDocuments = lazy(() => import('./pages/admin/Documents'));
+const ActivityLog = lazy(() => import('./pages/admin/ActivityLog'));
+const AdminServices = lazy(() => import('./pages/admin/Services'));
+const AdminCoupons = lazy(() => import('./pages/admin/Coupons'));
+const UserDetail = lazy(() => import('./pages/admin/UserDetail'));
+const About = lazy(() => import('./pages/About'));
+const GSTCalculator = lazy(() => import('./pages/tools/GSTCalculator'));
+const ComplianceCalendar = lazy(() => import('./pages/tools/ComplianceCalendar'));
+const ItrLandingPage = lazy(() => import('./pages/ItrLandingPage'));
+const ItrLandingPageB = lazy(() => import('./pages/ItrLandingPageB'));
 
 
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Routes>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div></div>}>
+          <Routes>
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<ServicesCatalog />} />
           <Route path="/services/:category/:slug" element={<ServicePage />} />
           <Route path="/tools/compliance-calendar" element={<ComplianceCalendar />} />
+          <Route path="/tools/gst-calculator" element={<GSTCalculator />} />
           <Route path="/tools" element={<div className="p-20 text-center text-2xl font-bold">Tools Page</div>} />
 
           <Route path="/blog" element={<Blog />} />
@@ -143,6 +146,7 @@ export default function App() {
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+          </Suspense>
     </BrowserRouter>
   );
 }

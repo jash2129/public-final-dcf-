@@ -287,14 +287,17 @@ export default function PublicLayout() {
           <div className="flex justify-between h-20">
             <div className="flex items-center flex-shrink-0">
               <Link to="/" className="flex items-center group flex-shrink-0">
-                <img 
-                  src="/logo.png" 
-                  alt="Deccan Filings"
-                  loading="lazy"
-                  width="180"
-                  height="45"
-                  className="h-14 lg:h-16 2xl:h-20 w-auto group-hover:scale-105 transition-transform duration-300"
-                />
+                <picture>
+                  <source srcSet="/logo.webp" type="image/webp" />
+                  <img 
+                    src="/logo.png" 
+                    alt="Deccan Filings"
+                    fetchpriority="high"
+                    width="180"
+                    height="45"
+                    className="h-14 lg:h-16 2xl:h-20 w-auto group-hover:scale-105 transition-transform duration-300"
+                  />
+                </picture>
               </Link>
             </div>
             
@@ -580,14 +583,17 @@ export default function PublicLayout() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
             <div className="lg:col-span-2 pr-8">
               <div className="inline-flex items-center mb-6 bg-white p-3.5 rounded-2xl shadow-sm">
-                <img 
-                  src="/logo.png" 
-                  alt="Deccan Filings Footer Logo" 
-                  width="160"
-                  height="40"
-                  loading="lazy"
-                  className="h-12 w-auto object-contain" 
-                />
+                <picture>
+                  <source srcSet="/logo.webp" type="image/webp" />
+                  <img 
+                    src="/logo.png" 
+                    alt="Deccan Filings Footer Logo" 
+                    loading="lazy"
+                    width="160"
+                    height="40"
+                    className="h-12 w-auto object-contain" 
+                  />
+                </picture>
               </div>
               <p className="text-sm text-slate-400 mb-6 leading-relaxed">
                 Deccan Filings is India's largest cloud-based business services platform dedicated to helping Entrepreneurs easily start and grow their business, at an affordable cost.
@@ -611,26 +617,12 @@ export default function PublicLayout() {
             {/* Footer Links */}
             {serviceCategories.slice(0, 5).map((category) => (
               <div key={category.title}>
-                <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-wider">{category.title}</h3>
-                <ul className="space-y-2.5 text-sm">
-                  {category.services.slice(0, 4).map(service => (
-                    <li key={service}>
-                      <Link 
-                        to={`/services/${category.slug}/${generateSlug(service)}`} 
-                        className="text-slate-400 hover:text-brand transition-colors relative py-0.5 inline-block after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-brand after:transition-transform after:duration-300 hover:after:scale-x-100"
-                      >
-                        {service}
-                      </Link>
-                    </li>
-                  ))}
-                  {category.services.length > 4 && (
-                    <li>
-                      <Link to={`/services#${category.slug}`} className="text-secondary hover:text-secondary-hover font-bold inline-block">
-                        View all &rarr;
-                      </Link>
-                    </li>
-                  )}
-                </ul>
+                <Link to={`/services#${category.slug}`} className="font-bold text-white mb-2 uppercase text-xs tracking-wider hover:text-brand transition-colors inline-block">
+                  {category.title}
+                </Link>
+                <p className="text-sm text-slate-400 leading-relaxed pr-4">
+                  Explore our complete range of {category.title.toLowerCase()} services to keep your business compliant.
+                </p>
               </div>
             ))}
           </div>
@@ -661,11 +653,16 @@ export default function PublicLayout() {
             </div>
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               {[
+                { name: 'Company Registration', path: '/services/startup-registrations/private-limited-company-registration' },
+                { name: 'GST Registration', path: '/services/gst/gst-registration' },
+                { name: 'Trademark Registration', path: '/services/trademark/trademark-registration-indian' },
+                { name: 'ITR Filing', path: '/itr-filing' },
                 { name: 'Blog', path: '/blog' },
                 { name: 'Careers', path: '/careers' },
                 { name: 'Privacy Policy', path: '/privacy' },
                 { name: 'Terms of Service', path: '/terms' },
-                { name: 'Refund Policy', path: '/refund' }
+                { name: 'Refund Policy', path: '/refund' },
+                { name: 'GST Calculator', path: '/tools/gst-calculator' }
               ].map(link => (
                 <Link
                   key={link.name}
@@ -685,6 +682,9 @@ export default function PublicLayout() {
               </a>
               <a href="https://www.linkedin.com/company/135255953/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="LinkedIn">
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              </a>
+              <a href="https://twitter.com/deccan_filings" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="X (Twitter)">
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
               <a href="https://www.facebook.com/profile.php?id=61590411898154" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="Facebook">
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>

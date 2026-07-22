@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import SEO from '../../components/SEO';
 import { 
   Calculator, 
   IndianRupee, 
@@ -74,6 +75,7 @@ export default function GSTCalculator() {
 
   return (
     <div className="max-w-6xl mx-auto py-6">
+      <SEO title="GST Interest Calculator | Deccan Filings" description="Calculate your GST late payment interest and liability easily online." />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-dark flex items-center gap-3">
