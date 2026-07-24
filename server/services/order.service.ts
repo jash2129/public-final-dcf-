@@ -169,10 +169,12 @@ async function triggerOrderNotification(userId: number, orderId: string, service
     const order = await orderModel.findOrderById(orderId);
     const finalAmount = order ? order.total_amount : (amount * 1.18);
     if (user) {
+      const phone = (user as any).whatsapp_number || user.phone || null;
+      console.log(`[NOTIFY] Order placement notification for user ${userId}. phone='${phone}'`);
       await notifyOrderPlacement(
         orderId,
         user.email,
-        user.phone || '',
+        phone || '',
         user.name,
         serviceName,
         finalAmount,
@@ -191,11 +193,13 @@ async function triggerStatusChangeNotification(userId: number, orderId: string, 
   try {
     const user = await userModel.findUserById(userId);
     if (user) {
+      const phone = (user as any).whatsapp_number || user.phone || null;
+      console.log(`[NOTIFY] Status change notification for order ${orderId}, user ${userId}. phone='${phone}', status='${status}'`);
       await notifyOrderStatusChange(
         orderId,
         status,
         user.email,
-        user.phone || '',
+        phone || '',
         user.name,
         userId
       );

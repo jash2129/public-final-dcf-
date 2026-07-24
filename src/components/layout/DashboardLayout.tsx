@@ -108,7 +108,7 @@ export default function DashboardLayout() {
 
   if (user.role === 'super_admin') {
     adminNavItems.push({ name: 'Manage Admins', path: '/admin/users', icon: User });
-    adminNavItems.push({ name: 'Activity Log', path: '/admin/activity', icon: FileText });
+    adminNavItems.push({ name: 'Activity Log', path: '/admin/users/activity', icon: FileText });
   }
 
   const getPageTitle = () => {
@@ -146,12 +146,16 @@ export default function DashboardLayout() {
               <img 
                 src="/logo-icon.png" 
                 alt="DF" 
+                width="48"
+                height="48"
                 className="h-12 w-12 object-contain group-hover:scale-110 transition-transform duration-300" 
               />
             ) : (
               <img 
                 src="/logo.png" 
                 alt="Deccan Filings" 
+                width="180"
+                height="64"
                 className="h-16 w-auto object-contain group-hover:scale-105 transition-transform duration-300" 
               />
             )}

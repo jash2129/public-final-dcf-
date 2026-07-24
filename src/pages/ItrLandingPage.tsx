@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Star, AlertCircle, Phone, ArrowRight, ShieldCheck, MessageSquare, Users, IndianRupee, User, Mail, Sparkles, Clock, Lock } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import Footer from '../components/layout/Footer';
 import { serviceCategories, generateSlug } from '../data/services';
 
 export default function ItrLandingPage() {
@@ -586,102 +587,7 @@ export default function ItrLandingPage() {
         </div>
       </section>
 
-      {/* Footer Section */}
-      <footer className="bg-gradient-to-b from-dark via-dark-100 to-black text-slate-300 pt-16 pb-8 border-t border-brand/10 relative overflow-hidden">
-        {/* Glowing bottom accent line */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand/20 to-transparent"></div>
-
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12 text-left">
-            <div className="lg:col-span-2 pr-8">
-              <div className="inline-flex items-center mb-6 bg-white p-3.5 rounded-2xl shadow-sm">
-                <picture>
-                  <source srcSet="/logo.webp" type="image/webp" />
-                  <img 
-                    src="/logo.png" 
-                    alt="Deccan Filings" 
-                    width="160"
-                    height="48"
-                    className="h-12 w-auto object-contain" 
-                  />
-                </picture>
-              </div>
-              <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                Deccan Filings is India's largest cloud-based business services platform dedicated to helping Entrepreneurs easily start and grow their business, at an affordable cost.
-              </p>
-              <div className="space-y-2 text-sm text-slate-400">
-                <p className="flex items-center gap-2 flex-wrap">
-                  <Phone className="h-4 w-4 text-brand" />
-                  <a href="tel:+919000930453" className="hover:text-brand transition-colors">+91 90009 30453</a>
-                  <span className="text-slate-600">/</span>
-                  <a href="tel:+919000243270" className="hover:text-brand transition-colors">+91 90002 43270</a>
-                </p>
-                <p className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-brand" />
-                  <a href="mailto:support@deccanfilings.com" className="hover:text-brand transition-colors">
-                    support@deccanfilings.com
-                  </a>
-                </p>
-              </div>
-            </div>
-            
-            {/* Footer Links */}
-            {serviceCategories.slice(0, 5).map((category) => (
-              <div key={category.title}>
-                <Link to={`/services#${category.slug}`} className="font-bold text-white mb-2 uppercase text-xs tracking-wider hover:text-brand transition-colors inline-block">
-                  {category.title}
-                </Link>
-                <p className="text-sm text-slate-400 leading-relaxed pr-4">
-                  Explore our complete range of {category.title.toLowerCase()} services to keep your business compliant.
-                </p>
-              </div>
-            ))}
-          </div>
-          
-          {/* ── Regulatory & Policy Disclaimer ── */}
-          <div className="border-t border-slate-800/40 pt-6 pb-6">
-            <p className="text-[11px] leading-relaxed text-slate-500 text-center md:text-left">
-              <span className="font-semibold text-slate-400">Disclaimer: </span>
-              Deccan Filings is an independent, private CA-assisted professional services platform operated by{' '}
-              <strong className="text-slate-300">TOR BUSINESS SOLUTIONS PRIVATE LIMITED</strong>. We are{' '}
-              <strong className="text-slate-300">not affiliated with, endorsed by, or an official portal of</strong> the Income Tax
-              Department of India, the Ministry of Corporate Affairs (MCA), the Registrar of Companies (RoC), or any other
-              government authority. All third-party brand names, trademarks, logos, and government portal names referenced on
-              this website are the property of their respective owners and are used solely for identification and descriptive
-              purposes. Our professional service and consultation fees are{' '}
-              <strong className="text-slate-300">entirely separate</strong> from any mandatory government filing fees,
-              statutory dues, or taxes payable to government departments, which remain the sole responsibility of the
-              applicant. Deccan Filings does not guarantee specific government processing timelines, approval outcomes, tax
-              refund amounts, or results, as these are determined solely by the relevant government authority.
-            </p>
-          </div>
-
-          {/* ── Copyright & Links ── */}
-          <div className="border-t border-slate-800/40 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-            <div className="text-center md:text-left space-y-1">
-              <p>© 2026 Deccan Filings. All rights reserved.</p>
-              <p>Deccan Filings is a brand owned and operated by <strong className="text-white">TOR BUSINESS SOLUTIONS PRIVATE LIMITED.</strong></p>
-            </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              {[
-                { name: 'Blog', path: '/blog' },
-                { name: 'Careers', path: '/careers' },
-                { name: 'Privacy Policy', path: '/privacy' },
-                { name: 'Terms of Service', path: '/terms' },
-                { name: 'Refund Policy', path: '/refund' }
-              ].map(link => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className="hover:text-white transition-colors relative py-0.5 inline-block after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Mobile Sticky CTA Bar */}
       <div

@@ -2,8 +2,8 @@ import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronDown, MessageSquare, Search, Phone, User, ChevronRight, ArrowRight, Sun, Moon, Calendar as CalendarIcon } from 'lucide-react';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { serviceCategories, generateSlug } from '../../data/services';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
+import Footer from './Footer';
 
 interface SearchResult {
   id?: number | string;
@@ -160,9 +160,9 @@ export default function PublicLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-white font-sans text-dark overflow-x-hidden">
       {/* Search Overlay */}
-      <AnimatePresence>
+      
         {isSearchOpen && (
-          <motion.div 
+          <div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -172,6 +172,7 @@ export default function PublicLayout() {
               <button 
                 onClick={() => setIsSearchOpen(false)}
                 className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                aria-label="Close Search"
               >
                 <X className="h-6 w-6" />
               </button>
@@ -191,9 +192,9 @@ export default function PublicLayout() {
               </form>
 
               {searchQuery.trim().length > 0 && (
-                <motion.div 
+                <div 
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  
                   className="mt-4 bg-white rounded-2xl shadow-2xl overflow-hidden"
                 >
                   {searchResults.length > 0 ? (
@@ -257,12 +258,12 @@ export default function PublicLayout() {
                       </Link>
                     </div>
                   )}
-                </motion.div>
+                </div>
               )}
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      
 
       {/* Top Bar */}
       <div className="bg-dark-200 text-brand-lightest py-1.5 px-4 sm:px-6 lg:px-8 text-xs flex justify-between items-center hidden md:flex">
@@ -335,7 +336,7 @@ export default function PublicLayout() {
                     {/* Middle and Right Column Service Items */}
                     <div className="col-span-8 flex flex-col justify-between">
                       <div className="grid grid-cols-2 gap-x-6 gap-y-3.5">
-                        {category.services.slice(0, 5).map((service) => (
+                        {category.services.map((service) => (
                           <Link 
                             key={service} 
                             to={`/services/${category.slug}/${generateSlug(service)}`} 
@@ -374,8 +375,8 @@ export default function PublicLayout() {
                         </button>
                         
                         {/* Sub dropdown with slide-in transition */}
-                        <div className="absolute right-full top-0 mr-1 w-64 bg-white border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover/sub:opacity-100 group-hover/sub:pointer-events-auto transform -translate-x-4 group-hover/sub:translate-x-0 transition-all duration-300 z-50">
-                          {category.services.slice(0, 5).map((service) => (
+                        <div className="absolute right-full top-0 mr-1 w-64 max-h-[70vh] overflow-y-auto overflow-x-hidden bg-white border border-slate-200/60 shadow-2xl rounded-2xl py-4 opacity-0 pointer-events-none group-hover/sub:opacity-100 group-hover/sub:pointer-events-auto transform -translate-x-4 group-hover/sub:translate-x-0 transition-all duration-300 z-50">
+                          {category.services.map((service) => (
                             <Link 
                               key={service} 
                               to={`/services/${category.slug}/${generateSlug(service)}`} 
@@ -411,6 +412,7 @@ export default function PublicLayout() {
                 onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
                 className="p-2 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-xl transition-all duration-300 relative group flex items-center justify-center cursor-pointer"
                 title={`Switch to ${resolvedTheme === 'light' ? 'Dark' : 'Light'} Mode`}
+                aria-label={`Switch to ${resolvedTheme === 'light' ? 'Dark' : 'Light'} Mode`}
               >
                 {resolvedTheme === 'light' ? (
                   <Moon className="h-5 w-5 transition-transform group-hover:rotate-12" />
@@ -432,6 +434,7 @@ export default function PublicLayout() {
               <button 
                 onClick={() => setIsSearchOpen(true)}
                 className="text-dark-400 hover:text-secondary p-3 md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Search mobile"
               >
                 <Search className="h-5 w-5" />
               </button>
@@ -441,6 +444,7 @@ export default function PublicLayout() {
                   if (isMenuOpen) setTimeout(() => setActiveMobileCategory(null), 300);
                 }} 
                 className="text-dark-400 p-3 bg-slate-100 rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               >
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -449,11 +453,11 @@ export default function PublicLayout() {
         </div>
 
         {/* Mobile Menu (Drill-down) */}
-        <AnimatePresence>
+        
           {isMenuOpen && (
-            <motion.div 
+            <div 
               initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
+              
               exit={{ opacity: 0, y: -10 }}
               className="xl:hidden bg-white border-b border-slate-200 absolute top-full left-0 w-full overflow-hidden shadow-xl h-[calc(100vh-80px)]"
             >
@@ -526,6 +530,7 @@ export default function PublicLayout() {
                     <button 
                       onClick={() => setActiveMobileCategory(null)}
                       className="p-2 -ml-2 hover:bg-slate-100 rounded-full transition-colors"
+                      aria-label="Back to categories"
                     >
                       <ChevronRight className="h-6 w-6 text-dark rotate-180" />
                     </button>
@@ -564,9 +569,9 @@ export default function PublicLayout() {
                 </div>
 
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        
       </header>
 
       {/* Main Content */}
@@ -574,125 +579,7 @@ export default function PublicLayout() {
         <Outlet />
       </main>
 
-      {/* Footer Redesign with premium dark gradient and underline hovers */}
-      <footer className="bg-gradient-to-b from-dark via-dark-100 to-black text-slate-300 pt-16 pb-8 border-t border-brand/10 relative overflow-hidden">
-        {/* Glowing bottom accent line */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand/20 to-transparent"></div>
-
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-            <div className="lg:col-span-2 pr-8">
-              <div className="inline-flex items-center mb-6 bg-white p-3.5 rounded-2xl shadow-sm">
-                <picture>
-                  <source srcSet="/logo.webp" type="image/webp" />
-                  <img 
-                    src="/logo.png" 
-                    alt="Deccan Filings Footer Logo" 
-                    loading="lazy"
-                    width="160"
-                    height="40"
-                    className="h-12 w-auto object-contain" 
-                  />
-                </picture>
-              </div>
-              <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                Deccan Filings is India's largest cloud-based business services platform dedicated to helping Entrepreneurs easily start and grow their business, at an affordable cost.
-              </p>
-              <div className="space-y-2 text-sm text-slate-400">
-                <p className="flex items-center gap-2 flex-wrap">
-                  <Phone className="h-4 w-4 text-brand" />
-                  <a href="tel:+919000930453" className="hover:text-brand transition-colors">+91 90009 30453</a>
-                  <span className="text-slate-600">/</span>
-                  <a href="tel:+919000243270" className="hover:text-brand transition-colors">+91 90002 43270</a>
-                </p>
-                <p className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-brand" />
-                  <a href="mailto:support@deccanfilings.com" className="hover:text-brand transition-colors">
-                    support@deccanfilings.com
-                  </a>
-                </p>
-              </div>
-            </div>
-            
-            {/* Footer Links */}
-            {serviceCategories.slice(0, 5).map((category) => (
-              <div key={category.title}>
-                <Link to={`/services#${category.slug}`} className="font-bold text-white mb-2 uppercase text-xs tracking-wider hover:text-brand transition-colors inline-block">
-                  {category.title}
-                </Link>
-                <p className="text-sm text-slate-400 leading-relaxed pr-4">
-                  Explore our complete range of {category.title.toLowerCase()} services to keep your business compliant.
-                </p>
-              </div>
-            ))}
-          </div>
-          
-          {/* ── Regulatory & Policy Disclaimer ── */}
-          <div className="border-t border-slate-800/40 pt-6 pb-6">
-            <p className="text-[11px] leading-relaxed text-slate-500 text-center md:text-left">
-              <span className="font-semibold text-slate-400">Disclaimer: </span>
-              Deccan Filings is an independent, private CA-assisted professional services platform operated by{' '}
-              <strong className="text-slate-300">TOR BUSINESS SOLUTIONS PRIVATE LIMITED</strong>. We are{' '}
-              <strong className="text-slate-300">not affiliated with, endorsed by, or an official portal of</strong> the Income Tax
-              Department of India, the Ministry of Corporate Affairs (MCA), the Registrar of Companies (RoC), or any other
-              government authority. All third-party brand names, trademarks, logos, and government portal names referenced on
-              this website are the property of their respective owners and are used solely for identification and descriptive
-              purposes. Our professional service and consultation fees are{' '}
-              <strong className="text-slate-300">entirely separate</strong> from any mandatory government filing fees,
-              statutory dues, or taxes payable to government departments, which remain the sole responsibility of the
-              applicant. Deccan Filings does not guarantee specific government processing timelines, approval outcomes, tax
-              refund amounts, or results, as these are determined solely by the relevant government authority.
-            </p>
-          </div>
-
-          {/* ── Copyright & Links ── */}
-          <div className="border-t border-slate-800/40 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-            <div className="text-center md:text-left space-y-1">
-              <p>© 2026 Deccan Filings. All rights reserved.</p>
-              <p>Deccan Filings is a brand owned and operated by <strong className="text-white">TOR BUSINESS SOLUTIONS PRIVATE LIMITED.</strong></p>
-            </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              {[
-                { name: 'Company Registration', path: '/services/startup-registrations/private-limited-company-registration' },
-                { name: 'GST Registration', path: '/services/gst/gst-registration' },
-                { name: 'Trademark Registration', path: '/services/trademark/trademark-registration-indian' },
-                { name: 'ITR Filing', path: '/itr-filing' },
-                { name: 'Blog', path: '/blog' },
-                { name: 'Careers', path: '/careers' },
-                { name: 'Privacy Policy', path: '/privacy' },
-                { name: 'Terms of Service', path: '/terms' },
-                { name: 'Refund Policy', path: '/refund' },
-                { name: 'GST Calculator', path: '/tools/gst-calculator' }
-              ].map(link => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className="hover:text-white transition-colors relative py-0.5 inline-block after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-            <div className="flex gap-4 items-center">
-              <a href="https://www.youtube.com/@Deccanfilings" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="YouTube">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-              </a>
-              <a href="https://www.instagram.com/deccan_filings/?hl=en" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="Instagram">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-              </a>
-              <a href="https://www.linkedin.com/company/135255953/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="LinkedIn">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-              </a>
-              <a href="https://twitter.com/deccan_filings" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="X (Twitter)">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              </a>
-              <a href="https://www.facebook.com/profile.php?id=61590411898154" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" aria-label="Facebook">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Sticky Contact CTA (Mobile Only) */}
       <div className="fixed bottom-0 left-0 w-full p-4 md:hidden z-40 bg-gradient-to-t from-white via-white/90 to-transparent pb-safe">
@@ -727,6 +614,7 @@ export default function PublicLayout() {
         <button 
           onClick={() => navigate('/contact')}
           className="relative flex bg-brand-lightest text-dark p-4 rounded-full shadow-xl hover:bg-brand-light hover:scale-105 active:scale-95 transition-all items-center justify-center cursor-pointer btn-tap"
+          aria-label="Chat with Expert"
         >
           <span className="absolute inset-0 rounded-full bg-brand-lightest opacity-30 animate-ping"></span>
           <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black text-white shadow-sm">1</span>

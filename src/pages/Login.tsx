@@ -2,9 +2,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Building2, ArrowRight, CheckCircle2, Star } from 'lucide-react';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useGoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 
-export default function Login() {
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+
+function LoginContent() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -59,10 +61,13 @@ export default function Login() {
   };
 
   const loginWithGoogle = useGoogleLogin({
+    flow: 'implicit',
     onSuccess: async (tokenResponse) => {
+      console.log('[DEBUG] Google onSuccess triggered:', tokenResponse);
       setIsLoading(true);
       setAuthError('');
       try {
+        console.log('[DEBUG] Initiating backend API request to /api/auth/google');
         const response = await fetch('/api/auth/google', {
           method: 'POST',
           headers: {
@@ -71,8 +76,10 @@ export default function Login() {
           body: JSON.stringify({ credential: tokenResponse.access_token }),
         });
 
+        console.log('[DEBUG] Backend API response status:', response.status);
         if (response.ok) {
           const result = await response.json();
+          console.log('[DEBUG] Backend API success result:', result);
           if (result.isNewUser) {
             setTempToken(result.token);
             setCrmData({
@@ -85,7 +92,7 @@ export default function Login() {
           } else {
             localStorage.setItem('token', result.token);
             localStorage.setItem('user', JSON.stringify(result.user));
-            
+            console.log('[DEBUG] JWT stored, updating AuthContext and redirecting...');
             if (result.user.role === 'admin' || result.user.role === 'super_admin') {
               navigate('/admin');
             } else {
@@ -94,18 +101,20 @@ export default function Login() {
           }
         } else {
           const result = await response.json();
+          console.error('[DEBUG] Backend API rejected auth:', result);
           setAuthError(result.error || 'Google login failed');
         }
       } catch (error) {
-        console.error('Google login error:', error);
+        console.error('[DEBUG] Fetch exception during Google login:', error);
         setAuthError('An error occurred during Google login');
       } finally {
         setIsLoading(false);
       }
     },
-    onError: (error) => {
-      console.error('Google Sign-In failed:', error);
-      setAuthError('Google Sign-In failed');
+    onError: (errorResponse) => {
+      console.error('[DEBUG] Google onError triggered:', errorResponse);
+      setAuthError('Google login popup was closed or failed to communicate.');
+      setIsLoading(false);
     }
   });
 
@@ -130,6 +139,7 @@ export default function Login() {
           name: crmData.name,
           email: crmData.email,
           phone: crmData.phone,
+          whatsapp_number: crmData.phone, // Store the same number as WhatsApp so notifications and Settings are populated
         }),
       });
       
@@ -167,6 +177,14 @@ export default function Login() {
     } finally {
       setCrmLoading(false);
     }
+  };
+
+  const handleGoogleClick = () => {
+    if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+      setAuthError('Google Login is currently misconfigured. Please use email/password.');
+      return;
+    }
+    loginWithGoogle();
   };
 
   return (
@@ -282,7 +300,7 @@ export default function Login() {
               <div className="mt-8">
                 <button
                   type="button"
-                  onClick={() => loginWithGoogle()}
+                  onClick={handleGoogleClick}
                   className="inline-flex w-full justify-center items-center gap-2 rounded-xl border border-slate-200 bg-white py-3 px-4 text-sm font-bold text-dark shadow-sm hover:bg-slate-50 cursor-pointer transition-colors"
                 >
                   <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
@@ -384,7 +402,7 @@ export default function Login() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Phone Number
+                  WhatsApp Number
                 </label>
                 <input
                   type="tel"
@@ -429,5 +447,13 @@ export default function Login() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <LoginContent />
+    </GoogleOAuthProvider>
   );
 }

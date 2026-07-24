@@ -6,6 +6,21 @@ import { serviceCategories } from '../../data/services';
 import DateRangeFilter from '../../components/orders/DateRangeFilter';
 import Skeleton from '../../components/ui/Skeleton';
 
+const loadRazorpay = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if ((window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.id = 'razorpay-script';
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 interface Order {
   id: string;
   service: string;
@@ -250,6 +265,11 @@ export default function Orders() {
       const user = userStr ? JSON.parse(userStr) : null;
       
       // 2. Open Razorpay checkout modal
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
+      }
+
       const options = {
         key: paymentData.key,
         amount: paymentData.amount,

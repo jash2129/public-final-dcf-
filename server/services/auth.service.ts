@@ -16,6 +16,43 @@ export interface AuthResult {
 }
 
 /**
+ * Sync contact to CRM
+ */
+async function syncContactToCRM(user: any) {
+  try {
+    const webhookUrl = process.env.CRM_WEBHOOK_URL || 'http://localhost:3000/api/webhooks/contacts';
+    const webhookSecret = process.env.WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      console.warn('Missing WEBHOOK_SECRET. CRM sync skipped.');
+      return;
+    }
+
+    const payload = {
+      name: user.name,
+      phone: formatPhoneWithCountryCode(user.phone || user.whatsapp_number) || (user.phone || user.whatsapp_number),
+      email: user.email,
+      company: user.company_name
+    };
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${webhookSecret}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      console.error(`CRM sync failed with status: ${response.status}`);
+    }
+  } catch (err) {
+    console.error('Error syncing contact to CRM:', err);
+  }
+}
+
+/**
  * Register a new user account
  */
 export async function register(userData: any): Promise<AuthResult> {
@@ -39,8 +76,10 @@ export async function register(userData: any): Promise<AuthResult> {
     email: userData.email,
     password: hashedPassword,
     role: 'user', // Default register role is user
-    phone: userData.phone || null,
-    whatsapp_number: userData.whatsapp_number || null,
+    // User enters one number (Mobile / WhatsApp). We store it in both columns
+    // so all code paths (JWT phone, notifications, order guard) work without friction.
+    phone: userData.whatsapp_number || userData.phone || null,
+    whatsapp_number: userData.whatsapp_number || userData.phone || null,
     company_name: userData.companyName || null,
     address: userData.address || null,
     gstin: userData.gstin || null
@@ -49,6 +88,13 @@ export async function register(userData: any): Promise<AuthResult> {
   const user = await userModel.findUserById(userId);
   if (!user) {
     throw { status: 500, message: 'Failed to retrieve created user profile' };
+  }
+
+  // Sync to CRM but don't block registration on failure
+  try {
+    await syncContactToCRM(user);
+  } catch (crmError) {
+    console.error('Unhandled CRM sync error:', crmError);
   }
 
   const token = generateToken({

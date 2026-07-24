@@ -402,24 +402,14 @@ export default function Settings() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-dark mb-2">Phone Number</label>
+                    <label className="block text-sm font-bold text-dark mb-2">Mobile / WhatsApp Number</label>
                     <input 
                       type="tel" 
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+91 00000 00000"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-dark mb-2">WhatsApp Number</label>
-                    <input 
-                      type="tel" 
-                      value={formData.whatsapp_number}
-                      onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                      value={formData.whatsapp_number || formData.phone || ''}
+                      onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value, phone: e.target.value })}
                       placeholder="e.g. 9876543210"
                       pattern="^\+?[0-9]{10,15}$"
-                      title="Please enter a valid WhatsApp number (10-15 digits)"
+                      title="Please enter a valid mobile number (10-15 digits)"
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-all"
                     />
                   </div>

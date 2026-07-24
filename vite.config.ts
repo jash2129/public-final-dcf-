@@ -9,8 +9,8 @@ export default defineConfig(({mode}) => {
   return {
     plugins: [react(), tailwindcss(), ViteImageOptimizer({})],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.GOOGLE_CLIENT_ID': JSON.stringify(env.GOOGLE_CLIENT_ID),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
+      'process.env.GOOGLE_CLIENT_ID': JSON.stringify(env.GOOGLE_CLIENT_ID || ''),
     },
     resolve: {
       alias: {
@@ -25,34 +25,33 @@ export default defineConfig(({mode}) => {
     },
     build: {
       target: 'es2022',
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: true,
-          drop_debugger: true,
-        },
-      },
+      cssCodeSplit: true,
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-                return 'vendor-react';
-              }
-              if (id.includes('recharts') || id.includes('d3')) {
-                return 'vendor-recharts';
-              }
-              if (id.includes('lucide-react')) {
-                return 'vendor-lucide';
-              }
-              if (id.includes('motion')) {
-                return 'vendor-motion';
-              }
-              return 'vendor-core';
+            // Isolate recharts (332KB) — only loaded when accessing dashboard routes
+            if (id.includes('recharts') || id.includes('d3-') || id.includes('victory-')) {
+              return 'charts';
             }
-          }
-        }
-      }
-    }
+            // Isolate framer-motion to reduce TBT
+            if (id.includes('framer-motion') || id.includes('motion')) {
+              return 'vendor-motion';
+            }
+            // Bundle all lucide icons into a single chunk to avoid request waterfalls
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            // Split React and React-DOM core
+            if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+              return 'vendor-react';
+            }
+            // Split React Router
+            if (id.includes('node_modules/react-router-dom/') || id.includes('node_modules/@remix-run/')) {
+              return 'vendor-router';
+            }
+          },
+        },
+      },
+    },
   };
 });

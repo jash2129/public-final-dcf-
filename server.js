@@ -139,7 +139,8 @@ async function setupDatabase() {
       password: dbPassword,
       database: dbName,
       waitForConnections: true,
-      connectionLimit: 20,
+      connectionLimit: 100,
+      // Increased for better concurrency and TTFB under load
       queueLimit: 0,
       enableKeepAlive: true,
       keepAliveInitialDelay: 1e4,
@@ -1178,7 +1179,7 @@ async function sendWhatsAppTemplate(toPhone, templateName, params, userId) {
   const phoneId = process.env.WHATSAPP_PHONE_ID;
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
   if (!phoneId || !token) {
-    console.log(`[WHATSAPP MOCK] Missing credentials. Would send template '${templateName}' to ${toPhone} with params:`, params);
+    console.warn(`[WHATSAPP MOCK] Missing WHATSAPP_PHONE_ID or WHATSAPP_ACCESS_TOKEN. Would send template '${templateName}' to ${toPhone} with params:`, params);
     logNotificationToFile("WHATSAPP_TEMPLATE", toPhone, templateName, JSON.stringify(params));
     return true;
   }
@@ -1190,36 +1191,41 @@ async function sendWhatsAppTemplate(toPhone, templateName, params, userId) {
   ] : [];
   try {
     const cleanPhone = toPhone.replace(/\D/g, "");
-    const response = await fetch(`https://graph.facebook.com/v17.0/${phoneId}/messages`, {
+    const apiUrl = `https://graph.facebook.com/v17.0/${phoneId}/messages`;
+    const requestBody = {
+      messaging_product: "whatsapp",
+      to: cleanPhone,
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: "en" },
+        components
+      }
+    };
+    console.log(`[WHATSAPP] Sending template '${templateName}' to ${cleanPhone} via ${apiUrl}`);
+    console.log(`[WHATSAPP] Request body:`, JSON.stringify(requestBody, null, 2));
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to: cleanPhone,
-        type: "template",
-        template: {
-          name: templateName,
-          language: { code: "en" },
-          // Adjust if you use a different default language
-          components
-        }
-      })
+      body: JSON.stringify(requestBody)
     });
     const result = await response.json();
+    console.log(`[WHATSAPP] Meta API response status: ${response.status}`);
+    console.log(`[WHATSAPP] Meta API response body:`, JSON.stringify(result, null, 2));
     if (!response.ok) {
-      console.error(`[WHATSAPP ERROR] Failed to send template ${templateName} to ${toPhone}:`, result);
+      console.error(`[WHATSAPP ERROR] Failed to send template '${templateName}' to ${cleanPhone}. Status: ${response.status}. Body:`, JSON.stringify(result));
       return false;
     }
-    console.log(`[WHATSAPP] Sent template ${templateName} to ${toPhone}`);
+    console.log(`[WHATSAPP] Successfully sent template '${templateName}' to ${cleanPhone}.`);
     if (userId) {
       await logToActivityDB(userId, "WhatsApp Template Dispatched", `Template: ${templateName}`);
     }
     return true;
   } catch (error) {
-    console.error(`[WHATSAPP ERROR] Exception while sending template ${templateName} to ${toPhone}:`, error);
+    console.error(`[WHATSAPP ERROR] Exception while sending template '${templateName}' to ${toPhone}:`, error);
     return false;
   }
 }
@@ -1418,9 +1424,12 @@ Team Deccan Filings`;
   `;
   await sendEmail(email, subject, textBody, userId, void 0, htmlBody);
   if (phone) {
+    console.log(`[NOTIFY] Phone/WhatsApp number provided for user ${userId}: '${phone}'. Dispatching SMS and WhatsApp...`);
     const smsMessage = `Hi ${name}, welcome to Deccan Filings! We're excited to partner with you. Track your business filings & consult experts at deccanfilings.com.`;
     await sendSMS(phone, smsMessage, userId);
     await sendWhatsAppTemplate(phone, "utility_welcome", [name], userId);
+  } else {
+    console.warn(`[NOTIFY] No phone number available for user ${userId}. WhatsApp and SMS welcome message SKIPPED.`);
   }
 }
 async function sendMarketingEmail(name, email, phone, serviceName, step) {
@@ -1532,7 +1541,8 @@ async function runComplianceScan() {
   };
   try {
     const [tasks] = await pool.query(
-      `SELECT c.*, u.name as user_name, u.email as user_email, u.phone as user_phone, 
+      `SELECT c.*, u.name as user_name, u.email as user_email, 
+              u.phone as user_phone, u.whatsapp_number as user_whatsapp,
               s.reminder_offsets, s.name as service_name
        FROM compliance_tasks c
        JOIN users u ON c.user_id = u.id
@@ -1559,11 +1569,13 @@ async function runComplianceScan() {
           result.details.push(`Task ID ${task.id} ("${task.title}") transitioned to OVERDUE`);
         }
         if (diffDays === -1 || diffDays % 7 === 0) {
+          const phone = task.user_whatsapp || task.user_phone || "";
+          console.log(`[NOTIFY] Compliance OVERDUE for task ${task.id} "${task.title}", user ${task.user_id}. phone='${phone}'`);
           await notifyComplianceDeadline(
             task.title,
             task.dueDate,
             task.user_email,
-            task.user_phone || "",
+            phone,
             task.user_name,
             "overdue",
             diffDays,
@@ -1573,11 +1585,13 @@ async function runComplianceScan() {
           result.details.push(`Sent OVERDUE notification for "${task.title}" to ${task.user_email}`);
         }
       } else if (diffDays === 0) {
+        const phone = task.user_whatsapp || task.user_phone || "";
+        console.log(`[NOTIFY] Compliance DUE TODAY for task ${task.id} "${task.title}", user ${task.user_id}. phone='${phone}'`);
         await notifyComplianceDeadline(
           task.title,
           task.dueDate,
           task.user_email,
-          task.user_phone || "",
+          phone,
           task.user_name,
           "upcoming",
           0,
@@ -1586,11 +1600,13 @@ async function runComplianceScan() {
         result.notificationsSent++;
         result.details.push(`Sent DUE TODAY notification for "${task.title}" to ${task.user_email}`);
       } else if (offsets.includes(diffDays)) {
+        const phone = task.user_whatsapp || task.user_phone || "";
+        console.log(`[NOTIFY] Compliance UPCOMING (${diffDays}d) for task ${task.id} "${task.title}", user ${task.user_id}. phone='${phone}'`);
         await notifyComplianceDeadline(
           task.title,
           task.dueDate,
           task.user_email,
-          task.user_phone || "",
+          phone,
           task.user_name,
           "upcoming",
           diffDays,
@@ -1748,6 +1764,35 @@ function verifyToken(token) {
 
 // server/services/auth.service.ts
 init_helpers();
+async function syncContactToCRM(user) {
+  try {
+    const webhookUrl = process.env.CRM_WEBHOOK_URL || "http://localhost:3000/api/webhooks/contacts";
+    const webhookSecret = process.env.WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.warn("Missing WEBHOOK_SECRET. CRM sync skipped.");
+      return;
+    }
+    const payload = {
+      name: user.name,
+      phone: formatPhoneWithCountryCode(user.phone || user.whatsapp_number) || (user.phone || user.whatsapp_number),
+      email: user.email,
+      company: user.company_name
+    };
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${webhookSecret}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      console.error(`CRM sync failed with status: ${response.status}`);
+    }
+  } catch (err) {
+    console.error("Error syncing contact to CRM:", err);
+  }
+}
 async function register(userData) {
   const existingUser = await findUserByEmail(userData.email);
   if (existingUser) {
@@ -1767,8 +1812,10 @@ async function register(userData) {
     password: hashedPassword,
     role: "user",
     // Default register role is user
-    phone: userData.phone || null,
-    whatsapp_number: userData.whatsapp_number || null,
+    // User enters one number (Mobile / WhatsApp). We store it in both columns
+    // so all code paths (JWT phone, notifications, order guard) work without friction.
+    phone: userData.whatsapp_number || userData.phone || null,
+    whatsapp_number: userData.whatsapp_number || userData.phone || null,
     company_name: userData.companyName || null,
     address: userData.address || null,
     gstin: userData.gstin || null
@@ -1776,6 +1823,11 @@ async function register(userData) {
   const user = await findUserById(userId);
   if (!user) {
     throw { status: 500, message: "Failed to retrieve created user profile" };
+  }
+  try {
+    await syncContactToCRM(user);
+  } catch (crmError) {
+    console.error("Unhandled CRM sync error:", crmError);
   }
   const token = generateToken({
     id: user.id,
@@ -1974,15 +2026,18 @@ router.post("/register", async (req, res, next) => {
     }
     const result = await register(req.body);
     await logActivity(result.user.id, "REGISTER", "Registered new user account");
+    const whatsappPhone = result.user.whatsapp_number || result.user.phone || null;
+    console.log(`[NOTIFY] Registration complete for user ${result.user.id}. whatsapp_number='${whatsappPhone}', phone='${result.user.phone}'`);
     try {
       await notifyWelcome(
         result.user.email,
         result.user.name,
         result.user.id,
-        result.user.phone
+        whatsappPhone
       );
+      console.log(`[NOTIFY] notifyWelcome dispatched successfully for user ${result.user.id}.`);
     } catch (notifErr) {
-      console.error("Failed to dispatch welcome notification:", notifErr);
+      console.error("[NOTIFY ERROR] Failed to dispatch welcome notification:", notifErr);
     }
     return res.status(201).json(result);
   } catch (error) {
@@ -2018,6 +2073,12 @@ router.post("/google", async (req, res, next) => {
     let name;
     let picture;
     const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (process.env.NODE_ENV === "production") {
+      if (!clientId || clientId === "YOUR_GOOGLE_CLIENT_ID") {
+        console.error("[AUTH ERROR] Google Auth is missing a valid GOOGLE_CLIENT_ID in production.");
+        return res.status(500).json({ error: "Google Auth is currently misconfigured on the server. Please contact support." });
+      }
+    }
     if (!clientId || clientId === "YOUR_GOOGLE_CLIENT_ID" || credential.startsWith("mock_token_")) {
       console.log("[GOOGLE-AUTH-MOCK] Bypassing Google verification for local testing.");
       if (credential.startsWith("mock_token_")) {
@@ -2086,15 +2147,18 @@ router.post("/google", async (req, res, next) => {
       user = await findUserById(userId);
       await logActivity(userId, "REGISTER_GOOGLE", "Registered using Google OAuth");
       if (user) {
+        const googleUserPhone = user.phone || user.whatsapp_number || null;
+        console.log(`[NOTIFY] Google registration complete for user ${user.id}. phone='${googleUserPhone}'`);
         try {
           await notifyWelcome(
             user.email,
             user.name,
             user.id,
-            user.phone
+            googleUserPhone
           );
+          console.log(`[NOTIFY] notifyWelcome dispatched successfully for Google user ${user.id}.`);
         } catch (notifErr) {
-          console.error("Failed to dispatch welcome notification for Google user:", notifErr);
+          console.error("[NOTIFY ERROR] Failed to dispatch welcome notification for Google user:", notifErr);
         }
       }
     }
@@ -2614,10 +2678,12 @@ async function triggerOrderNotification(userId, orderId, serviceName, amount) {
     const order = await findOrderById(orderId);
     const finalAmount = order ? order.total_amount : amount * 1.18;
     if (user) {
+      const phone = user.whatsapp_number || user.phone || null;
+      console.log(`[NOTIFY] Order placement notification for user ${userId}. phone='${phone}'`);
       await notifyOrderPlacement(
         orderId,
         user.email,
-        user.phone || "",
+        phone || "",
         user.name,
         serviceName,
         finalAmount,
@@ -2632,11 +2698,13 @@ async function triggerStatusChangeNotification(userId, orderId, status) {
   try {
     const user = await findUserById(userId);
     if (user) {
+      const phone = user.whatsapp_number || user.phone || null;
+      console.log(`[NOTIFY] Status change notification for order ${orderId}, user ${userId}. phone='${phone}', status='${status}'`);
       await notifyOrderStatusChange(
         orderId,
         status,
         user.email,
-        user.phone || "",
+        phone || "",
         user.name,
         userId
       );
@@ -2805,8 +2873,10 @@ router3.use(authenticate);
 router3.post("/", async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-    if (!req.user.phone || req.user.phone.trim() === "") {
-      return res.status(403).json({ error: "Phone number is required to place an order." });
+    const dbUser = await findUserById(req.user.id);
+    const hasContact = dbUser && (dbUser.phone || dbUser.whatsapp_number);
+    if (!hasContact) {
+      return res.status(403).json({ error: "A phone or WhatsApp number is required to place an order. Please update your profile in Settings." });
     }
     const validation = validateOrder(req.body);
     if (!validation.isValid) {
@@ -4366,6 +4436,7 @@ dotenv.config();
 async function startServer() {
   const app = express2();
   app.set("trust proxy", true);
+  app.use(compression());
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
   const uploadsDir3 = path5.join(process.cwd(), "uploads");
   if (!fs5.existsSync(uploadsDir3)) {
@@ -4375,6 +4446,7 @@ async function startServer() {
     contentSecurityPolicy: false,
     // Disabled to prevent blocking existing inline scripts/GTM
     crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     hsts: {
       maxAge: 31536e3,
       // 1 year
@@ -4607,6 +4679,7 @@ async function startServer() {
     }));
     app.get("*", async (req, res) => {
       try {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         let html = await fs5.promises.readFile(path5.join(distPath, "index.html"), "utf8");
         let title = "Deccan Filings | Start & Grow Your Business in India";
         let desc = "India's trusted compliance platform for Company Registration, GST, Trademark, and Tax Filings.";
@@ -4639,6 +4712,7 @@ async function startServer() {
         }
         html = html.replace(/<meta property="og:description" content=".*?"\s*\/>/i, `<meta property="og:description" content="${desc}" />`);
         html = html.replace(/<meta name="twitter:description" content=".*?"\s*\/>/i, `<meta name="twitter:description" content="${desc}" />`);
+        res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
         res.send(html);
       } catch (err) {
         console.error("SSR Error:", err);

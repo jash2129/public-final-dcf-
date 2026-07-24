@@ -71,7 +71,7 @@ export async function setupDatabase(): Promise<mysql.Pool> {
       password: dbPassword,
       database: dbName,
       waitForConnections: true,
-      connectionLimit: 20,
+      connectionLimit: 100, // Increased for better concurrency and TTFB under load
       queueLimit: 0,
       enableKeepAlive: true,
       keepAliveInitialDelay: 10000,

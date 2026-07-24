@@ -31,6 +31,8 @@ import { getAllBlogPosts } from "./server/services/blog.service";
 async function startServer() {
   const app = express();
   app.set('trust proxy', true);
+  app.use(compression()); // Enable GZIP compression for all responses
+  
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   // Ensure uploads directory exists
@@ -43,6 +45,7 @@ async function startServer() {
   app.use(helmet({
     contentSecurityPolicy: false, // Disabled to prevent blocking existing inline scripts/GTM
     crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     hsts: {
       maxAge: 31536000, // 1 year
       includeSubDomains: true,
@@ -302,6 +305,7 @@ async function startServer() {
     
     app.get('*', async (req, res) => {
       try {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         let html = await fs.promises.readFile(path.join(distPath, 'index.html'), 'utf8');
         
         let title = 'Deccan Filings | Start & Grow Your Business in India';
@@ -339,6 +343,8 @@ async function startServer() {
         html = html.replace(/<meta property="og:description" content=".*?"\s*\/>/i, `<meta property="og:description" content="${desc}" />`);
         html = html.replace(/<meta name="twitter:description" content=".*?"\s*\/>/i, `<meta name="twitter:description" content="${desc}" />`);
         
+        // Prevent stale HTML, but allow conditional caching
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
         res.send(html);
       } catch (err) {
         console.error('SSR Error:', err);

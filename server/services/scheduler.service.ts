@@ -52,7 +52,8 @@ export async function runComplianceScan(): Promise<ScanResult> {
   try {
     // Fetch all non-completed tasks
     const [tasks] = await pool.query<mysql.RowDataPacket[]>(
-      `SELECT c.*, u.name as user_name, u.email as user_email, u.phone as user_phone, 
+      `SELECT c.*, u.name as user_name, u.email as user_email, 
+              u.phone as user_phone, u.whatsapp_number as user_whatsapp,
               s.reminder_offsets, s.name as service_name
        FROM compliance_tasks c
        JOIN users u ON c.user_id = u.id
@@ -87,13 +88,14 @@ export async function runComplianceScan(): Promise<ScanResult> {
         }
 
         // Trigger overdue notification once (e.g. if due yesterday, or weekly)
-        // To be safe and prevent spamming, we send overdue reminders if diffDays matches -1, -7, -14, etc.
         if (diffDays === -1 || diffDays % 7 === 0) {
+          const phone = task.user_whatsapp || task.user_phone || '';
+          console.log(`[NOTIFY] Compliance OVERDUE for task ${task.id} "${task.title}", user ${task.user_id}. phone='${phone}'`);
           await notifyComplianceDeadline(
             task.title,
             task.dueDate,
             task.user_email,
-            task.user_phone || '',
+            phone,
             task.user_name,
             'overdue',
             diffDays,
@@ -105,11 +107,13 @@ export async function runComplianceScan(): Promise<ScanResult> {
       } 
       // Check if task is due today
       else if (diffDays === 0) {
+        const phone = task.user_whatsapp || task.user_phone || '';
+        console.log(`[NOTIFY] Compliance DUE TODAY for task ${task.id} "${task.title}", user ${task.user_id}. phone='${phone}'`);
         await notifyComplianceDeadline(
           task.title,
           task.dueDate,
           task.user_email,
-          task.user_phone || '',
+          phone,
           task.user_name,
           'upcoming',
           0,
@@ -120,11 +124,13 @@ export async function runComplianceScan(): Promise<ScanResult> {
       } 
       // Check if days remaining matches any of the parsed offsets
       else if (offsets.includes(diffDays)) {
+        const phone = task.user_whatsapp || task.user_phone || '';
+        console.log(`[NOTIFY] Compliance UPCOMING (${diffDays}d) for task ${task.id} "${task.title}", user ${task.user_id}. phone='${phone}'`);
         await notifyComplianceDeadline(
           task.title,
           task.dueDate,
           task.user_email,
-          task.user_phone || '',
+          phone,
           task.user_name,
           'upcoming',
           diffDays,

@@ -45,16 +45,21 @@ router.post('/register', async (req, res, next) => {
     // Log registration
     await logActivity(result.user.id, 'REGISTER', 'Registered new user account');
 
-    // Send welcome notification (email + SMS)
+    // Send welcome notification (email + WhatsApp)
+    // NOTE: Registration form collects `whatsapp_number`, not `phone`.
+    // We pass whatsapp_number so the phone guard inside notifyWelcome evaluates to true.
+    const whatsappPhone = result.user.whatsapp_number || result.user.phone || null;
+    console.log(`[NOTIFY] Registration complete for user ${result.user.id}. whatsapp_number='${whatsappPhone}', phone='${result.user.phone}'`);
     try {
       await notificationService.notifyWelcome(
         result.user.email,
         result.user.name,
         result.user.id,
-        result.user.phone
+        whatsappPhone
       );
+      console.log(`[NOTIFY] notifyWelcome dispatched successfully for user ${result.user.id}.`);
     } catch (notifErr) {
-      console.error('Failed to dispatch welcome notification:', notifErr);
+      console.error('[NOTIFY ERROR] Failed to dispatch welcome notification:', notifErr);
     }
     
     return res.status(201).json(result);
@@ -106,7 +111,15 @@ router.post('/google', async (req, res, next) => {
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
     
-    // Check if we are running in verification bypass/simulation mode
+    // Strict security check for production
+    if (process.env.NODE_ENV === 'production') {
+      if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
+        console.error('[AUTH ERROR] Google Auth is missing a valid GOOGLE_CLIENT_ID in production.');
+        return res.status(500).json({ error: 'Google Auth is currently misconfigured on the server. Please contact support.' });
+      }
+    }
+    
+    // Check if we are running in verification bypass/simulation mode (only allowed locally)
     if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID' || credential.startsWith('mock_token_')) {
       console.log('[GOOGLE-AUTH-MOCK] Bypassing Google verification for local testing.');
       if (credential.startsWith('mock_token_')) {
@@ -182,17 +195,22 @@ router.post('/google', async (req, res, next) => {
       user = await userModel.findUserById(userId);
       await logActivity(userId, 'REGISTER_GOOGLE', 'Registered using Google OAuth');
 
-      // Send welcome notification (email + SMS)
+      // Send welcome notification (email + WhatsApp)
+      // Google users have no phone number stored, so WhatsApp is skipped for them by design.
+      // The email will always be sent regardless.
       if (user) {
+        const googleUserPhone = user.phone || user.whatsapp_number || null;
+        console.log(`[NOTIFY] Google registration complete for user ${user.id}. phone='${googleUserPhone}'`);
         try {
           await notificationService.notifyWelcome(
             user.email,
             user.name,
             user.id,
-            user.phone
+            googleUserPhone
           );
+          console.log(`[NOTIFY] notifyWelcome dispatched successfully for Google user ${user.id}.`);
         } catch (notifErr) {
-          console.error('Failed to dispatch welcome notification for Google user:', notifErr);
+          console.error('[NOTIFY ERROR] Failed to dispatch welcome notification for Google user:', notifErr);
         }
       }
     }

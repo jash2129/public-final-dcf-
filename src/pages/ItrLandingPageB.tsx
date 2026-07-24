@@ -19,7 +19,22 @@ import {
   ClipboardList,
   UserCheck,
   FileCheck,
+  Briefcase, 
+  FileText,
+  Users, 
+  Play, 
+  Upload, 
+  ChevronRight, 
+  Activity, 
+  Clock, 
+  Shield, 
+  IndianRupee, 
+  Info, 
+  Building2, 
+  TrendingUp, 
+  HelpCircle
 } from 'lucide-react';
+import Footer from '../components/layout/Footer';
 import { Helmet } from 'react-helmet-async';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1142,61 +1157,7 @@ export default function ItrLandingPageB() {
       {/* ══════════════════════════════════════════════════
           FOOTER — Compliance + Legal
       ══════════════════════════════════════════════════ */}
-      <footer className="bg-[#0A0F1A] text-slate-400 py-10 px-4 sm:px-6 border-t border-slate-800">
-        <div className="max-w-5xl mx-auto space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <picture>
-                <source srcSet="/logo.webp" type="image/webp" />
-                <img src="/logo.png" alt="Deccan Filings" width="128" height="32" className="h-8 w-auto object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).classList.add('hidden'); }} />
-              </picture>
-              <span className="font-black text-white text-base">Deccan Filings</span>
-            </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500 justify-center">
-              {[
-                { label: 'Privacy Policy', path: '/privacy' },
-                { label: 'Terms of Service', path: '/terms' },
-                { label: 'Refund Policy', path: '/refund' },
-                { label: 'Contact', path: '/contact' },
-              ].map((l) => (
-                <Link key={l.label} to={l.path} className="hover:text-white transition-colors">
-                  {l.label}
-                </Link>
-              ))}
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <a href="tel:+919000930453" className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors">
-                <Phone className="h-3.5 w-3.5" />
-                +91 90009 30453
-              </a>
-              <span className="text-slate-700">|</span>
-              <a href="https://wa.me/919000930453" className="flex items-center gap-1.5 text-slate-400 hover:text-[#4ADE80] transition-colors">
-                <MessageCircle className="h-3.5 w-3.5" />
-                WhatsApp
-              </a>
-            </div>
-          </div>
-
-          {/* Legal disclaimer */}
-          <div className="border-t border-slate-800 pt-6">
-            <p className="text-[11px] leading-relaxed text-slate-600 text-center">
-              <span className="font-semibold text-slate-500">Disclaimer: </span>
-              Deccan Filings is an independent, private CA-assisted professional services platform operated by{' '}
-              <strong className="text-slate-400">TOR BUSINESS SOLUTIONS PRIVATE LIMITED</strong>. We are{' '}
-              <strong className="text-slate-400">not affiliated with, endorsed by, or an official portal of</strong> the Income Tax
-              Department of India, the Ministry of Corporate Affairs (MCA), or any government authority. All third-party brand names
-              and government portal names referenced are the property of their respective owners. Our professional service fees are
-              entirely separate from any mandatory government filing fees. Deccan Filings does not guarantee specific government
-              processing timelines, approval outcomes, or tax refund amounts, as these are determined solely by the relevant
-              government authority.
-            </p>
-          </div>
-
-          <div className="border-t border-slate-800 pt-4 text-center text-xs text-slate-600">
-            © 2026 Deccan Filings. All rights reserved. A brand of TOR BUSINESS SOLUTIONS PRIVATE LIMITED.
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* ══════════════════════════════════════════════════
           MOBILE STICKY BOTTOM CTA BAR

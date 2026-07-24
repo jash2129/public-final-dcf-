@@ -4,6 +4,7 @@ import * as orderModel from '../models/order.model';
 import { validateOrder } from '../schemas/validation.schema';
 import { authenticate, AuthenticatedRequest } from '../middlewares/auth';
 import * as paymentService from '../services/payment.service';
+import * as userModel from '../models/user.model';
 
 const router = Router();
 
@@ -17,8 +18,13 @@ router.use(authenticate);
 router.post('/', async (req: AuthenticatedRequest, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    if (!req.user.phone || req.user.phone.trim() === '') {
-      return res.status(403).json({ error: 'Phone number is required to place an order.' });
+
+    // JWT payload only includes `phone`. Google users may only have `whatsapp_number`.
+    // Fetch the full user from DB to check both fields before blocking the order.
+    const dbUser = await userModel.findUserById(req.user.id);
+    const hasContact = dbUser && (dbUser.phone || dbUser.whatsapp_number);
+    if (!hasContact) {
+      return res.status(403).json({ error: 'A phone or WhatsApp number is required to place an order. Please update your profile in Settings.' });
     }
 
     const validation = validateOrder(req.body);

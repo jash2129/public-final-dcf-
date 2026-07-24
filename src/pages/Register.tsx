@@ -2,9 +2,11 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Building2, ArrowRight, CheckCircle2, Star } from 'lucide-react';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useGoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 
-export default function Register() {
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+
+function RegisterContent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -56,10 +58,13 @@ export default function Register() {
   };
 
   const loginWithGoogle = useGoogleLogin({
+    flow: 'implicit',
     onSuccess: async (tokenResponse) => {
+      console.log('[DEBUG] Google onSuccess triggered:', tokenResponse);
       setIsLoading(true);
       setAuthError('');
       try {
+        console.log('[DEBUG] Initiating backend API request to /api/auth/google');
         const response = await fetch('/api/auth/google', {
           method: 'POST',
           headers: {
@@ -68,8 +73,10 @@ export default function Register() {
           body: JSON.stringify({ credential: tokenResponse.access_token }),
         });
 
+        console.log('[DEBUG] Backend API response status:', response.status);
         if (response.ok) {
           const result = await response.json();
+          console.log('[DEBUG] Backend API success result:', result);
           if (result.isNewUser) {
             setTempToken(result.token);
             setCrmData({
@@ -82,7 +89,7 @@ export default function Register() {
           } else {
             localStorage.setItem('token', result.token);
             localStorage.setItem('user', JSON.stringify(result.user));
-            
+            console.log('[DEBUG] JWT stored, updating AuthContext and redirecting...');
             if (result.user.role === 'admin' || result.user.role === 'super_admin') {
               navigate('/admin');
             } else {
@@ -91,18 +98,20 @@ export default function Register() {
           }
         } else {
           const result = await response.json();
+          console.error('[DEBUG] Backend API rejected auth:', result);
           setAuthError(result.error || 'Google login failed');
         }
       } catch (error) {
-        console.error('Google login error:', error);
+        console.error('[DEBUG] Fetch exception during Google login:', error);
         setAuthError('An error occurred during Google login');
       } finally {
         setIsLoading(false);
       }
     },
-    onError: (error) => {
-      console.error('Google Sign-In failed:', error);
-      setAuthError('Google Sign-In failed');
+    onError: (errorResponse) => {
+      console.error('[DEBUG] Google onError triggered:', errorResponse);
+      setAuthError('Google login popup was closed or failed to communicate.');
+      setIsLoading(false);
     }
   });
 
@@ -127,6 +136,7 @@ export default function Register() {
           name: crmData.name,
           email: crmData.email,
           phone: crmData.phone,
+          whatsapp_number: crmData.phone, // Store the same number as WhatsApp so notifications and Settings are populated
         }),
       });
       
@@ -164,6 +174,14 @@ export default function Register() {
     } finally {
       setCrmLoading(false);
     }
+  };
+
+  const handleGoogleClick = () => {
+    if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+      setAuthError('Google Login is currently misconfigured. Please use email/password.');
+      return;
+    }
+    loginWithGoogle();
   };
 
   return (
@@ -237,7 +255,7 @@ export default function Register() {
 
               <div>
                 <label htmlFor="whatsapp_number" className="block text-sm font-bold text-dark mb-2">
-                  WhatsApp Number
+                  Mobile / WhatsApp Number
                 </label>
                 <input
                   id="whatsapp_number"
@@ -246,7 +264,7 @@ export default function Register() {
                   inputMode="numeric"
                   required
                   pattern="^\+?[0-9]{10,15}$"
-                  title="Please enter a valid WhatsApp number (10-15 digits)"
+                  title="Please enter a valid mobile number (10-15 digits)"
                   className="block w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 placeholder-slate-400 shadow-sm focus:border-dark focus:outline-none focus:ring-1 focus:ring-dark sm:text-sm transition-all bg-slate-50 focus:bg-white"
                   placeholder="e.g. 9876543210"
                   defaultValue={initialPhone}
@@ -295,7 +313,7 @@ export default function Register() {
               <div className="mt-8">
                 <button
                   type="button"
-                  onClick={() => loginWithGoogle()}
+                  onClick={handleGoogleClick}
                   className="inline-flex w-full justify-center items-center gap-2 rounded-xl border border-slate-200 bg-white py-3.5 px-4 text-sm font-bold text-dark shadow-sm hover:bg-slate-50 cursor-pointer transition-colors"
                 >
                   <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
@@ -397,7 +415,7 @@ export default function Register() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Phone Number
+                  WhatsApp Number
                 </label>
                 <input
                   type="tel"
@@ -442,5 +460,13 @@ export default function Register() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Register() {
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <RegisterContent />
+    </GoogleOAuthProvider>
   );
 }

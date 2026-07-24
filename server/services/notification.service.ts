@@ -37,9 +37,9 @@ function ensureLogFile() {
 function logNotificationToFile(type: 'EMAIL' | 'SMS' | 'WHATSAPP_TEMPLATE' | 'WHATSAPP', recipient: string, subjectOrMessage: string, body?: string) {
   ensureLogFile();
   const timestamp = new Date().toISOString();
-  const logEntry = `[${timestamp}] [${type}] To: ${recipient}\n` + 
-                   (body ? `Subject: ${subjectOrMessage}\nBody: ${body}` : `Message: ${subjectOrMessage}`) + 
-                   `\n------------------------------------------------------------\n`;
+  const logEntry = `[${timestamp}] [${type}] To: ${recipient}\n` +
+    (body ? `Subject: ${subjectOrMessage}\nBody: ${body}` : `Message: ${subjectOrMessage}`) +
+    `\n------------------------------------------------------------\n`;
   fs.appendFileSync(LOG_FILE, logEntry, 'utf-8');
 }
 
@@ -72,7 +72,7 @@ export async function sendEmail(
   html?: string
 ): Promise<boolean> {
   const smtpHost = process.env.SMTP_HOST;
-  
+
   if (smtpHost) {
     try {
       const fromEmail = process.env.SYSTEM_EMAIL_FROM || process.env.SMTP_USER || 'support@deccanfilings.com';
@@ -128,7 +128,7 @@ export async function sendWhatsAppTemplate(
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
 
   if (!phoneId || !token) {
-    console.log(`[WHATSAPP MOCK] Missing credentials. Would send template '${templateName}' to ${toPhone} with params:`, params);
+    console.warn(`[WHATSAPP MOCK] Missing WHATSAPP_PHONE_ID or WHATSAPP_ACCESS_TOKEN. Would send template '${templateName}' to ${toPhone} with params:`, params);
     logNotificationToFile('WHATSAPP_TEMPLATE', toPhone, templateName, JSON.stringify(params));
     return true;
   }
@@ -144,38 +144,46 @@ export async function sendWhatsAppTemplate(
   try {
     // Remove '+' and spaces from phone number as Meta expects format without leading +
     const cleanPhone = toPhone.replace(/\D/g, '');
-    
-    const response = await fetch(`https://graph.facebook.com/v17.0/${phoneId}/messages`, {
+    const apiUrl = `https://graph.facebook.com/v17.0/${phoneId}/messages`;
+    const requestBody = {
+      messaging_product: 'whatsapp',
+      to: cleanPhone,
+      type: 'template',
+      template: {
+        name: templateName,
+        language: { code: 'en' },
+        components
+      }
+    };
+
+    console.log(`[WHATSAPP] Sending template '${templateName}' to ${cleanPhone} via ${apiUrl}`);
+    console.log(`[WHATSAPP] Request body:`, JSON.stringify(requestBody, null, 2));
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: cleanPhone,
-        type: 'template',
-        template: {
-          name: templateName,
-          language: { code: 'en' }, // Adjust if you use a different default language
-          components
-        }
-      })
+      body: JSON.stringify(requestBody)
     });
 
     const result = await response.json();
+    console.log(`[WHATSAPP] Meta API response status: ${response.status}`);
+    console.log(`[WHATSAPP] Meta API response body:`, JSON.stringify(result, null, 2));
+
     if (!response.ok) {
-      console.error(`[WHATSAPP ERROR] Failed to send template ${templateName} to ${toPhone}:`, result);
+      console.error(`[WHATSAPP ERROR] Failed to send template '${templateName}' to ${cleanPhone}. Status: ${response.status}. Body:`, JSON.stringify(result));
       return false;
     }
-    
-    console.log(`[WHATSAPP] Sent template ${templateName} to ${toPhone}`);
+
+    console.log(`[WHATSAPP] Successfully sent template '${templateName}' to ${cleanPhone}.`);
     if (userId) {
       await logToActivityDB(userId, 'WhatsApp Template Dispatched', `Template: ${templateName}`);
     }
     return true;
   } catch (error) {
-    console.error(`[WHATSAPP ERROR] Exception while sending template ${templateName} to ${toPhone}:`, error);
+    console.error(`[WHATSAPP ERROR] Exception while sending template '${templateName}' to ${toPhone}:`, error);
     return false;
   }
 }
@@ -204,16 +212,16 @@ export async function notifyOrderPlacement(
   // Email
   const emailSubject = `Order Placed Successfully - ${orderId}`;
   const emailBody = `Hi ${userName},\n\n` +
-                    `Thank you for choosing Deccan Filings! We have received your order.\n\n` +
-                    `Order Details:\n` +
-                    `- Order ID: ${orderId}\n` +
-                    `- Services: ${serviceNames}\n` +
-                    `- Base Price: ${formattedBase}\n` +
-                    `- CGST (9%): ${formattedCgst}\n` +
-                    `- SGST (9%): ${formattedSgst}\n` +
-                    `- Total Amount: ${formattedTotal}\n` +
-                    `- Status: Placed (Our experts will start working shortly)\n\n` +
-                    `Best regards,\nTeam Deccan Filings`;
+    `Thank you for choosing Deccan Filings! We have received your order.\n\n` +
+    `Order Details:\n` +
+    `- Order ID: ${orderId}\n` +
+    `- Services: ${serviceNames}\n` +
+    `- Base Price: ${formattedBase}\n` +
+    `- CGST (9%): ${formattedCgst}\n` +
+    `- SGST (9%): ${formattedSgst}\n` +
+    `- Total Amount: ${formattedTotal}\n` +
+    `- Status: Placed (Our experts will start working shortly)\n\n` +
+    `Best regards,\nTeam Deccan Filings`;
   await sendEmail(userEmail, emailSubject, emailBody, userId);
 
   // SMS & WhatsApp
@@ -240,9 +248,9 @@ export async function notifyOrderStatusChange(
   // Email
   const emailSubject = `Order Update - ${orderId}`;
   const emailBody = `Hi ${userName},\n\n` +
-                    `Your order ${orderId} has been updated to: ${statusDisplay}.\n\n` +
-                    `You can track the progress and upload any required documents via your customer dashboard.\n\n` +
-                    `Best regards,\nTeam Deccan Filings`;
+    `Your order ${orderId} has been updated to: ${statusDisplay}.\n\n` +
+    `You can track the progress and upload any required documents via your customer dashboard.\n\n` +
+    `Best regards,\nTeam Deccan Filings`;
   await sendEmail(userEmail, emailSubject, emailBody, userId);
 
   // SMS & WhatsApp
@@ -267,15 +275,15 @@ export async function notifyComplianceDeadline(
   userId: number
 ): Promise<void> {
   // Email
-  const subject = status === 'overdue' 
-    ? `URGENT: Compliance Overdue - ${taskTitle}` 
+  const subject = status === 'overdue'
+    ? `URGENT: Compliance Overdue - ${taskTitle}`
     : `Reminder: Compliance Due in ${daysRemaining} Days - ${taskTitle}`;
 
   const emailBody = `Hi ${userName},\n\n` +
-                    (status === 'overdue'
-                      ? `This is a reminder that the compliance filing for "${taskTitle}" was due on ${dueDate} and is now OVERDUE. Please submit the required documents immediately to avoid statutory penalties.`
-                      : `This is a reminder that the compliance filing for "${taskTitle}" is due on ${dueDate} (${daysRemaining} days remaining). Please share the necessary documents so we can file on time.`) +
-                    `\n\nBest regards,\nTeam Deccan Filings`;
+    (status === 'overdue'
+      ? `This is a reminder that the compliance filing for "${taskTitle}" was due on ${dueDate} and is now OVERDUE. Please submit the required documents immediately to avoid statutory penalties.`
+      : `This is a reminder that the compliance filing for "${taskTitle}" is due on ${dueDate} (${daysRemaining} days remaining). Please share the necessary documents so we can file on time.`) +
+    `\n\nBest regards,\nTeam Deccan Filings`;
   await sendEmail(userEmail, subject, emailBody, userId);
 
   // SMS & WhatsApp
@@ -315,16 +323,16 @@ export async function notifyPaymentSuccess(
 
   const emailSubject = `Payment Received - Invoice for Order ${orderId}`;
   const emailBody = `Hi ${userName},\n\n` +
-                    `We are pleased to confirm that your payment of ${formattedTotal} for Order ${orderId} has been successfully received.\n\n` +
-                    `Payment Summary:\n` +
-                    `- Base Price: ${formattedBase}\n` +
-                    `- CGST (9%): ${formattedCgst}\n` +
-                    `- SGST (9%): ${formattedSgst}\n` +
-                    `- Total Paid: ${formattedTotal}\n\n` +
-                    `Thank you for choosing Deccan Filings! Our professional team has already begun processing your filing request. We will reach out to you if any additional documents or clarifications are needed.\n\n` +
-                    `You can monitor the status of your request at any time by logging into your dashboard.\n\n` +
-                    `Best regards,\nTeam Deccan Filings`;
-  
+    `We are pleased to confirm that your payment of ${formattedTotal} for Order ${orderId} has been successfully received.\n\n` +
+    `Payment Summary:\n` +
+    `- Base Price: ${formattedBase}\n` +
+    `- CGST (9%): ${formattedCgst}\n` +
+    `- SGST (9%): ${formattedSgst}\n` +
+    `- Total Paid: ${formattedTotal}\n\n` +
+    `Thank you for choosing Deccan Filings! Our professional team has already begun processing your filing request. We will reach out to you if any additional documents or clarifications are needed.\n\n` +
+    `You can monitor the status of your request at any time by logging into your dashboard.\n\n` +
+    `Best regards,\nTeam Deccan Filings`;
+
   let attachments: any[] | undefined = undefined;
   try {
     const pdfBuffer = await invoiceService.generateInvoiceBuffer(
@@ -371,15 +379,15 @@ export async function notifyWelcome(
   phone?: string | null
 ): Promise<void> {
   const subject = `Welcome to Deccan Filings, ${name}!`;
-  
+
   const textBody = `Hi ${name},\n\n` +
-                   `Welcome to Deccan Filings! We're excited to help you launch and grow your business.\n\n` +
-                   `Here is what you can do next:\n` +
-                   `1. Explore our services: Private Limited registration, GST filings, Trademark filing, and more.\n` +
-                   `2. Access your Customer Dashboard to place orders, upload documents, and track compliance status.\n` +
-                   `3. Schedule a free consultation with our CA/CS experts.\n\n` +
-                   `If you have any questions, feel free to reply to this email or call our team at +91 90009 30453 / +91 90002 43270.\n\n` +
-                   `Best regards,\nTeam Deccan Filings`;
+    `Welcome to Deccan Filings! We're excited to help you launch and grow your business.\n\n` +
+    `Here is what you can do next:\n` +
+    `1. Explore our services: Private Limited registration, GST filings, Trademark filing, and more.\n` +
+    `2. Access your Customer Dashboard to place orders, upload documents, and track compliance status.\n` +
+    `3. Schedule a free consultation with our CA/CS experts.\n\n` +
+    `If you have any questions, feel free to reply to this email or call our team at +91 90009 30453 / +91 90002 43270.\n\n` +
+    `Best regards,\nTeam Deccan Filings`;
 
   const htmlBody = `
     <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 24px; background-color: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0; color: #0f172a;">
@@ -438,9 +446,12 @@ export async function notifyWelcome(
   await sendEmail(email, subject, textBody, userId, undefined, htmlBody);
 
   if (phone) {
+    console.log(`[NOTIFY] Phone/WhatsApp number provided for user ${userId}: '${phone}'. Dispatching SMS and WhatsApp...`);
     const smsMessage = `Hi ${name}, welcome to Deccan Filings! We're excited to partner with you. Track your business filings & consult experts at deccanfilings.com.`;
     await sendSMS(phone, smsMessage, userId);
     await sendWhatsAppTemplate(phone, 'utility_welcome', [name], userId);
+  } else {
+    console.warn(`[NOTIFY] No phone number available for user ${userId}. WhatsApp and SMS welcome message SKIPPED.`);
   }
 }
 

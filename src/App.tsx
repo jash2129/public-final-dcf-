@@ -7,7 +7,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PublicLayout from './components/layout/PublicLayout';
 import ScrollToTop from './components/layout/ScrollToTop';
-import DashboardLayout from './components/layout/DashboardLayout';
+const DashboardLayout = lazy(() => import('./components/layout/DashboardLayout'));
 const Home = lazy(() => import('./pages/Home'));
 const ServicePage = lazy(() => import('./pages/ServicePage'));
 const ServicesCatalog = lazy(() => import('./pages/ServicesCatalog'));
