@@ -18,7 +18,7 @@ export interface AuthResult {
 /**
  * Sync contact to CRM
  */
-async function syncContactToCRM(user: any) {
+export async function syncContactToCRM(user: any) {
   try {
     const webhookUrl = process.env.CRM_WEBHOOK_URL || 'http://localhost:3000/api/webhooks/contacts';
     const webhookSecret = process.env.WEBHOOK_SECRET;

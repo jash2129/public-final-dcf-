@@ -7,6 +7,8 @@ import { pool } from '../db';
 import { authenticate, requireSuperAdmin, AuthenticatedRequest } from '../middlewares/auth';
 import mysql from 'mysql2/promise';
 import { formatPhoneWithCountryCode } from '../utils/helpers';
+import { syncContactToCRM } from '../services/auth.service';
+import { sendSMS, sendWhatsAppTemplate } from '../services/notification.service';
 
 const router = Router();
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -104,6 +106,9 @@ router.patch('/user/profile', async (req: AuthenticatedRequest, res, next) => {
       }
     }
 
+    const [existingUsers] = await pool.query<mysql.RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    const currentUser = existingUsers[0];
+
     await pool.execute(
       'UPDATE users SET name = ?, email = ?, phone = ?, whatsapp_number = ?, company_name = ?, address = ?, gstin = ? WHERE id = ?',
       [
@@ -117,6 +122,32 @@ router.patch('/user/profile', async (req: AuthenticatedRequest, res, next) => {
         req.user.id
       ]
     );
+
+    // Fetch the updated user profile
+    const [updatedUsers] = await pool.query<mysql.RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    const updatedUser = updatedUsers[0];
+
+    // Trigger CRM Sync whenever profile is updated
+    try {
+      await syncContactToCRM(updatedUser);
+    } catch (crmErr) {
+      console.error('CRM Sync failed during profile update:', crmErr);
+    }
+
+    // Check if user (likely from Google Auth) previously had no phone, and just added one
+    const prevPhone = currentUser.phone || currentUser.whatsapp_number;
+    const newPhone = updatedUser.phone || updatedUser.whatsapp_number;
+    
+    if (!prevPhone && newPhone) {
+      console.log(`[NOTIFY] Phone/WhatsApp number added for user ${updatedUser.id}: '${newPhone}'. Dispatching Welcome SMS and WhatsApp...`);
+      try {
+        const smsMessage = `Hi ${updatedUser.name}, welcome to Deccan Filings! We're excited to partner with you. Track your business filings & consult experts at deccanfilings.com.`;
+        await sendSMS(newPhone, smsMessage, updatedUser.id);
+        await sendWhatsAppTemplate(newPhone, 'utility_welcome', [updatedUser.name], updatedUser.id);
+      } catch (notifErr) {
+        console.error('Failed to send welcome SMS/WhatsApp on profile completion:', notifErr);
+      }
+    }
 
     await logActivity(req.user.id, 'PROFILE_UPDATE', 'Updated profile information');
     return res.json({ message: "Profile updated successfully" });

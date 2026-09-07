@@ -212,6 +212,13 @@ router.post('/google', async (req, res, next) => {
         } catch (notifErr) {
           console.error('[NOTIFY ERROR] Failed to dispatch welcome notification for Google user:', notifErr);
         }
+        
+        // Initial CRM Sync (will lack phone number until profile is completed, but still creates the contact)
+        try {
+          await authService.syncContactToCRM(user);
+        } catch (crmErr) {
+          console.error('Unhandled CRM sync error on Google register:', crmErr);
+        }
       }
     }
 
